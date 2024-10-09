@@ -6,7 +6,7 @@ img, gray = loadImageGrey('sample_images/twisted.png')
 twisted_edges = cannyEdges(gray, True)
 
 showImage(twisted_edges)
-
+###
 rotatedImage = rotateAdjustImage(twisted_edges, img)
 
 showImage(rotatedImage)
