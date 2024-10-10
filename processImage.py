@@ -3,21 +3,20 @@ from utils import *
 
 img, gray = loadImageGrey('sample_images/twisted.png')
 
-twisted_edges = cannyEdges(gray, True)
+thresh_image = thresh(gray, 160)
+showImage(thresh_image, 'threshold')
 
-showImage(twisted_edges)
-###
+twisted_edges = cannyEdges(thresh_image, 3)
+showImage(twisted_edges, 'edges')
+
 rotatedImage = rotateAdjustImage(twisted_edges, img)
+showImage(rotatedImage, 'rotate')
 
-showImage(rotatedImage)
+horizontal_edges = cannyEdges(rotatedImage, 3)
+showImage(horizontal_edges, 'horizontal edges')
 
-horizontal_edges = cannyEdges(rotatedImage, True)
-
-showImage(horizontal_edges)
-
-linesImage = getHorizontalLines(rotatedImage, horizontal_edges)
-
-showImage(linesImage)
+linesImage = getHorizontalLines(rotatedImage, horizontal_edges, 20, 1000, 50)
+showImage(linesImage, 'lines')
 
 resized_image = adjustImageSize(linesImage)
 

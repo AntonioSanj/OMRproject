@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 
 from constants import IMAGE_SIZE, WHITE, IMAGE_CENTER
-from utils import showImage
 
 
 def loadImageGrey(image_path):
@@ -15,19 +14,24 @@ def loadImageGrey(image_path):
     return img, gray
 
 
-def cannyEdges(image, dilate):
+def thresh(grayImage, threshold):
+    _, umbralized_image = cv2.threshold(grayImage, threshold, 255, cv2.THRESH_BINARY)
+    return umbralized_image
+
+
+def cannyEdges(image, dilate_kernel_radius):
     # compute edges
     edges = cv2.Canny(image, 50, 200, apertureSize=3)
 
-    if dilate:
+    if dilate_kernel_radius != 0:
         # dilate canny edges for easing line detection
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (dilate_kernel_radius, dilate_kernel_radius))
         edges = cv2.dilate(edges, kernel, iterations=1)
 
     return edges
 
 
-def rotateAdjustImage(edges, img):
+def rotateAdjustImage(edges, original):
     # detect lines of pentagram
     minLineLength = 1000
     maxLineGap = 50
@@ -51,9 +55,9 @@ def rotateAdjustImage(edges, img):
             # store angles
             angles.append(angle)
 
-    # rotate image by the mean angle
+    # rotate original image by the mean angle
     matrix = cv2.getRotationMatrix2D(IMAGE_CENTER, np.mean(angles), 1.0)
-    rotated_image = cv2.warpAffine(img, matrix, (IMAGE_SIZE[0], IMAGE_SIZE[1]), borderValue=WHITE)
+    rotated_image = cv2.warpAffine(original, matrix, (IMAGE_SIZE[0], IMAGE_SIZE[1]), borderValue=WHITE)
 
     return rotated_image
 
@@ -63,15 +67,12 @@ def adjustImageSize(img):
     return resized_image
 
 
-def getHorizontalLines(image, edges):
-    # detect lines
-    minLineLength = 1000
-    maxLineGap = 50
+def getHorizontalLines(draw_image, edges, threshold, minLineLength, maxLineGap):
     angle = np.pi / 180
-    lines = cv2.HoughLinesP(edges, 1, angle, threshold=10, minLineLength=minLineLength, maxLineGap=maxLineGap)
+    lines = cv2.HoughLinesP(edges, 1, angle, threshold=threshold, minLineLength=minLineLength, maxLineGap=maxLineGap)
 
     # draw obtained lines
-    linesImage = image.copy()
+    linesImage = draw_image.copy()
 
     if lines is not None:
         for line in lines:
@@ -79,5 +80,6 @@ def getHorizontalLines(image, edges):
             x1, y1, x2, y2 = line[0]
             # draw line
             cv2.line(linesImage, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    print(lines)
 
     return linesImage
