@@ -79,7 +79,29 @@ def getHorizontalLines(draw_image, edges, threshold, minLineLength, maxLineGap):
             # obtain line points
             x1, y1, x2, y2 = line[0]
             # draw line
-            cv2.line(linesImage, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    print(lines)
+            cv2.line(linesImage, (x1, y1), (x2, y2), (0, 255, 0), 1)
 
-    return linesImage
+    return linesImage, lines
+
+
+def getLineHeights(lines, minGap):
+    heights = []
+    for line in lines:
+        # obtain line height points
+        _, y1, _, y2 = line[0]
+        if y1 == y2:
+            heights.append(y1)
+
+    # order heights
+    heights.sort()
+
+    lineHeights = []
+    for i in range(len(heights) - 1):
+        gap = heights[i + 1] - heights[i]
+        if gap > minGap:
+            lineHeights.append(heights[i])
+
+    # add last line
+    lineHeights.append(heights[len(heights)-1])
+    print(lineHeights)
+    return lineHeights
