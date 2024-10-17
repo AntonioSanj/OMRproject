@@ -1,4 +1,3 @@
-# Mostrar la imagen original con las líneas horizontales detectadas
 from matplotlib import pyplot as plt
 
 plt.switch_backend('TkAgg')  # force matplot separate window

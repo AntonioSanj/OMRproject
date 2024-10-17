@@ -1,5 +1,5 @@
 from ImageOperations import *
-from utils import *
+from plotUtils import *
 
 img, gray = loadImageGrey('sample_images/twisted.png')
 
