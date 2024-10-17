@@ -4,22 +4,24 @@ from utils import *
 img, gray = loadImageGrey('sample_images/twisted.png')
 
 thresh_image = thresh(gray, 160)
-#showImage(thresh_image, 'threshold')
+# showImage(thresh_image, 'threshold')
 
 twisted_edges = cannyEdges(thresh_image, 3)
-#showImage(twisted_edges, 'edges')
+# showImage(twisted_edges, 'edges')
 
 rotatedImage = rotateAdjustImage(twisted_edges, img)
-#showImage(rotatedImage, 'rotate')
+# showImage(rotatedImage, 'rotate')
 
 horizontal_edges = cannyEdges(rotatedImage, 3)
-#showImage(horizontal_edges, 'horizontal edges')
+# showImage(horizontal_edges, 'horizontal edges')
 
 linesImage, lines = getHorizontalLines(rotatedImage, horizontal_edges, 1000, 1000, 50)
-#showImage(linesImage, 'lines')
+# showImage(linesImage, 'lines')
 
-lineHeights = getLineHeights(lines, 3)
+lineHeights, meanGap = getLineHeights(lines, 3, 6)
 
+consolidateLines = consolidateLines(lineHeights, meanGap, 5)
 
-showImage(linesImage, 'Pentagram detection')
-#compareToOg(linesImage, gray)
+mappedNotes = mapNotesInC(lineHeights)
+
+compareToOg(linesImage, gray)
