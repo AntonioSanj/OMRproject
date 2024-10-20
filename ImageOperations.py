@@ -163,19 +163,19 @@ def consolidateLines(lineHeights, meanGap, tolerance):
     return lineHeights
 
 
-def getLinesAbove(lineHeight, meanGap, amount):
+def getLinesAbove(lineHeight, meanGap, lineAmount):
     newLines = []
     i = 1
-    while i <= amount:
+    while i <= lineAmount:
         newLines.append(lineHeight - meanGap * i)
         i += 1
     return newLines
 
 
-def getLinesBelow(lineHeight, meanGap, amount):
+def getLinesBelow(lineHeight, meanGap, lineAmount):
     newLines = []
-    i = 0
-    while i < amount:
+    i = 1
+    while i <= lineAmount:
         newLines.append(lineHeight + meanGap * i)
         i += 1
     return newLines
@@ -217,7 +217,7 @@ def generateStaves(lineHeights, meanGap):
     # generate extra line heights
     for i in range(len(staves)):
         staves[i].addLines(getLinesAbove(staves[i].topLine, meanGap, 2))
-        staves[i].addLines(getLinesBelow(staves[i].bottomLine, meanGap, 2))
+        staves[i].addLines(getLinesBelow(staves[i].bottomLine, meanGap, 2), True)
 
         staves[i].print()
         print("")

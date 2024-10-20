@@ -24,9 +24,10 @@ class Stave:
     def addLineHeight(self, value):
         self.lineHeights.append(value)
 
-    def addLines(self, lines):
+    def addLines(self, lines, sortTrigger=False):
         self.lineHeights.extend(lines)
-        self.lineHeights.sort()
+        if sortTrigger:
+            self.lineHeights.sort()
 
     def print(self):
         print(f"Stave {self.staveIndex}:")
