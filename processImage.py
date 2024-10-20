@@ -22,6 +22,6 @@ lineHeights, meanGap = getLineHeights(lines, 3)
 
 consolidateLines = consolidateLines(lineHeights, meanGap, 5)
 
-finalLineHeights = generateExtraLineHeights(lineHeights, meanGap)
+staves = generateStaves(consolidateLines, meanGap)
 
 compareToOg(linesImage, gray)

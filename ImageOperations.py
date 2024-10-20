@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 
-from IntMod import NoteIndex
-from constants import IMAGE_WIDTH, IMAGE_HEIGHT, WHITE, IMAGE_CENTER, NOTES
+from objectTypes.IntMod import NoteIndex
+from constants import IMAGE_WIDTH, IMAGE_HEIGHT, WHITE, IMAGE_CENTER
+from objectTypes.Stave import Stave
 
 
 def loadImageGrey(image_path):
@@ -16,6 +17,7 @@ def loadImageGrey(image_path):
 
 
 def thresh(grayImage, threshold):
+    # apply threshold to image
     _, umbralized_image = cv2.threshold(grayImage, threshold, 255, cv2.THRESH_BINARY)
     return umbralized_image
 
@@ -163,8 +165,8 @@ def consolidateLines(lineHeights, meanGap, tolerance):
 
 def getLinesAbove(lineHeight, meanGap, amount):
     newLines = []
-    i = 0
-    while i < amount:
+    i = 1
+    while i <= amount:
         newLines.append(lineHeight - meanGap * i)
         i += 1
     return newLines
@@ -179,40 +181,45 @@ def getLinesBelow(lineHeight, meanGap, amount):
     return newLines
 
 
-def generateExtraLineHeights(lineHeights, meanGap):
-
-    firstStaveLines = []
-    lastStaveLines = []
-    NoteIndex(1, 7)
+def generateStaves(lineHeights, meanGap):
+    staves = []
 
     i = 1
+    staveIndex = 0
+    currentStave = Stave(staveIndex)
+
     while i < len(lineHeights) - 1:
+
+        # add line to currentStave
+        currentStave.addLineHeight(lineHeights[i])
+
+        # if meanGap is below, not above, that that means it is the first line of a stave
         if (not isGapAboveMeanGap(i, lineHeights, meanGap, 5) and
                 isGapBelowMeanGap(i, lineHeights, meanGap, 5)):
-            # meanGap is below, not above, that is first line of a stave
-            firstStaveLines.append(lineHeights[i])
 
+            # set stave top line
+            currentStave.setTopLine(lineHeights[i])
+
+        # meanGap is above, not below, that is last line of a stave
         if (isGapAboveMeanGap(i, lineHeights, meanGap, 5) and
                 not isGapBelowMeanGap(i, lineHeights, meanGap, 5)):
-            # meanGap is below, not above, that is first line of a stave
-            lastStaveLines.append(lineHeights[i])
+
+            # set stave bottom line
+            currentStave.setBottomLine(lineHeights[i])
+
+            # store current stave before resetting values
+            staves.append(currentStave)
+            staveIndex += 1
+            currentStave = Stave(staveIndex)
+
         i += 1
 
-    print("(", len(firstStaveLines), ") ", "firstStaveLines: ", firstStaveLines)
-    print("(", len(lastStaveLines), ") ", "lastStaveLines: ", lastStaveLines)
+    # generate extra line heights
+    for i in range(len(staves)):
+        staves[i].addLines(getLinesAbove(staves[i].topLine, meanGap, 2))
+        staves[i].addLines(getLinesBelow(staves[i].bottomLine, meanGap, 2))
 
-    if len(firstStaveLines) != len(lastStaveLines):
-        raise "StaveDetectionError"
+        staves[i].print()
+        print("")
 
-    newLines = []
-
-    for i in range(len(firstStaveLines)):
-        newLines.extend(getLinesAbove(firstStaveLines[i], meanGap, 2))
-        newLines.extend(getLinesBelow(lastStaveLines[i], meanGap, 2))
-
-    print("(", len(newLines), ") ", "newLines: ", newLines)
-
-    lineHeights.extend(newLines)
-    lineHeights.sort()
-    print("(", len(lineHeights), ") ", "LineHeights: ", lineHeights)
-    return lineHeights
+    return staves
