@@ -18,10 +18,10 @@ horizontal_edges = cannyEdges(rotatedImage, 3)
 linesImage, lines = getHorizontalLines(rotatedImage, horizontal_edges, 1000, 1000, 50)
 # showImage(linesImage, 'lines')
 
-lineHeights, meanGap = getLineHeights(lines, 3, 6)
+lineHeights, meanGap = getLineHeights(lines, 3)
 
 consolidateLines = consolidateLines(lineHeights, meanGap, 5)
 
-mappedNotes = mapNotesInC(lineHeights)
+finalLineHeights = generateExtraLineHeights(lineHeights, meanGap)
 
 compareToOg(linesImage, gray)

@@ -1,15 +1,15 @@
 import cv2
 import numpy as np
 
-from IntMod import IntMod
+from IntMod import NoteIndex
 from constants import IMAGE_WIDTH, IMAGE_HEIGHT, WHITE, IMAGE_CENTER, NOTES
 
 
 def loadImageGrey(image_path):
-    # Cargar la imagen
+    # load image
     img = cv2.imread(image_path)
 
-    # Convertir a escala de grises
+    # gray scale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     return img, gray
@@ -85,12 +85,15 @@ def getHorizontalLines(draw_image, edges, threshold, minLineLength, maxLineGap):
     return linesImage, lines
 
 
-def getLineHeights(lines, minGap, trimMeanFactor):
+def getLineHeights(lines, minGap):
     # lines:    array of line heights
     # minGap:   minimum gap between lines in the returning array
     # trimMeanFactor:   when computing the mean of gaps how many elements are
     #                   removed from each side of the sorted gap array list
-    heights = []
+
+    # gap above the actual first stave line and gap below actual last stave line must be computed
+    heights = [0, IMAGE_HEIGHT]
+
     for line in lines:
         # obtain line height points
         _, y1, _, y2 = line[0]
@@ -103,21 +106,38 @@ def getLineHeights(lines, minGap, trimMeanFactor):
     lineHeights = []
     gapList = []
 
+    # select only lines distanced enough
     for i in range(len(heights) - 1):
         gap = heights[i + 1] - heights[i]
         if gap > minGap:
             lineHeights.append(heights[i])
-            gapList.append(gap)
 
     # add last line
     lineHeights.append(heights[len(heights) - 1])
-    gapList.append(IMAGE_HEIGHT - heights[len(heights) - 1])
+
+    # compute gaps of the remaining lines
+    for i in range(len(lineHeights) - 1):
+        gap = lineHeights[i + 1] - lineHeights[i]
+        gapList.append(gap)
+
+    # lineHeight[i] has a gap above of gapList[i-1] and a gap below of gapList[i]
+
     print("(", len(lineHeights), ") ", "LineHeights: ", lineHeights)
-    print("(", len(gapList), ") ", "LineHeights: ", gapList)
+    print("(", len(gapList), ") ", "gapList: ", gapList)
 
     meanGap = np.bincount(gapList).argmax()  # most repeated value
 
     return lineHeights, meanGap
+
+
+def isGapAboveMeanGap(lineIndex, lineHeights, meanGap, tolerance):
+    # is the gap above the current line the size of meanGap?
+    return abs(abs(lineHeights[lineIndex - 1] - lineHeights[lineIndex]) - meanGap) <= tolerance
+
+
+def isGapBelowMeanGap(lineIndex, lineHeights, meanGap, tolerance):
+    # is the gap below the current line the size of meanGap?
+    return abs(abs(lineHeights[lineIndex + 1] - lineHeights[lineIndex]) - meanGap) <= tolerance
 
 
 def consolidateLines(lineHeights, meanGap, tolerance):
@@ -129,20 +149,70 @@ def consolidateLines(lineHeights, meanGap, tolerance):
 
     i = 1
     while i < len(lineHeights) - 1:
-        if abs(abs(lineHeights[i - 1] - lineHeights[i]) - meanGap) > tolerance and abs(
-                abs(lineHeights[i + 1] - lineHeights[i]) - meanGap) > tolerance:
+        if (not isGapAboveMeanGap(i, lineHeights, meanGap, tolerance) and
+                not isGapBelowMeanGap(i, lineHeights, meanGap, tolerance)):
+
             lineHeights.pop(i)
+
         else:
             i += 1
 
-    print("(", len(lineHeights), ") ", "CONSOL ", lineHeights)
+    print("(", len(lineHeights), ") ", "CONSOLIDATED: ", lineHeights)
     return lineHeights
 
 
-def mapNotesInC(lineHeights):
-    mappedNotes = []
-    noteIndex = IntMod(3, 7)
-    for i in range(len(lineHeights)):
-        mappedNotes.append([lineHeights[i], noteIndex])
+def getLinesAbove(lineHeight, meanGap, amount):
+    newLines = []
+    i = 0
+    while i < amount:
+        newLines.append(lineHeight - meanGap * i)
+        i += 1
+    return newLines
 
-    return mappedNotes
+
+def getLinesBelow(lineHeight, meanGap, amount):
+    newLines = []
+    i = 0
+    while i < amount:
+        newLines.append(lineHeight + meanGap * i)
+        i += 1
+    return newLines
+
+
+def generateExtraLineHeights(lineHeights, meanGap):
+
+    firstStaveLines = []
+    lastStaveLines = []
+    NoteIndex(1, 7)
+
+    i = 1
+    while i < len(lineHeights) - 1:
+        if (not isGapAboveMeanGap(i, lineHeights, meanGap, 5) and
+                isGapBelowMeanGap(i, lineHeights, meanGap, 5)):
+            # meanGap is below, not above, that is first line of a stave
+            firstStaveLines.append(lineHeights[i])
+
+        if (isGapAboveMeanGap(i, lineHeights, meanGap, 5) and
+                not isGapBelowMeanGap(i, lineHeights, meanGap, 5)):
+            # meanGap is below, not above, that is first line of a stave
+            lastStaveLines.append(lineHeights[i])
+        i += 1
+
+    print("(", len(firstStaveLines), ") ", "firstStaveLines: ", firstStaveLines)
+    print("(", len(lastStaveLines), ") ", "lastStaveLines: ", lastStaveLines)
+
+    if len(firstStaveLines) != len(lastStaveLines):
+        raise "StaveDetectionError"
+
+    newLines = []
+
+    for i in range(len(firstStaveLines)):
+        newLines.extend(getLinesAbove(firstStaveLines[i], meanGap, 2))
+        newLines.extend(getLinesBelow(lastStaveLines[i], meanGap, 2))
+
+    print("(", len(newLines), ") ", "newLines: ", newLines)
+
+    lineHeights.extend(newLines)
+    lineHeights.sort()
+    print("(", len(lineHeights), ") ", "LineHeights: ", lineHeights)
+    return lineHeights
