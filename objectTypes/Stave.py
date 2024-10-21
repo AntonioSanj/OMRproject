@@ -33,5 +33,5 @@ class Stave:
         print(f"Stave {self.staveIndex}:")
         print(f"\tClef: {self.clef.value}")
         print(f"\tTopLine: {self.topLine}.")
-        print(f"\tBottomLine at {self.bottomLine}.")
+        print(f"\tBottomLine: {self.bottomLine}.")
         print(f"\tLines at: {self.lineHeights}.")

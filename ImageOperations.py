@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 
-from objectTypes.IntMod import NoteIndex
-from constants import IMAGE_WIDTH, IMAGE_HEIGHT, WHITE, IMAGE_CENTER
+from constants import IMAGE_WIDTH, IMAGE_HEIGHT, WHITE, IMAGE_CENTER, COLORS
 from objectTypes.Stave import Stave
 
 
@@ -70,21 +69,28 @@ def adjustImageSize(img):
     return resized_image
 
 
-def getHorizontalLines(draw_image, edges, threshold, minLineLength, maxLineGap):
+def getHorizontalLines(edges, threshold, minLineLength, maxLineGap):
     angle = np.pi / 180
     lines = cv2.HoughLinesP(edges, 1, angle, threshold=threshold, minLineLength=minLineLength, maxLineGap=maxLineGap)
 
-    # draw obtained lines
-    linesImage = draw_image.copy()
+    return lines
 
-    if lines is not None:
-        for line in lines:
-            # obtain line points
-            x1, y1, x2, y2 = line[0]
-            # draw line
-            cv2.line(linesImage, (x1, y1), (x2, y2), (0, 255, 0), 1)
 
-    return linesImage, lines
+def chooseCandidate(candidates, op="min"):
+    n = len(candidates)
+    value = 0
+    if op == "min":
+        value = min(candidates)
+    elif op == "max":
+        value = max(candidates)
+    elif op == "med":
+        if n % 2 == 1:  # Odd length
+            value = candidates[n // 2]
+        else:  # even length
+            value = candidates[n // 2 - 1]
+    elif op == "mean":
+        value = round(sum(candidates)/len(candidates))
+    return value
 
 
 def getLineHeights(lines, minGap):
@@ -107,12 +113,15 @@ def getLineHeights(lines, minGap):
 
     lineHeights = []
     gapList = []
+    candidates = []
 
     # select only lines distanced enough
     for i in range(len(heights) - 1):
+        candidates.append(heights[i])
         gap = heights[i + 1] - heights[i]
         if gap > minGap:
-            lineHeights.append(heights[i])
+            lineHeights.append(chooseCandidate(candidates))
+            candidates = []
 
     # add last line
     lineHeights.append(heights[len(heights) - 1])
@@ -123,7 +132,6 @@ def getLineHeights(lines, minGap):
         gapList.append(gap)
 
     # lineHeight[i] has a gap above of gapList[i-1] and a gap below of gapList[i]
-
     print("(", len(lineHeights), ") ", "LineHeights: ", lineHeights)
     print("(", len(gapList), ") ", "gapList: ", gapList)
 
@@ -196,14 +204,12 @@ def generateStaves(lineHeights, meanGap):
         # if meanGap is below, not above, that that means it is the first line of a stave
         if (not isGapAboveMeanGap(i, lineHeights, meanGap, 5) and
                 isGapBelowMeanGap(i, lineHeights, meanGap, 5)):
-
             # set stave top line
             currentStave.setTopLine(lineHeights[i])
 
         # meanGap is above, not below, that is last line of a stave
         if (isGapAboveMeanGap(i, lineHeights, meanGap, 5) and
                 not isGapBelowMeanGap(i, lineHeights, meanGap, 5)):
-
             # set stave bottom line
             currentStave.setBottomLine(lineHeights[i])
 
@@ -223,3 +229,10 @@ def generateStaves(lineHeights, meanGap):
         print("")
 
     return staves
+
+
+def drawLineHeights(staves, image, thickness=1):
+    for stave in staves:
+        for lh in stave.lineHeights:
+            cv2.line(image, (0, lh), (IMAGE_WIDTH, lh), COLORS[stave.staveIndex % len(COLORS)], thickness)
+    return image

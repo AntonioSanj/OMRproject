@@ -15,7 +15,7 @@ rotatedImage = rotateAdjustImage(twisted_edges, img)
 horizontal_edges = cannyEdges(rotatedImage, 3)
 # showImage(horizontal_edges, 'horizontal edges')
 
-linesImage, lines = getHorizontalLines(rotatedImage, horizontal_edges, 1000, 1000, 50)
+lines = getHorizontalLines(horizontal_edges, 1000, 1000, 50)
 # showImage(linesImage, 'lines')
 
 lineHeights, meanGap = getLineHeights(lines, 3)
@@ -24,4 +24,6 @@ consolidateLines = consolidateLines(lineHeights, meanGap, 5)
 
 staves = generateStaves(consolidateLines, meanGap)
 
-compareToOg(linesImage, gray)
+result = drawLineHeights(staves, rotatedImage, 2)
+
+compareToOg(result, gray)
