@@ -1,29 +1,41 @@
 from ImageOperations import *
+from ImageOperations import consolidateLines
+from constants import denseDataSet
 from plotUtils import *
 
-img, gray = loadImageGrey('sample_images/twisted.png')
 
-thresh_image = thresh(gray, 160)
-# showImage(thresh_image, 'threshold')
+def processImage(imagePath, show=False, printData=False, debug=False):
+    img, gray = loadImageGrey(imagePath)
 
-twisted_edges = cannyEdges(thresh_image, 3)
-# showImage(twisted_edges, 'edges')
+    thresh_image = thresh(gray, 160)
+    # showImage(thresh_image, 'threshold')
 
-rotatedImage = rotateAdjustImage(twisted_edges, img)
-# showImage(rotatedImage, 'rotate')
+    twisted_edges = cannyEdges(thresh_image, 3)
+    # showImage(twisted_edges, 'edges')
 
-horizontal_edges = cannyEdges(rotatedImage, 3)
-# showImage(horizontal_edges, 'horizontal edges')
+    rotatedImage = rotateAdjustImage(twisted_edges, img)
+    # showImage(rotatedImage, 'rotate')
 
-lines = getHorizontalLines(horizontal_edges, 1000, 1000, 50)
-# showImage(linesImage, 'lines')
+    horizontal_edges = cannyEdges(rotatedImage, 3)
+    # showImage(horizontal_edges, 'horizontal edges')
 
-lineHeights, meanGap = getLineHeights(lines, 3)
+    lines, linesImage = getHorizontalLines(horizontal_edges, rotatedImage, 1000, 1000, 80)
 
-consolidateLines = consolidateLines(lineHeights, meanGap, 5)
+    if debug:
+        showImage(linesImage, 'Detected lines')
 
-staves = generateStaves(consolidateLines, meanGap)
+    lineHeights, meanGap = getLineHeights(lines, 3)
 
-result = drawLineHeights(staves, rotatedImage, 2)
+    consolidatedLines = consolidateLines(lineHeights, meanGap, 5)
 
-compareToOg(result, gray)
+    staves = generateStaves(consolidatedLines, meanGap, 0)
+
+    result = drawLineHeights(staves, rotatedImage, 2)
+
+    if printData:
+        printStaves(staves)
+
+    if show:
+        compareToOg(result, gray)
+
+    return result, staves

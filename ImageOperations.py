@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 
-from constants import IMAGE_WIDTH, IMAGE_HEIGHT, WHITE, IMAGE_CENTER, COLORS
+from constants import IMAGE_WIDTH, IMAGE_HEIGHT, WHITE, IMAGE_CENTER, COLORS, RED
 from objectTypes.Stave import Stave
+from plotUtils import showImage
 
 
 def loadImageGrey(image_path):
@@ -33,13 +34,21 @@ def cannyEdges(image, dilate_kernel_radius):
     return edges
 
 
-def rotateAdjustImage(edges, original):
+def rotateAdjustImage(edges, original, showLines=False):
     # detect lines of pentagram
     minLineLength = 1000
     maxLineGap = 50
     angle = np.pi / 180
     lines = cv2.HoughLinesP(edges, 1, angle, threshold=10, minLineLength=minLineLength, maxLineGap=maxLineGap)
 
+    if showLines:
+        lineShow = original.copy()
+        for line in lines:
+            # obtain line points
+            x1, y1, x2, y2 = line[0]
+            cv2.line(lineShow, (x1, y1), (x2, y2), (255, 0, 0), 2)
+
+        showImage(lineShow, 'All lines detected')
     # store line angles
     angles = []
 
@@ -54,8 +63,10 @@ def rotateAdjustImage(edges, original):
             else:
                 slope = 0
             angle = np.arctan(slope) * (180.0 / np.pi)
-            # store angles
-            angles.append(angle)
+            # remove vertical lines
+            if 45 > angle > -45:
+                # store angles
+                angles.append(angle)
 
     # rotate original image by the mean angle
     matrix = cv2.getRotationMatrix2D(IMAGE_CENTER, np.mean(angles), 1.0)
@@ -69,11 +80,17 @@ def adjustImageSize(img):
     return resized_image
 
 
-def getHorizontalLines(edges, threshold, minLineLength, maxLineGap):
+def getHorizontalLines(edges, og, threshold, minLineLength, maxLineGap):
     angle = np.pi / 180
     lines = cv2.HoughLinesP(edges, 1, angle, threshold=threshold, minLineLength=minLineLength, maxLineGap=maxLineGap)
 
-    return lines
+    og2 = og.copy()
+    for line in lines:
+        # obtain line points
+        x1, y1, x2, y2 = line[0]
+        cv2.line(og2, (x1, y1), (x2, y2), RED, 1)
+
+    return lines, og2
 
 
 def chooseCandidate(candidates, op="min"):
@@ -89,7 +106,7 @@ def chooseCandidate(candidates, op="min"):
         else:  # even length
             value = candidates[n // 2 - 1]
     elif op == "mean":
-        value = round(sum(candidates)/len(candidates))
+        value = round(sum(candidates) / len(candidates))
     return value
 
 
@@ -132,8 +149,8 @@ def getLineHeights(lines, minGap):
         gapList.append(gap)
 
     # lineHeight[i] has a gap above of gapList[i-1] and a gap below of gapList[i]
-    print("(", len(lineHeights), ") ", "LineHeights: ", lineHeights)
-    print("(", len(gapList), ") ", "gapList: ", gapList)
+    # print("(", len(lineHeights), ") ", "LineHeights: ", lineHeights)
+    # print("(", len(gapList), ") ", "gapList: ", gapList)
 
     meanGap = np.bincount(gapList).argmax()  # most repeated value
 
@@ -167,29 +184,29 @@ def consolidateLines(lineHeights, meanGap, tolerance):
         else:
             i += 1
 
-    print("(", len(lineHeights), ") ", "CONSOLIDATED: ", lineHeights)
+    # print("(", len(lineHeights), ") ", "CONSOLIDATED: ", lineHeights)
     return lineHeights
 
 
-def getLinesAbove(lineHeight, meanGap, lineAmount):
+def getLinesAbove(lineHeight, meanGap, extraLines):
     newLines = []
     i = 1
-    while i <= lineAmount:
+    while i <= extraLines:
         newLines.append(lineHeight - meanGap * i)
         i += 1
     return newLines
 
 
-def getLinesBelow(lineHeight, meanGap, lineAmount):
+def getLinesBelow(lineHeight, meanGap, extraLines):
     newLines = []
     i = 1
-    while i <= lineAmount:
+    while i <= extraLines:
         newLines.append(lineHeight + meanGap * i)
         i += 1
     return newLines
 
 
-def generateStaves(lineHeights, meanGap):
+def generateStaves(lineHeights, meanGap, extraLines=2):
     staves = []
 
     i = 1
@@ -222,13 +239,17 @@ def generateStaves(lineHeights, meanGap):
 
     # generate extra line heights
     for i in range(len(staves)):
-        staves[i].addLines(getLinesAbove(staves[i].topLine, meanGap, 2))
-        staves[i].addLines(getLinesBelow(staves[i].bottomLine, meanGap, 2), True)
-
-        staves[i].print()
-        print("")
+        staves[i].addLines(getLinesAbove(staves[i].topLine, meanGap, extraLines))
+        staves[i].addLines(getLinesBelow(staves[i].bottomLine, meanGap, extraLines), True)
 
     return staves
+
+
+def printStaves(staves):
+    for i in range(len(staves)):
+        staves[i].print()
+        print("")
+    return
 
 
 def drawLineHeights(staves, image, thickness=1):
