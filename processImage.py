@@ -1,6 +1,5 @@
 from ImageOperations import *
 from ImageOperations import consolidateLines
-from constants import denseDataSet
 from plotUtils import *
 
 
@@ -19,7 +18,7 @@ def processImage(imagePath, show=False, printData=False, debug=False):
     horizontal_edges = cannyEdges(rotatedImage, 3)
     # showImage(horizontal_edges, 'horizontal edges')
 
-    lines, linesImage = getHorizontalLines(horizontal_edges, rotatedImage, 1000, 1000, 80)
+    lines, linesImage = getHorizontalLines(horizontal_edges, rotatedImage, 1000, 700, 120)
 
     if debug:
         showImage(linesImage, 'Detected lines')
