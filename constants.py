@@ -20,3 +20,4 @@ class Clef(Enum):
 denseDataSet = 'dataset/denseDataSet'
 basicSet = 'dataset/codingSet/basicSet'
 challengingSet = 'dataset/codingSet/challengingSet'
+challengingSet2 = 'dataset/codingSet/challengingSet2'
