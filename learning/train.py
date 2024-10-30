@@ -1,3 +1,4 @@
+import os
 from random import seed
 
 import torch
@@ -9,29 +10,39 @@ from learning.modelLoader import model
 
 seed(1)
 
-# Hyperparameters
+# Define device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("RUNNING IN ", device)
+# Move model to device
+model.to(device)
+
+# hyperparameters
 batch_size = 2
 num_epochs = 10
 learning_rate = 0.005
 
-# Paths to your images and annotation file
+# paths to your images and annotation file
 images_dir = r"C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\denseDataSet\images"
 annotations = r"C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\denseDataSet\annotations"
 
-# Create dataset
+# initialize dataset
 dataset = CustomDataset(images_dir, annotations)
 
-train_size = int(0.8 * len(dataset))
-val_size = len(dataset) - train_size
-train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+# set size for train and validation set
+trainSet_size = int(0.8 * len(dataset))
+validationSet_size = len(dataset) - trainSet_size
 
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=lambda x: tuple(zip(*x)))
-val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))
+# assign items randomly to a set
+trainSet, validationSet = random_split(dataset, [trainSet_size, validationSet_size])
+
+train_loader = DataLoader(trainSet, batch_size=batch_size, shuffle=True, collate_fn=lambda x: tuple(zip(*x)))
+val_loader = DataLoader(validationSet, batch_size=batch_size, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))
 
 # Define optimizer
 params = [p for p in model.parameters() if p.requires_grad]
 optimizer = torch.optim.SGD(params, lr=learning_rate, momentum=0.9, weight_decay=0.0005)
 
+print("STARTING TRAINING...")
 # Training loop
 for epoch in range(num_epochs):
     model.train()
@@ -49,7 +60,7 @@ for epoch in range(num_epochs):
         optimizer.step()
 
     print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {losses.item()}")
-
+print("STARTING EVALUATION...")
 model.eval()
 with torch.no_grad():
     for images, targets in val_loader:

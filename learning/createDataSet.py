@@ -21,8 +21,27 @@ class CustomDataset(torch.utils.data.Dataset):
         img_path = os.path.join(self.images_dir, self.imgs[i])
         img, _ = loadImageGrey(img_path)
 
-        # Load mask in gray scale
-        mask_path = os.path.join(self.masks_dir, self.imgs[i], "_inst")  # mask_path = imagePath+"_inst"
+        # Convert the image from NumPy array to PyTorch tensor
+        img = torch.as_tensor(img, dtype=torch.float32)  # Convert to float tensor
+
+        # Check if the image is grayscale (1 channel)
+        if img.ndimension() == 2:  # If shape is (H, W)
+            img = img.unsqueeze(0)  # Add channel dimension
+            img = img.repeat(3, 1, 1)  # Convert to 3 channels
+        elif img.shape[0] == 1:  # If only 1 channel (grayscale)
+            img = img.repeat(3, 1, 1)  # Convert to 3 channels
+
+        # Ensure the image shape is (C, H, W)
+        img = img.permute(2, 0, 1)  # Change from (H, W, C) to (C, H, W)
+
+        # Construct mask path
+        mask_name = os.path.splitext(self.imgs[i])[0] + "_inst.png"
+        mask_path = os.path.join(self.masks_dir, mask_name)
+
+        # Check if mask file exists
+        if not os.path.exists(mask_path):
+            raise FileNotFoundError(f"Mask file not found: {mask_path}")
+
         _, grayMask = loadImageGrey(mask_path)
 
         # Convert mask to numpy array for processing
@@ -32,24 +51,36 @@ class CustomDataset(torch.utils.data.Dataset):
         obj_ids = np.unique(grayMask)
         obj_ids = obj_ids[obj_ids != 0]
 
-        # Split mask into binary masks for each instance
+        # Create binary masks and bounding boxes for each object ID
         masks = grayMask == obj_ids[:, None, None]
 
         # Compute bounding boxes from masks
         boxes = []
         for j in range(len(obj_ids)):
             pos = np.where(masks[j])
+            if pos[0].size == 0:  # If no pixels found for this mask
+                continue  # Skip this mask
+
             xmin = np.min(pos[1])
             xmax = np.max(pos[1])
             ymin = np.min(pos[0])
             ymax = np.max(pos[0])
-            boxes.append([xmin, ymin, xmax, ymax])
+
+            # Check if bounding box is valid
+            if xmax > xmin and ymax > ymin:
+                boxes.append([xmin, ymin, xmax, ymax])
 
         # Convert to tensor
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
-        labels = torch.ones((len(obj_ids),),
-                            dtype=torch.int64)  # Assuming all objects are of class 1 (change as needed)
         masks = torch.as_tensor(masks, dtype=torch.uint8)
+
+        # Filter out empty boxes
+        valid_indices = boxes.sum(dim=1) > 0  # Ensure that the boxes have positive area
+        boxes = boxes[valid_indices]
+        masks = masks[valid_indices]
+
+        # Assuming all objects are of class 1 (change as needed)
+        labels = torch.ones((len(boxes),), dtype=torch.int64)
 
         target = {"boxes": boxes, "labels": labels, "masks": masks}
 
