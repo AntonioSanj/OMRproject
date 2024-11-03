@@ -1,8 +1,7 @@
-import os
 from random import seed
 
 import torch
-from torch import device
+import torchvision
 from torch.utils.data import DataLoader, random_split
 
 from learning.createDataSet import CustomDataset
@@ -12,7 +11,8 @@ seed(1)
 
 # Define device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("RUNNING IN ", device)
+print("RUNNING IN ", device, "\tCuda version: ", torch.version.cuda)
+
 # Move model to device
 model.to(device)
 
@@ -47,6 +47,7 @@ print("STARTING TRAINING...")
 for epoch in range(num_epochs):
     model.train()
     for images, targets in train_loader:
+        print("inn loop")
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 

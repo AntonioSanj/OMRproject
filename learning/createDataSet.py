@@ -55,11 +55,12 @@ class CustomDataset(torch.utils.data.Dataset):
         masks = grayMask == obj_ids[:, None, None]
 
         # Compute bounding boxes from masks
+        # Compute bounding boxes from masks
         boxes = []
         for j in range(len(obj_ids)):
             pos = np.where(masks[j])
-            if pos[0].size == 0:  # If no pixels found for this mask
-                continue  # Skip this mask
+            if pos[0].size == 0:  # Skip masks with no valid pixels
+                continue
 
             xmin = np.min(pos[1])
             xmax = np.max(pos[1])
@@ -74,12 +75,15 @@ class CustomDataset(torch.utils.data.Dataset):
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         masks = torch.as_tensor(masks, dtype=torch.uint8)
 
-        # Filter out empty boxes
-        valid_indices = boxes.sum(dim=1) > 0  # Ensure that the boxes have positive area
-        boxes = boxes[valid_indices]
-        masks = masks[valid_indices]
+        # Ensure valid masks match valid boxes
+        valid_indices = torch.nonzero(boxes.sum(dim=1) > 0).squeeze()
+        if valid_indices.numel() > 0:  # Only filter if there are valid indices
+            boxes = boxes[valid_indices]
+            masks = masks[valid_indices]
+        else:
+            raise ValueError("No valid masks or boxes found in the sample.")
 
-        # Assuming all objects are of class 1 (change as needed)
+        # Assuming all objects are of class 1 (adjust as needed)
         labels = torch.ones((len(boxes),), dtype=torch.int64)
 
         target = {"boxes": boxes, "labels": labels, "masks": masks}

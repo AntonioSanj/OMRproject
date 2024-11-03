@@ -1,6 +1,6 @@
 from ImageOperations import *
 from ImageOperations import consolidateLines
-from plotUtils import *
+from utils.plotUtils import *
 
 
 def processImage(imagePath, show=False, printData=False, debug=False):
