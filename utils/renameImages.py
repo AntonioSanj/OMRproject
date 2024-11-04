@@ -1,8 +1,9 @@
 import os
 import shutil
+from constants import *
 
 
-def labelImages(sourcePath, destinationPath, name):
+def labelImages(sourcePath, destinationPath, isMask=False):
     # Check if the source folder exists
     if not os.path.exists(sourcePath):
         raise FileNotFoundError(f"The source folder '{sourcePath}' does not exist.")
@@ -35,7 +36,11 @@ def labelImages(sourcePath, destinationPath, name):
         # Check if the file is an image
         if filename.lower().endswith(image_extensions):
             # Create the new name (e.g., image_1.jpg)
-            new_name = f"{name}_{counter}{os.path.splitext(filename)[1]}"
+            if isMask:
+                new_name = f"image_{counter}_inst{os.path.splitext(filename)[1]}"
+            else:
+                new_name = f"image_{counter}{os.path.splitext(filename)[1]}"
+
 
             # Create full paths for old and new file names
             old_file = os.path.join(sourcePath, filename)
@@ -50,9 +55,11 @@ def labelImages(sourcePath, destinationPath, name):
 
 
 # Specify the source folder and destination folder here
-srcPath = '../dataset/denseDataSet/annotations'
-destPath = '../dataset/denseDataSet/annotations_labeled'
-name = 'mask'
+srcPath = denseDataSetImages
+destPath = denseDataSetImagesLabeled
+src2 = denseDataSetAnnotations
+dest2 = denseDataSetAnnotationsLabeled
 
 # Call the function
-labelImages(srcPath, destPath, name)
+labelImages(srcPath, destPath)
+labelImages(src2, dest2)

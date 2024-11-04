@@ -1,8 +1,10 @@
 import os
 
+import cv2
 import numpy as np
 import torch
 
+from utils.plotUtils import showImage
 from vision.ImageOperations import loadImageGrey
 
 
@@ -42,7 +44,7 @@ class CustomDataset(torch.utils.data.Dataset):
         if not os.path.exists(mask_path):
             raise FileNotFoundError(f"Mask file not found: {mask_path}")
 
-        _, grayMask = loadImageGrey(mask_path)
+        mask, grayMask = loadImageGrey(mask_path)
 
         # Convert mask to numpy array for processing
         grayMask = np.array(grayMask)
@@ -71,6 +73,8 @@ class CustomDataset(torch.utils.data.Dataset):
             if xmax > xmin and ymax > ymin:
                 boxes.append([xmin, ymin, xmax, ymax])
 
+        drawMasks(mask, boxes)
+
         # Convert to tensor
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         masks = torch.as_tensor(masks, dtype=torch.uint8)
@@ -92,3 +96,13 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.imgs)
+
+
+def drawMasks(maskImage, boxes):
+    showImage(maskImage)
+    image = maskImage.copy()
+    for box in boxes:
+        xmin, ymin, xmax, ymax = box
+        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)  # Draw rectangle
+
+    showImage(image, 'bboxes')
