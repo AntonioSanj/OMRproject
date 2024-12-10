@@ -1,10 +1,9 @@
 from random import seed
+from constants import *
 
 import torch
-import torchvision
 from torch.utils.data import DataLoader, random_split
 
-from constants import *
 from learning.createDataSet import CustomDataset
 from learning.modelLoader import model
 
@@ -23,8 +22,8 @@ num_epochs = 10
 learning_rate = 0.005
 
 # paths to your images and annotation file
-images_dir = r"C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\reducedDataSet\reducedImages"
-annotations = r"C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\reducedDataSet\reducedAnnotations"
+images_dir = reducedSetImages
+annotations = reducedSetAnnotations
 
 # initialize dataset
 dataset = CustomDataset(images_dir, annotations)

@@ -17,15 +17,11 @@ class Clef(Enum):
     UNDEFINED = '_'
 
 
-basicSet = 'dataset/codingSet/basicSet'
+outputVision = 'output/outputVision'
+
 challengingSet = 'dataset/codingSet/challengingSet'
 challengingSet2 = 'dataset/codingSet/challengingSet2'
 
-reducedSetImages = r"C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\reducedDataSet\reducedImages"
-reducedSetAnnotations = r"C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\reducedDataSet\reducedAnnotations"
-
-denseDataSetImagesLabeled = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset/denseDataSet/images_labeled'
-denseDataSetAnnotationsLabeled = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset/denseDataSet/annotations_labeled'
-
-denseDataSetImages = r"C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\denseDataSet\images"
-denseDataSetAnnotations = r"C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\denseDataSet\annotations"
+myDataImg = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\img'
+myDataCsv = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\ann'
+myDataJson = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\json'

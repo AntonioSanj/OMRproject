@@ -9,8 +9,8 @@ def labelImages(sourcePath, destinationPath, isMask=False):
         raise FileNotFoundError(f"The source folder '{sourcePath}' does not exist.")
 
     # Check if the source folder exists
-    if not os.path.exists(destPath):
-        raise FileNotFoundError(f"The destination folder '{destPath}' does not exist.")
+    if not os.path.exists(destinationPath):
+        raise FileNotFoundError(f"The destination folder '{destinationPath}' does not exist.")
 
     # Supported image file extensions
     image_extensions = ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff')
@@ -48,7 +48,7 @@ def labelImages(sourcePath, destinationPath, isMask=False):
 
             # Copy the file to the new folder
             shutil.copy2(old_file, new_file)
-            print(f'Copied: "{filename}" to "{new_name}" in "{destPath}"')
+            print(f'Copied: "{filename}" to "{new_name}" in "{destinationPath}"')
 
             # Increment the counter
             counter += 1

@@ -44,4 +44,4 @@ def testProcessImage(sourceDir, outputDir, show=False, printData=False, maxData=
     return
 
 
-testProcessImage(challengingSet2, 'dataset/output/processImageData', True, True, 100, True)
+testProcessImage(challengingSet2, outputVision, True, True, 100, True)
