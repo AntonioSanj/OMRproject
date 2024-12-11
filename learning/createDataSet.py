@@ -1,108 +1,57 @@
 import os
-
-import cv2
-import numpy as np
 import torch
-
-from utils.plotUtils import showImage
+from torch.utils.data import Dataset
+import pandas as pd
 from vision.ImageOperations import loadImageGrey
 
 
-class CustomDataset(torch.utils.data.Dataset):
-    def __init__(self, images_dir, masks_dir):
-        # directory of images
-        self.images_dir = images_dir
-        # directory of ground truth
-        self.masks_dir = masks_dir
-
-        # array with all the image file names
-        self.imgs = list(sorted(os.listdir(self.images_dir)))
-
-    def __getitem__(self, i):
-        # Load image
-        img_path = os.path.join(self.images_dir, self.imgs[i])
-        img, _ = loadImageGrey(img_path)
-
-        # Convert the image from NumPy array to PyTorch tensor
-        img = torch.as_tensor(img, dtype=torch.float32)  # Convert to float tensor
-
-        # Check if the image is grayscale (1 channel)
-        if img.ndimension() == 2:  # If shape is (H, W)
-            img = img.unsqueeze(0)  # Add channel dimension
-            img = img.repeat(3, 1, 1)  # Convert to 3 channels
-        elif img.shape[0] == 1:  # If only 1 channel (grayscale)
-            img = img.repeat(3, 1, 1)  # Convert to 3 channels
-
-        # Ensure the image shape is (C, H, W)
-        img = img.permute(2, 0, 1)  # Change from (H, W, C) to (C, H, W)
-
-        # Construct mask path
-        mask_name = os.path.splitext(self.imgs[i])[0] + "_inst.png"
-        mask_path = os.path.join(self.masks_dir, mask_name)
-
-        # Check if mask file exists
-        if not os.path.exists(mask_path):
-            raise FileNotFoundError(f"Mask file not found: {mask_path}")
-
-        mask, grayMask = loadImageGrey(mask_path)
-
-        # Convert mask to numpy array for processing
-        grayMask = np.array(grayMask)
-
-        # Get unique object IDs (ignoring background with ID 0)
-        obj_ids = np.unique(grayMask)
-        obj_ids = obj_ids[obj_ids != 0]
-
-        # Create binary masks and bounding boxes for each object ID
-        masks = grayMask == obj_ids[:, None, None]
-
-        # Compute bounding boxes from masks
-        # Compute bounding boxes from masks
-        boxes = []
-        for j in range(len(obj_ids)):
-            pos = np.where(masks[j])
-            if pos[0].size == 0:  # Skip masks with no valid pixels
-                continue
-
-            xmin = np.min(pos[1])
-            xmax = np.max(pos[1])
-            ymin = np.min(pos[0])
-            ymax = np.max(pos[0])
-
-            # Check if bounding box is valid
-            if xmax > xmin and ymax > ymin:
-                boxes.append([xmin, ymin, xmax, ymax])
-
-        drawMasks(mask, boxes)
-
-        # Convert to tensor
-        boxes = torch.as_tensor(boxes, dtype=torch.float32)
-        masks = torch.as_tensor(masks, dtype=torch.uint8)
-
-        # Ensure valid masks match valid boxes
-        valid_indices = torch.nonzero(boxes.sum(dim=1) > 0).squeeze()
-        if valid_indices.numel() > 0:  # Only filter if there are valid indices
-            boxes = boxes[valid_indices]
-            masks = masks[valid_indices]
-        else:
-            raise ValueError("No valid masks or boxes found in the sample.")
-
-        # Assuming all objects are of class 1 (adjust as needed)
-        labels = torch.ones((len(boxes),), dtype=torch.int64)
-
-        target = {"boxes": boxes, "labels": labels, "masks": masks}
-
-        return img, target
+class MyDataset(Dataset):
+    def __init__(self, image_dir, annotation_dir):
+        self.image_dir = image_dir
+        self.annotation_dir = annotation_dir
+        self.image_files = [f for f in os.listdir(image_dir) if f.endswith(".png")]
 
     def __len__(self):
-        return len(self.imgs)
+        return len(self.image_files)
 
+    def __getitem__(self, idx):
+        image_file = self.image_files[idx]
+        image_path = os.path.join(self.image_dir, image_file)
 
-def drawMasks(maskImage, boxes):
-    showImage(maskImage)
-    image = maskImage.copy()
-    for box in boxes:
-        xmin, ymin, xmax, ymax = box
-        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)  # Draw rectangle
+        # Load the image
+        image, _ = loadImageGrey(image_path)
 
-    showImage(image, 'bboxes')
+        # Ensure image is converted to a PyTorch tensor
+        if not isinstance(image, torch.Tensor):
+            image = torch.from_numpy(image).float()  # Convert numpy array to float tensor
+
+        # If the image is grayscale, repeat it across 3 channels
+        if image.ndimension() == 2:  # Single-channel image
+            image = image.unsqueeze(0).repeat(3, 1, 1)  # Convert to 3-channel image
+
+        # Ensure image is in (C, H, W) format
+        if image.ndimension() == 3 and image.shape[0] != 3:
+            image = image.permute(2, 0, 1)  # Rearrange dimensions to (C, H, W)
+
+        # Load annotations
+        csv_file = os.path.join(self.annotation_dir, image_file.replace(".png", ".csv"))
+        if not os.path.exists(csv_file):
+            raise FileNotFoundError(f"Annotation file {csv_file} not found for image {image_file}")
+
+        annotations = pd.read_csv(csv_file)
+        boxes, labels = [], []
+
+        for _, row in annotations.iterrows():
+            boxes.append([row["x1"], row["y1"], row["x2"], row["y2"]])
+            labels.append(
+                {"GClef": 1, "FClef": 2, "Half": 3, "One": 4, "Double": 5,
+                 "RestOne": 6, "RestHalf": 7, "Four": 8, "OpeningBracket": 9, "Quarter": 10}
+                [row["classTitle"]]
+            )
+
+        target = {
+            "boxes": torch.as_tensor(boxes, dtype=torch.float32),
+            "labels": torch.as_tensor(labels, dtype=torch.int64),
+        }
+
+        return image, target
