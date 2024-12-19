@@ -6,18 +6,19 @@ from torch.utils.data import DataLoader, random_split
 
 from learning.createDataSet import MyDataset
 from learning.modelLoader import get_model
+from learning.testImage import testImage
 from learning.trainingMetrics import calculate_accuracy
 
 seed(1)
 
 # Hyperparameters
-num_classes = 11  # 10 classes + background
-num_epochs = 20
+num_classes = 6  # 10 classes + background
+num_epochs = 10
 learning_rate = 0.005
 
 # paths
 image_dir = myDataImg
-annotation_dir = myDataCsv
+annotation_dir = myDataCsv2
 
 # dataset load
 dataset = MyDataset(image_dir, annotation_dir)
@@ -78,4 +79,6 @@ for epoch in range(num_epochs):
     lr_scheduler.step()
 
 print("\nFINISHED\n")
+
+testImage(feelTheLove, model, device)
 # torch.save(model.state_dict(), "fasterrcnn_model.pth")

@@ -44,8 +44,10 @@ class MyDataset(Dataset):
         for _, row in annotations.iterrows():
             boxes.append([row["x1"], row["y1"], row["x2"], row["y2"]])
             labels.append(
-                {"GClef": 1, "FClef": 2, "Half": 3, "One": 4, "Double": 5,
-                 "RestOne": 6, "RestHalf": 7, "Four": 8, "OpeningBracket": 9, "Quarter": 10}
+                {
+                    "One": 1, "Double": 2, "Four": 3, "Half": 4, "Quarter": 5
+                    # "GClef": 6, "FClef": 7, "OpeningBracket": 8, "RestOne": 9, "RestHalf": 10,
+                }
                 [row["classTitle"]]
             )
 
