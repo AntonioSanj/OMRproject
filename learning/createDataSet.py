@@ -21,15 +21,8 @@ class MyDataset(Dataset):
         # Load the image
         image, _ = loadImageGrey(image_path)
 
-        # Ensure image is converted to a PyTorch tensor
-        if not isinstance(image, torch.Tensor):
-            image = torch.from_numpy(image).float()  # Convert numpy array to float tensor
+        image = torch.from_numpy(image).float()
 
-        # If the image is grayscale, repeat it across 3 channels
-        if image.ndimension() == 2:  # Single-channel image
-            image = image.unsqueeze(0).repeat(3, 1, 1)  # Convert to 3-channel image
-
-        # Ensure image is in (C, H, W) format
         if image.ndimension() == 3 and image.shape[0] != 3:
             image = image.permute(2, 0, 1)  # Rearrange dimensions to (C, H, W)
 
@@ -42,7 +35,11 @@ class MyDataset(Dataset):
         boxes, labels = [], []
 
         for _, row in annotations.iterrows():
-            boxes.append([row["x1"], row["y1"], row["x2"], row["y2"]])
+            x1 = row["x1"]
+            x2 = row["x2"]
+            y1 = row["y1"]
+            y2 = row["y2"]
+            boxes.append([x1, y1, round(x2-x1), round(y2-y1)])
             labels.append(
                 {
                     "One": 1, "Double": 2, "Four": 3, "Half": 4, "Quarter": 5
@@ -50,6 +47,7 @@ class MyDataset(Dataset):
                 }
                 [row["classTitle"]]
             )
+        print(boxes)
 
         target = {
             "boxes": torch.as_tensor(boxes, dtype=torch.float32),
