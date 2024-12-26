@@ -2,7 +2,6 @@ import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 
-# Define model
 def get_model(num_classes):
     # Load pre-trained Faster R-CNN
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
