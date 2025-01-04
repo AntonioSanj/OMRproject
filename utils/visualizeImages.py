@@ -2,7 +2,7 @@ import os
 
 from constants import demoSet
 from utils.plotUtils import showImage
-from vision.ImageOperations import loadImageGrey
+from vision.staveDetection.ImageOperations import loadImageGrey
 
 
 def showImages(sourcePath):

@@ -17,7 +17,7 @@ class Clef(Enum):
     UNDEFINED = '_'
 
 
-outputVision = 'output/outputVision'
+outputVision = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\output\outputVision'
 
 challengingSet = 'dataset/codingSet/challengingSet'
 challengingSet2 = 'dataset/codingSet/challengingSet2'
@@ -27,6 +27,7 @@ myDataCsv = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet
 myDataCsv2 = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\ann2'
 myDataJson = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\json'
 myDataCoco = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\coco\coco_annotations.json'
+myDataCoco2 = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\coco\coco_annotations2.json'
 modelsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/FasterRCNN/models/'
 
 feelTheLove = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\img\feelthelove1.png'

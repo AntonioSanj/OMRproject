@@ -5,10 +5,11 @@ import os
 from constants import *
 
 # Directory containing CSV files
-csv_directory = myDataCsv
-output_file = myDataCoco
+csv_directory = myDataCsv2
+output_file = myDataCoco2
 
 # Category mapping
+"""
 category_mapping = {
     "One": 1,
     "Double": 2,
@@ -22,8 +23,17 @@ category_mapping = {
     "RestHalf": 10,
 }
 
+"""
+category_mapping = {
+    "One": 1,
+    "Double": 2,
+    "Four": 3,
+    "Half": 4,
+    "Quarter": 5
+}
+
 # Supercategory name
-supercategory_name = "One-Double-Four-Half-Quarter-GClef-FClef-OpeningBracket-RestOne-RestHalf"
+supercategory_name = "figure"
 
 # Initialize COCO format structure
 coco_format = {
@@ -57,6 +67,12 @@ for csv_file in os.listdir(csv_directory):
         for _, row in data.iterrows():
             x1, y1, x2, y2 = row["x1"], row["y1"], row["x2"], row["y2"]
             class_title = row["classTitle"]
+
+            # transformations
+            x1 = x1 - round((x2-x1) * 0.2)
+            x2 = x2 + round((x2-x1) * 0.2)
+            y1 = y1 - round((y2-y1) * 0.2)
+            y2 = y2 + round((y2-y1) * 0.2)
 
             # Map classTitle to category_id
             category_id = category_mapping.get(class_title)

@@ -1,7 +1,7 @@
 import cv2
 
 from constants import *
-from processImage import processImage
+from staveDetection import getStaves
 import os
 
 
@@ -25,23 +25,23 @@ def testProcessImage(sourceDir, outputDir, show=False, printData=False, maxData=
 
         # stop processing when maxData is reached
         if maxData != -1 and count > maxData - 1:
-            print(f"PROCESSING FINISHED SUCCESSFULLY. REACHED MAX-DATA={maxData}")
+            print(f"STAVE DETECTION FINISHED. REACHED MAX-DATA={maxData}")
             return
 
         # get file path
         filePath = os.path.join(sourceDir, filename)
 
         # process image
-        image, _ = processImage(filePath, show, printData, debug)
+        image, _ = getStaves(filePath, show, printData, debug)
 
         # save image
         cv2.imwrite(outputDir + '/output_' + filename, image)
 
         count += 1
-        print(f"({count}):\t", filename, "\t\tProcessed and saved successfully")
+        print(f"({count}):\t", filename, "\t\tStaves detected")
 
-    print(f"PROCESSING FINISHED SUCCESSFULLY. {count} IMAGES PROCESSED")
+    print(f"STAVE DETECTION FINISHED. {count} IMAGES PROCESSED")
     return
 
 
-testProcessImage(challengingSet2, outputVision, True, True, 100, True)
+testProcessImage(myDataImg, outputVision, True, True)

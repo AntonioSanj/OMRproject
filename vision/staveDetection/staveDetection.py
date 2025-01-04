@@ -3,7 +3,7 @@ from ImageOperations import consolidateLines
 from utils.plotUtils import *
 
 
-def processImage(imagePath, show=False, printData=False, debug=False):
+def getStaves(imagePath, show=False, printData=False, debug=False):
     img, gray = loadImageGrey(imagePath)
 
     thresh_image = thresh(gray, 160)

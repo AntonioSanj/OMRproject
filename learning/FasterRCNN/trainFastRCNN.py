@@ -6,21 +6,25 @@ from learning.FasterRCNN.cocoDataSet import get_coco_dataset
 from learning.FasterRCNN.getModel import get_model
 from learning.FasterRCNN.trainEpoch import train_one_epoch
 
+images = myDataImg
+ann = myDataCoco2
+num_classes = 6  # Background + categories
+
 train_dataset = get_coco_dataset(
-    img_dir=myDataImg,
-    ann_file=myDataCoco
+    img_dir=images,
+    ann_file=ann
 )
 
 val_dataset = get_coco_dataset(
-    img_dir=myDataImg,
-    ann_file=myDataCoco
+    img_dir=images,
+    ann_file=ann
 )
 
 # DataLoader
 train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, collate_fn=lambda x: tuple(zip(*x)))
 val_loader = DataLoader(val_dataset, batch_size=4, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))
 
-num_classes = 11  # Background + categories
+
 model = get_model(num_classes)
 
 # Move model to GPU if available
@@ -39,6 +43,6 @@ for epoch in range(num_epochs):
     lr_scheduler.step()
 
     # Save the model's state dictionary after every epoch
-    model_path = f'fasterrcnn_resnet50_epoch_{epoch + 1}.pth'
+    model_path = modelsDir + f'fasterrcnn_epoch_{epoch + 1}.pth'
     torch.save(model.state_dict(), model_path)
     print(f"Model saved: {model_path}")
