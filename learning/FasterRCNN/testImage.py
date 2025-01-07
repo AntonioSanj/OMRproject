@@ -49,7 +49,7 @@ def draw_boxes(image, prediction, fig_size=(10, 10)):
     scores = prediction[0]['scores'].cpu().numpy()  # Get predicted scores
 
     # Set a threshold for showing boxes (e.g., score > 0.5)
-    threshold = 0.3
+    threshold = 0.0
 
     # Set up the figure size to control the image size
     plt.figure(figsize=fig_size)  # Adjust the figure size here

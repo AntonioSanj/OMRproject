@@ -5,7 +5,7 @@ import os
 from constants import *
 
 
-def getAllBoundingBoxes(srcDir, outputDir):
+def jsonToCsvDirectory(srcDir, outputDir):
     # get bounding boxes for each file in srcDir
 
     # check if source and output directories exist
@@ -30,13 +30,13 @@ def getAllBoundingBoxes(srcDir, outputDir):
             json_file_path = os.path.join(srcDir, file_name)
 
             try:
-                getBoundingBoxes(json_file_path, outputDir)
+                jsonToCsvFile(json_file_path, outputDir)
             except Exception as e:
                 print(f"Error processing file {file_name}: {e}")
     return
 
 
-def getBoundingBoxes(jsonPath, outputDir):
+def jsonToCsvFile(jsonPath, outputDir):
 
     if not os.path.exists(outputDir):
         raise FileNotFoundError(f"Output directory '{outputDir}' does not exist.")
@@ -74,4 +74,4 @@ def getBoundingBoxes(jsonPath, outputDir):
     print(f"{csv_filename} created")
 
 
-getAllBoundingBoxes(myDataJson, myDataCsv)
+jsonToCsvDirectory(myDataJson, myDataCsv)

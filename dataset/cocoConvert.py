@@ -9,28 +9,31 @@ csv_directory = myDataCsv2
 output_file = myDataCoco2
 
 # Category mapping
-"""
-category_mapping = {
-    "One": 1,
-    "Double": 2,
-    "Four": 3,
-    "Half": 4,
-    "Quarter": 5,
-    "GClef": 6,
-    "FClef": 7,
-    "OpeningBracket": 8,
-    "RestOne": 9,
-    "RestHalf": 10,
-}
-
-"""
-category_mapping = {
-    "One": 1,
-    "Double": 2,
-    "Four": 3,
-    "Half": 4,
-    "Quarter": 5
-}
+if csv_directory == myDataCsv and output_file == myDataCoco:
+    print("All Categories selected")
+    category_mapping = {
+        "One": 1,
+        "Double": 2,
+        "Four": 3,
+        "Half": 4,
+        "Quarter": 5,
+        "GClef": 6,
+        "FClef": 7,
+        "OpeningBracket": 8,
+        "RestOne": 9,
+        "RestHalf": 10,
+    }
+elif csv_directory == myDataCsv2 and output_file == myDataCoco2:
+    print("Essential categories selected")
+    category_mapping = {
+        "One": 1,
+        "Double": 2,
+        "Four": 3,
+        "Half": 4,
+        "Quarter": 5
+    }
+else:
+    raise ValueError("Wrong dataset")
 
 # Supercategory name
 supercategory_name = "figure"
@@ -39,11 +42,11 @@ supercategory_name = "figure"
 coco_format = {
     "annotations": [],
     "categories": [
-        {"id": 0, "name": supercategory_name, "supercategory": "none"}
-    ] + [
-        {"id": cid, "name": name, "supercategory": supercategory_name}
-        for name, cid in category_mapping.items()
-    ],
+                      {"id": 0, "name": supercategory_name, "supercategory": "none"}
+                  ] + [
+                      {"id": cid, "name": name, "supercategory": supercategory_name}
+                      for name, cid in category_mapping.items()
+                  ],
     "images": []
 }
 
@@ -69,10 +72,10 @@ for csv_file in os.listdir(csv_directory):
             class_title = row["classTitle"]
 
             # transformations
-            x1 = x1 - round((x2-x1) * 0.2)
-            x2 = x2 + round((x2-x1) * 0.2)
-            y1 = y1 - round((y2-y1) * 0.2)
-            y2 = y2 + round((y2-y1) * 0.2)
+            x1 = x1 - round((x2 - x1) * 0.2)
+            x2 = x2 + round((x2 - x1) * 0.2)
+            y1 = y1 - round((y2 - y1) * 0.2)
+            y2 = y2 + round((y2 - y1) * 0.2)
 
             # Map classTitle to category_id
             category_id = category_mapping.get(class_title)
