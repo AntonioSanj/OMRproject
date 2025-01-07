@@ -1,6 +1,6 @@
 import os
 
-from constants import demoSet
+from constants import myDataImg
 from utils.plotUtils import showImage
 from vision.staveDetection.ImageOperations import loadImageGrey
 
@@ -29,4 +29,4 @@ def showImages(sourcePath):
             showImage(image)
 
 
-showImages(demoSet)
+showImages(myDataImg)
