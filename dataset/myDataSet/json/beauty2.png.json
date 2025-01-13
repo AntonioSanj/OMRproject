@@ -1,0 +1,2060 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 2772,
+        "width": 1960
+    },
+    "objects": [
+        {
+            "id": 1614540578,
+            "classId": 13461953,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:53:41.949Z",
+            "updatedAt": "2024-12-08T11:53:41.949Z",
+            "tags": [],
+            "classTitle": "GClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        286
+                    ],
+                    [
+                        214,
+                        390
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540581,
+            "classId": 13472079,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:53:53.215Z",
+            "updatedAt": "2024-12-08T11:54:10.090Z",
+            "tags": [],
+            "classTitle": "FClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        464
+                    ],
+                    [
+                        215,
+                        511
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540585,
+            "classId": 13497153,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:53:59.378Z",
+            "updatedAt": "2024-12-08T11:54:03.902Z",
+            "tags": [],
+            "classTitle": "One",
+            "points": {
+                "exterior": [
+                    [
+                        241,
+                        450
+                    ],
+                    [
+                        275,
+                        506
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540625,
+            "classId": 13472079,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:54:23.902Z",
+            "updatedAt": "2024-12-08T11:54:23.902Z",
+            "tags": [],
+            "classTitle": "FClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        865
+                    ],
+                    [
+                        216,
+                        913
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540629,
+            "classId": 13472079,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:54:33.996Z",
+            "updatedAt": "2024-12-08T11:54:33.996Z",
+            "tags": [],
+            "classTitle": "FClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        1268
+                    ],
+                    [
+                        216,
+                        1315
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540635,
+            "classId": 13472079,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:54:46.454Z",
+            "updatedAt": "2024-12-08T11:54:46.454Z",
+            "tags": [],
+            "classTitle": "FClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        1669
+                    ],
+                    [
+                        216,
+                        1717
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540644,
+            "classId": 13472079,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:54:58.628Z",
+            "updatedAt": "2024-12-08T11:54:58.628Z",
+            "tags": [],
+            "classTitle": "FClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        2070
+                    ],
+                    [
+                        216,
+                        2117
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540658,
+            "classId": 13472079,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:55:10.596Z",
+            "updatedAt": "2024-12-08T11:55:10.596Z",
+            "tags": [],
+            "classTitle": "FClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        2471
+                    ],
+                    [
+                        216,
+                        2518
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540672,
+            "classId": 13461953,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:55:30.394Z",
+            "updatedAt": "2024-12-08T11:55:30.394Z",
+            "tags": [],
+            "classTitle": "GClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        2292
+                    ],
+                    [
+                        214,
+                        2397
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540679,
+            "classId": 13461953,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:55:41.442Z",
+            "updatedAt": "2024-12-08T11:55:41.442Z",
+            "tags": [],
+            "classTitle": "GClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        1892
+                    ],
+                    [
+                        214,
+                        1998
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540685,
+            "classId": 13461953,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:55:51.992Z",
+            "updatedAt": "2024-12-08T11:55:51.992Z",
+            "tags": [],
+            "classTitle": "GClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        1491
+                    ],
+                    [
+                        214,
+                        1595
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540694,
+            "classId": 13461953,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:56:08.480Z",
+            "updatedAt": "2024-12-08T11:56:08.480Z",
+            "tags": [],
+            "classTitle": "GClef",
+            "points": {
+                "exterior": [
+                    [
+                        175,
+                        1089
+                    ],
+                    [
+                        214,
+                        1194
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540702,
+            "classId": 13461953,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:56:23.620Z",
+            "updatedAt": "2024-12-08T11:56:23.620Z",
+            "tags": [],
+            "classTitle": "GClef",
+            "points": {
+                "exterior": [
+                    [
+                        176,
+                        687
+                    ],
+                    [
+                        214,
+                        791
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540713,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:56:47.201Z",
+            "updatedAt": "2024-12-08T11:56:47.201Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        577,
+                        287
+                    ],
+                    [
+                        610,
+                        373
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540721,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:57:00.680Z",
+            "updatedAt": "2024-12-08T11:57:00.680Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        684,
+                        286
+                    ],
+                    [
+                        718,
+                        359
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540729,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:57:09.179Z",
+            "updatedAt": "2024-12-08T11:57:09.179Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        791,
+                        283
+                    ],
+                    [
+                        825,
+                        344
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540739,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:57:19.575Z",
+            "updatedAt": "2024-12-08T11:57:19.575Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        898,
+                        281
+                    ],
+                    [
+                        933,
+                        337
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540751,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:57:35.341Z",
+            "updatedAt": "2024-12-08T11:57:39.944Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1028,
+                        309
+                    ],
+                    [
+                        1063,
+                        365
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540763,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:57:52.208Z",
+            "updatedAt": "2024-12-08T11:57:52.208Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1448,
+                        450
+                    ],
+                    [
+                        1481,
+                        507
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540844,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:59:08.367Z",
+            "updatedAt": "2024-12-08T11:59:08.367Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1313,
+                        448
+                    ],
+                    [
+                        1346,
+                        506
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540880,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:59:29.406Z",
+            "updatedAt": "2024-12-08T11:59:29.406Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        470,
+                        448
+                    ],
+                    [
+                        504,
+                        506
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540885,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:59:40.484Z",
+            "updatedAt": "2024-12-08T11:59:40.484Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        577,
+                        688
+                    ],
+                    [
+                        611,
+                        774
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540900,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T11:59:53.211Z",
+            "updatedAt": "2024-12-08T11:59:56.348Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        684,
+                        687
+                    ],
+                    [
+                        718,
+                        761
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540910,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:00:04.259Z",
+            "updatedAt": "2024-12-08T12:00:07.395Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        791,
+                        685
+                    ],
+                    [
+                        824,
+                        746
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540921,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:00:17.443Z",
+            "updatedAt": "2024-12-08T12:00:17.443Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        898,
+                        683
+                    ],
+                    [
+                        933,
+                        739
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540930,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:00:33.083Z",
+            "updatedAt": "2024-12-08T12:00:33.083Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1350,
+                        711
+                    ],
+                    [
+                        1384,
+                        776
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540935,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:00:44.427Z",
+            "updatedAt": "2024-12-08T12:00:51.898Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1458,
+                        717
+                    ],
+                    [
+                        1491,
+                        774
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540945,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:01:04.741Z",
+            "updatedAt": "2024-12-08T12:01:07.789Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1566,
+                        710
+                    ],
+                    [
+                        1600,
+                        771
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614540953,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:01:18.724Z",
+            "updatedAt": "2024-12-08T12:01:24.447Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1673,
+                        696
+                    ],
+                    [
+                        1707,
+                        769
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541254,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:01:39.808Z",
+            "updatedAt": "2024-12-08T12:01:43.359Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1241,
+                        866
+                    ],
+                    [
+                        1277,
+                        924
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541384,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:01:56.197Z",
+            "updatedAt": "2024-12-08T12:01:56.197Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        470,
+                        850
+                    ],
+                    [
+                        503,
+                        908
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541392,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:02:07.776Z",
+            "updatedAt": "2024-12-08T12:02:10.959Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        526,
+                        1126
+                    ],
+                    [
+                        560,
+                        1192
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541397,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:02:15.385Z",
+            "updatedAt": "2024-12-08T12:02:19.276Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        642,
+                        1132
+                    ],
+                    [
+                        675,
+                        1189
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541410,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:02:30.822Z",
+            "updatedAt": "2024-12-08T12:02:30.822Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        757,
+                        1126
+                    ],
+                    [
+                        792,
+                        1187
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541417,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:02:38.598Z",
+            "updatedAt": "2024-12-08T12:02:38.598Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        873,
+                        1113
+                    ],
+                    [
+                        908,
+                        1185
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541428,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:02:55.297Z",
+            "updatedAt": "2024-12-08T12:02:55.297Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1317,
+                        1113
+                    ],
+                    [
+                        1351,
+                        1176
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541432,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:03:03.201Z",
+            "updatedAt": "2024-12-08T12:03:03.201Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1435,
+                        1104
+                    ],
+                    [
+                        1466,
+                        1176
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541437,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:03:09.132Z",
+            "updatedAt": "2024-12-08T12:03:09.132Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1550,
+                        1119
+                    ],
+                    [
+                        1582,
+                        1176
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541441,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:03:20.735Z",
+            "updatedAt": "2024-12-08T12:03:20.735Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1664,
+                        1112
+                    ],
+                    [
+                        1698,
+                        1176
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541451,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:03:38.597Z",
+            "updatedAt": "2024-12-08T12:03:38.597Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1320,
+                        1514
+                    ],
+                    [
+                        1352,
+                        1579
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541458,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:03:49.246Z",
+            "updatedAt": "2024-12-08T12:03:52.623Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1433,
+                        1521
+                    ],
+                    [
+                        1468,
+                        1577
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541468,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:04:02.943Z",
+            "updatedAt": "2024-12-08T12:04:02.943Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1549,
+                        1514
+                    ],
+                    [
+                        1583,
+                        1574
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541470,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:04:11.361Z",
+            "updatedAt": "2024-12-08T12:04:15.652Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1666,
+                        1500
+                    ],
+                    [
+                        1698,
+                        1572
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541477,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:04:29.752Z",
+            "updatedAt": "2024-12-08T12:04:32.879Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        525,
+                        1930
+                    ],
+                    [
+                        560,
+                        1995
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541484,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:04:46.650Z",
+            "updatedAt": "2024-12-08T12:04:55.680Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        641,
+                        1936
+                    ],
+                    [
+                        675,
+                        1993
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541504,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:05:11.118Z",
+            "updatedAt": "2024-12-08T12:05:15.015Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        756,
+                        1929
+                    ],
+                    [
+                        792,
+                        1990
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541511,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:05:27.197Z",
+            "updatedAt": "2024-12-08T12:05:30.530Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        874,
+                        1915
+                    ],
+                    [
+                        907,
+                        1988
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541516,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:05:41.055Z",
+            "updatedAt": "2024-12-08T12:05:41.055Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1317,
+                        1915
+                    ],
+                    [
+                        1351,
+                        1978
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541522,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:05:56.727Z",
+            "updatedAt": "2024-12-08T12:05:56.727Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1433,
+                        1908
+                    ],
+                    [
+                        1466,
+                        1978
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541528,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:06:03.576Z",
+            "updatedAt": "2024-12-08T12:06:07.078Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1548,
+                        1922
+                    ],
+                    [
+                        1582,
+                        1979
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541536,
+            "classId": 13472091,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:06:13.278Z",
+            "updatedAt": "2024-12-08T12:06:17.305Z",
+            "tags": [],
+            "classTitle": "Half",
+            "points": {
+                "exterior": [
+                    [
+                        1664,
+                        1915
+                    ],
+                    [
+                        1698,
+                        1978
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541546,
+            "classId": 13497153,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:06:38.331Z",
+            "updatedAt": "2024-12-08T12:06:38.331Z",
+            "tags": [],
+            "classTitle": "One",
+            "points": {
+                "exterior": [
+                    [
+                        1029,
+                        450
+                    ],
+                    [
+                        1062,
+                        506
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541555,
+            "classId": 13497153,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:06:51.285Z",
+            "updatedAt": "2024-12-08T12:06:51.285Z",
+            "tags": [],
+            "classTitle": "One",
+            "points": {
+                "exterior": [
+                    [
+                        1014,
+                        866
+                    ],
+                    [
+                        1047,
+                        921
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541560,
+            "classId": 13497153,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:07:03.400Z",
+            "updatedAt": "2024-12-08T12:07:03.400Z",
+            "tags": [],
+            "classTitle": "One",
+            "points": {
+                "exterior": [
+                    [
+                        241,
+                        852
+                    ],
+                    [
+                        275,
+                        908
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541572,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:07:27.609Z",
+            "updatedAt": "2024-12-08T12:07:31.134Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        577,
+                        450
+                    ],
+                    [
+                        611,
+                        506
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541578,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:07:41.794Z",
+            "updatedAt": "2024-12-08T12:07:41.794Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1012,
+                        717
+                    ],
+                    [
+                        1049,
+                        773
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541608,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:08:02.688Z",
+            "updatedAt": "2024-12-08T12:08:02.688Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1350,
+                        866
+                    ],
+                    [
+                        1384,
+                        921
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541614,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:08:14.117Z",
+            "updatedAt": "2024-12-08T12:08:14.117Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        577,
+                        852
+                    ],
+                    [
+                        611,
+                        908
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541622,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:08:38.978Z",
+            "updatedAt": "2024-12-08T12:08:42.976Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        222,
+                        1127
+                    ],
+                    [
+                        257,
+                        1182
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541628,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:08:55.910Z",
+            "updatedAt": "2024-12-08T12:08:55.910Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1030,
+                        1098
+                    ],
+                    [
+                        1065,
+                        1155
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541634,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:09:17.986Z",
+            "updatedAt": "2024-12-08T12:09:21.849Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        222,
+                        1261
+                    ],
+                    [
+                        257,
+                        1331
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541639,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:09:31.091Z",
+            "updatedAt": "2024-12-08T12:09:31.091Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        526,
+                        1268
+                    ],
+                    [
+                        560,
+                        1338
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541643,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:09:44.101Z",
+            "updatedAt": "2024-12-08T12:09:44.101Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1013,
+                        1274
+                    ],
+                    [
+                        1048,
+                        1345
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541647,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:09:56.753Z",
+            "updatedAt": "2024-12-08T12:09:56.753Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1316,
+                        1253
+                    ],
+                    [
+                        1352,
+                        1324
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541653,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:10:17.613Z",
+            "updatedAt": "2024-12-08T12:10:21.129Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        222,
+                        1528
+                    ],
+                    [
+                        257,
+                        1584
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541665,
+            "classId": 13515803,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:10:55.055Z",
+            "updatedAt": "2024-12-08T12:10:55.055Z",
+            "tags": [],
+            "classTitle": "Four",
+            "points": {
+                "exterior": [
+                    [
+                        238,
+                        1683
+                    ],
+                    [
+                        262,
+                        1712
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541667,
+            "classId": 13515803,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:11:05.574Z",
+            "updatedAt": "2024-12-08T12:11:05.574Z",
+            "tags": [],
+            "classTitle": "Four",
+            "points": {
+                "exterior": [
+                    [
+                        1032,
+                        1655
+                    ],
+                    [
+                        1056,
+                        1684
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541676,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:11:28.356Z",
+            "updatedAt": "2024-12-08T12:11:28.356Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        222,
+                        1929
+                    ],
+                    [
+                        257,
+                        1985
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541682,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:11:46.175Z",
+            "updatedAt": "2024-12-08T12:11:49.341Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1030,
+                        1901
+                    ],
+                    [
+                        1064,
+                        1958
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541689,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:12:00.127Z",
+            "updatedAt": "2024-12-08T12:12:07.714Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        222,
+                        2063
+                    ],
+                    [
+                        257,
+                        2134
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541694,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:12:13.628Z",
+            "updatedAt": "2024-12-08T12:12:17.532Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        525,
+                        2071
+                    ],
+                    [
+                        561,
+                        2141
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541700,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:12:29.916Z",
+            "updatedAt": "2024-12-08T12:12:29.916Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1013,
+                        2077
+                    ],
+                    [
+                        1048,
+                        2148
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541702,
+            "classId": 13499011,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:12:41.400Z",
+            "updatedAt": "2024-12-08T12:12:41.400Z",
+            "tags": [],
+            "classTitle": "Double",
+            "points": {
+                "exterior": [
+                    [
+                        1317,
+                        2056
+                    ],
+                    [
+                        1351,
+                        2126
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541711,
+            "classId": 13515803,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:12:57.977Z",
+            "updatedAt": "2024-12-08T12:12:57.977Z",
+            "tags": [],
+            "classTitle": "Four",
+            "points": {
+                "exterior": [
+                    [
+                        238,
+                        2330
+                    ],
+                    [
+                        262,
+                        2344
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541716,
+            "classId": 13515803,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:13:04.326Z",
+            "updatedAt": "2024-12-08T12:13:04.326Z",
+            "tags": [],
+            "classTitle": "Four",
+            "points": {
+                "exterior": [
+                    [
+                        237,
+                        2486
+                    ],
+                    [
+                        261,
+                        2514
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614541719,
+            "classId": 13515803,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T12:13:18.276Z",
+            "updatedAt": "2024-12-08T12:13:18.276Z",
+            "tags": [],
+            "classTitle": "Four",
+            "points": {
+                "exterior": [
+                    [
+                        1027,
+                        2486
+                    ],
+                    [
+                        1050,
+                        2513
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614549650,
+            "classId": 13472086,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T16:25:46.962Z",
+            "updatedAt": "2024-12-08T16:25:46.962Z",
+            "tags": [],
+            "classTitle": "OpeningBracket",
+            "points": {
+                "exterior": [
+                    [
+                        135,
+                        309
+                    ],
+                    [
+                        154,
+                        520
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614549680,
+            "classId": 13472086,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T16:25:53.129Z",
+            "updatedAt": "2024-12-08T16:25:53.129Z",
+            "tags": [],
+            "classTitle": "OpeningBracket",
+            "points": {
+                "exterior": [
+                    [
+                        135,
+                        712
+                    ],
+                    [
+                        154,
+                        922
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614549705,
+            "classId": 13472086,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T16:25:59.124Z",
+            "updatedAt": "2024-12-08T16:25:59.124Z",
+            "tags": [],
+            "classTitle": "OpeningBracket",
+            "points": {
+                "exterior": [
+                    [
+                        134,
+                        1112
+                    ],
+                    [
+                        154,
+                        1324
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614549718,
+            "classId": 13472086,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T16:26:06.069Z",
+            "updatedAt": "2024-12-08T16:26:06.069Z",
+            "tags": [],
+            "classTitle": "OpeningBracket",
+            "points": {
+                "exterior": [
+                    [
+                        135,
+                        1514
+                    ],
+                    [
+                        154,
+                        1726
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614549734,
+            "classId": 13472086,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T16:26:18.044Z",
+            "updatedAt": "2024-12-08T16:26:18.044Z",
+            "tags": [],
+            "classTitle": "OpeningBracket",
+            "points": {
+                "exterior": [
+                    [
+                        135,
+                        1915
+                    ],
+                    [
+                        154,
+                        2127
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 1614549766,
+            "classId": 13472086,
+            "objectId": null,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "asanjurjo",
+            "createdAt": "2024-12-08T16:26:26.517Z",
+            "updatedAt": "2024-12-08T16:26:26.517Z",
+            "tags": [],
+            "classTitle": "OpeningBracket",
+            "points": {
+                "exterior": [
+                    [
+                        135,
+                        2316
+                    ],
+                    [
+                        153,
+                        2526
+                    ]
+                ],
+                "interior": []
+            }
+        }
+    ]
+}
