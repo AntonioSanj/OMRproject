@@ -12,7 +12,7 @@ def get_class_name(class_id):
 
 
 COCO_CLASSES = {0: "Background", 1: "One", 2: "Double", 3: "Four", 4: "Half", 5: "Quarter", 6: "GClef", 7: "FClef",
-                8: "OpeningBracket", 9: "RestOne", 10: "RestHalf"}
+                8: "RestOne", 9: "RestHalf"}
 
 num_classes = 6
 

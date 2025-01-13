@@ -74,4 +74,4 @@ def jsonToCsvFile(jsonPath, outputDir):
     print(f"{csv_filename} created")
 
 
-jsonToCsvDirectory(myDataJson, myDataCsv)
+jsonToCsvDirectory(mySlicedDataJson, mySlicedDataCsv)

@@ -4,105 +4,109 @@ import os
 
 from constants import *
 
-# Directory containing CSV files
-csv_directory = myDataCsv2
-output_file = myDataCoco2
 
-# Category mapping
-if csv_directory == myDataCsv and output_file == myDataCoco:
-    print("All Categories selected")
-    category_mapping = {
-        "One": 1,
-        "Double": 2,
-        "Four": 3,
-        "Half": 4,
-        "Quarter": 5,
-        "GClef": 6,
-        "FClef": 7,
-        "OpeningBracket": 8,
-        "RestOne": 9,
-        "RestHalf": 10,
+def csvToCoco(csv_directory, output_file, transform_x=0, transform_y=0):
+    # Category mapping
+    if ((csv_directory == myDataCsv and output_file == myDataCoco) or
+            (csv_directory == mySlicedDataCsv and output_file == mySlicedDataCoco)):
+
+        print("All Categories selected")
+        category_mapping = {
+            "One": 1,
+            "Double": 2,
+            "Four": 3,
+            "Half": 4,
+            "Quarter": 5,
+            "GClef": 6,
+            "FClef": 7,
+            "RestOne": 8,
+            "RestHalf": 9,
+        }
+    elif ((csv_directory == myDataCsv2 and output_file == myDataCoco2) or
+          (csv_directory == mySlicedDataCsv2 and output_file == mySlicedDataCoco2)):
+        print("Essential categories selected")
+        category_mapping = {
+            "One": 1,
+            "Double": 2,
+            "Four": 3,
+            "Half": 4,
+            "Quarter": 5
+        }
+    else:
+        raise ValueError("Wrong dataset")
+
+    # Supercategory name
+    supercategory_name = "figure"
+
+    # Initialize COCO format structure
+    coco_format = {
+        "annotations": [],
+        "categories": [
+                          {"id": 0, "name": supercategory_name, "supercategory": "none"}
+                      ] + [
+                          {"id": cid, "name": name, "supercategory": supercategory_name}
+                          for name, cid in category_mapping.items()
+                      ],
+        "images": []
     }
-elif csv_directory == myDataCsv2 and output_file == myDataCoco2:
-    print("Essential categories selected")
-    category_mapping = {
-        "One": 1,
-        "Double": 2,
-        "Four": 3,
-        "Half": 4,
-        "Quarter": 5
-    }
-else:
-    raise ValueError("Wrong dataset")
 
-# Supercategory name
-supercategory_name = "figure"
+    annotation_id = 0  # Global counter for unique annotation IDs
+    image_id = 0  # Counter for unique image IDs
 
-# Initialize COCO format structure
-coco_format = {
-    "annotations": [],
-    "categories": [
-                      {"id": 0, "name": supercategory_name, "supercategory": "none"}
-                  ] + [
-                      {"id": cid, "name": name, "supercategory": supercategory_name}
-                      for name, cid in category_mapping.items()
-                  ],
-    "images": []
-}
+    # Process each CSV file
+    for csv_file in os.listdir(csv_directory):
+        if csv_file.endswith(".csv"):
+            # Parse the CSV
+            file_path = os.path.join(csv_directory, csv_file)
+            data = pd.read_csv(file_path)
 
-annotation_id = 0  # Global counter for unique annotation IDs
-image_id = 0  # Counter for unique image IDs
+            # Extract image name (assuming it matches the CSV file)
+            image_name = os.path.splitext(csv_file)[0] + ".png"
 
-# Process each CSV file
-for csv_file in os.listdir(csv_directory):
-    if csv_file.endswith(".csv"):
-        # Parse the CSV
-        file_path = os.path.join(csv_directory, csv_file)
-        data = pd.read_csv(file_path)
+            # Add image entry
+            coco_format["images"].append({"id": image_id, "file_name": image_name})
 
-        # Extract image name (assuming it matches the CSV file)
-        image_name = os.path.splitext(csv_file)[0] + ".png"
+            # Add annotations
+            for _, row in data.iterrows():
+                x1, y1, x2, y2 = row["x1"], row["y1"], row["x2"], row["y2"]
+                class_title = row["classTitle"]
 
-        # Add image entry
-        coco_format["images"].append({"id": image_id, "file_name": image_name})
+                # transformations
+                x1 = x1 - round((x2 - x1) * transform_x)
+                x2 = x2 + round((x2 - x1) * transform_x)
+                y1 = y1 - round((y2 - y1) * transform_y)
+                y2 = y2 + round((y2 - y1) * transform_y)
 
-        # Add annotations
-        for _, row in data.iterrows():
-            x1, y1, x2, y2 = row["x1"], row["y1"], row["x2"], row["y2"]
-            class_title = row["classTitle"]
+                # Map classTitle to category_id
+                category_id = category_mapping.get(class_title)
+                if category_id is None:
+                    raise ValueError(f"Unknown category: {class_title}")
 
-            # transformations
-            x1 = x1 - round((x2 - x1) * 0.2)
-            x2 = x2 + round((x2 - x1) * 0.2)
-            y1 = y1 - round((y2 - y1) * 0.2)
-            y2 = y2 + round((y2 - y1) * 0.2)
+                width = x2 - x1
+                height = y2 - y1
+                segmentation = [x1, y1, x2, y1, x2, y2, x1, y2]  # Approximate polygon
+                area = width * height
 
-            # Map classTitle to category_id
-            category_id = category_mapping.get(class_title)
-            if category_id is None:
-                raise ValueError(f"Unknown category: {class_title}")
+                annotation = {
+                    "segmentation": [segmentation],
+                    "area": area,
+                    "bbox": [x1, y1, width, height],
+                    "iscrowd": 0,
+                    "id": annotation_id,
+                    "image_id": image_id,
+                    "category_id": category_id,
+                }
+                coco_format["annotations"].append(annotation)
+                annotation_id += 1
 
-            width = x2 - x1
-            height = y2 - y1
-            segmentation = [x1, y1, x2, y1, x2, y2, x1, y2]  # Approximate polygon
-            area = width * height
+            image_id += 1
 
-            annotation = {
-                "segmentation": [segmentation],
-                "area": area,
-                "bbox": [x1, y1, width, height],
-                "iscrowd": 0,
-                "id": annotation_id,
-                "image_id": image_id,
-                "category_id": category_id,
-            }
-            coco_format["annotations"].append(annotation)
-            annotation_id += 1
+    # Save to JSON file
+    with open(output_file, "w") as f:
+        json.dump(coco_format, f, indent=4)
 
-        image_id += 1
+    print(f"COCO JSON saved to {output_file}")
 
-# Save to JSON file
-with open(output_file, "w") as f:
-    json.dump(coco_format, f, indent=4)
 
-print(f"COCO JSON saved to {output_file}")
+csvToCoco(mySlicedDataCsv, mySlicedDataCoco)
+csvToCoco(mySlicedDataCsv2, mySlicedDataCoco2)
