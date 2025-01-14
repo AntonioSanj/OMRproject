@@ -2,13 +2,14 @@ import torch
 from torch.utils.data import DataLoader
 
 from constants import *
-from learning.FasterRCNN.cocoDataSet import get_coco_dataset
+from learning.utils.cocoDataSet import get_coco_dataset
 from learning.FasterRCNN.getModel import get_model
-from learning.FasterRCNN.trainEpoch import train_one_epoch
+from learning.utils.trainEpoch import train_one_epoch
 
-images = myDataImg
-ann = myDataCoco2
-num_classes = 6  # Background + categories
+images = mySlicedDataImg
+ann = mySlicedDataCoco
+models_dir = slicedModelsDir
+num_classes = 10  # Background + categories
 
 train_dataset = get_coco_dataset(
     img_dir=images,
@@ -43,6 +44,6 @@ for epoch in range(num_epochs):
     lr_scheduler.step()
 
     # Save the model's state dictionary after every epoch
-    model_path = modelsDir + f'fasterrcnn_epoch_{epoch + 1}.pth'
+    model_path = models_dir + f'fasterrcnn_epoch_{epoch + 1}.pth'
     torch.save(model.state_dict(), model_path)
     print(f"Model saved: {model_path}")
