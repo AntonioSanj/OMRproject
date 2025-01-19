@@ -59,10 +59,10 @@ def testImage(image_path, modelDir, num_classes, threshold=0.0):
     draw_boxes(Image.open(image_path), prediction, threshold, fig_size=(9, 16))  # Example of increased size
 
 
-testImage(mySlicedDataImg + '/slice20.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.2)
-testImage(mySlicedDataImg + '/slice21.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.2)
-testImage(mySlicedDataImg + '/slice22.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.2)
-testImage(mySlicedDataImg + '/slice23.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.2)
-testImage(mySlicedDataImg + '/slice66.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.2)
+testImage(mySlicedDataImg + '/slice30.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
+testImage(mySlicedDataImg + '/slice31.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
+testImage(mySlicedDataImg + '/slice32.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
+testImage(mySlicedDataImg + '/slice33.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
+testImage(mySlicedDataImg + '/slice36.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
 
 

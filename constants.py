@@ -1,8 +1,10 @@
 from enum import Enum
 
-# image processing
+# image data
 IMAGE_WIDTH = 1960
 IMAGE_HEIGHT = 2772
+SLICE_WIDTH = 800
+SLICE_HEIGHT = 500
 IMAGE_CENTER = (IMAGE_WIDTH // 2, IMAGE_HEIGHT // 2)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)

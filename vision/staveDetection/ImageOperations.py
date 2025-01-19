@@ -3,7 +3,7 @@ import numpy as np
 
 from constants import IMAGE_WIDTH, IMAGE_HEIGHT, WHITE, IMAGE_CENTER, COLORS, RED
 
-from vision.objectTypes.Stave import Stave
+from objectTypes.Stave import Stave
 from utils.plotUtils import showImage
 
 

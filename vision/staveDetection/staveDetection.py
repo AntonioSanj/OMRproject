@@ -1,5 +1,4 @@
-from ImageOperations import *
-from ImageOperations import consolidateLines
+from vision.staveDetection.ImageOperations import *
 from utils.plotUtils import *
 
 
