@@ -1,10 +1,11 @@
 from PIL import Image
 
 from constants import *
-from mainFunctions import obtainSliceHeights, getPredictions, startModel, showPredictions
+from mainFunctions import obtainSliceHeights, getPredictions, startModel, showPredictions, mergeFigures, \
+    translateToFullSheet, filterOutBorderFigures
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = myDataImg + r'\image_13.png'
+imagePath = myDataImg + r'\image_6.png'
 
 print(imagePath)
 _, staves = getStaves(imagePath)
@@ -16,21 +17,37 @@ if len(staves) % 2 != 0:
     raise ValueError(f"Stave detetection went wrong. Staves detected: {len(staves)}")
 
 i = 0
-x_increment = int(SLICE_WIDTH/3)
+x_increment = int(SLICE_WIDTH / 3)
 
 model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10)
 
+fullSheetFigures = []
+
 while i < (len(staves)):
-    print("STAVE PAIR", i / 2 + 1)
+    print(f"ANALYSING STAVE PAIR {i / 2 + 1} ", end="")
     sliceTop, sliceBottom = obtainSliceHeights(staves[i], staves[i + 1])
     j = 0
     while j < IMAGE_WIDTH - SLICE_WIDTH:
-        print("j:", j)
+        print("::::::", end="")
+
         slicedImage = image.crop((j, sliceTop, j + SLICE_WIDTH, sliceBottom))
 
-        figures = getPredictions(slicedImage, model, 0.15, device)
+        sliceFigures = getPredictions(slicedImage, model, 0.15, device)
 
-        showPredictions(slicedImage, figures)
+        sliceFigures = filterOutBorderFigures(sliceFigures, 30)
+
+        sliceFigures = mergeFigures(sliceFigures)
+
+        sliceFigures = translateToFullSheet(sliceFigures, j, sliceTop)
+
+        fullSheetFigures = fullSheetFigures + sliceFigures
 
         j = j + x_increment
-    i = i + 10
+
+    i = i + 2
+
+    print("  COMPLETED")
+
+fullSheetFigures = mergeFigures(fullSheetFigures, 0.3)
+
+showPredictions(image, fullSheetFigures)
