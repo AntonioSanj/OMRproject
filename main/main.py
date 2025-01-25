@@ -2,12 +2,11 @@ from PIL import Image
 
 from constants import *
 from mainFunctions import obtainSliceHeights, getPredictions, startModel, showPredictions, mergeFigures, \
-    translateToFullSheet, filterOutBorderFigures
+    translateToFullSheet, filterOutBorderFigures, saveFigures
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = myDataImg + r'\image_6.png'
+imagePath = myDataImg + '/image_10.png'
 
-print(imagePath)
 _, staves = getStaves(imagePath)
 
 image = Image.open(imagePath).convert("RGB")
@@ -24,7 +23,7 @@ model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10)
 fullSheetFigures = []
 
 while i < (len(staves)):
-    print(f"ANALYSING STAVE PAIR {i / 2 + 1} ", end="")
+    print(f"ANALYSING STAVE PAIR {int(i / 2) + 1} ", end="")
     sliceTop, sliceBottom = obtainSliceHeights(staves[i], staves[i + 1])
     j = 0
     while j < IMAGE_WIDTH - SLICE_WIDTH:
@@ -35,6 +34,8 @@ while i < (len(staves)):
         sliceFigures = getPredictions(slicedImage, model, 0.15, device)
 
         sliceFigures = filterOutBorderFigures(sliceFigures, 30)
+
+        # showPredictions(slicedImage, sliceFigures)
 
         sliceFigures = mergeFigures(sliceFigures)
 
@@ -51,3 +52,5 @@ while i < (len(staves)):
 fullSheetFigures = mergeFigures(fullSheetFigures, 0.3)
 
 showPredictions(image, fullSheetFigures)
+
+# saveFigures(image, fullSheetFigures, myFiguresDataSet, 555)

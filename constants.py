@@ -40,8 +40,10 @@ mySlicedDataCsv2 = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\my
 mySlicedDataJson = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\json'
 mySlicedDataCoco = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\coco\coco_annotations.json'
 mySlicedDataCoco2 = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\coco\coco_annotations2.json'
-slicedModelsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/SlicedFasterRCNN/models/'
+slicedModelsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/FasterRCNN/sliceModels/'
 
-# image paths
-feelTheLove = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\img\feelthelove1.png'
-slice19 = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\img\slice19.png'
+# fullsheets path
+fullsheetsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/dataset/fullsheets/'
+
+myFiguresDataSet = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/dataset/myFiguresDataSet'
+figureModels = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figureClassification/models/'

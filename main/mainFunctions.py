@@ -68,7 +68,8 @@ def getPredictions(slicedImage, model, threshold, device):
 def filterOutBorderFigures(figures, borderSeparation=30):
     res = []
     for figure in figures:
-        if figure.box[0] > borderSeparation and figure.box[2] < SLICE_WIDTH - borderSeparation:
+        if figure.box[0] > borderSeparation and figure.box[2] < SLICE_WIDTH - borderSeparation\
+                and figure.box[1] > borderSeparation and figure.box[3] < SLICE_HEIGHT - borderSeparation:
             res.append(figure)
     return res
 
@@ -82,7 +83,7 @@ def showPredictions(image, figures):
         draw.rectangle(box, outline="red", width=1)
 
     # Display using matplotlib
-    plt.figure(figsize=(16, 10))
+    plt.figure(figsize=(10, 16))
     plt.imshow(imageCopy)
     plt.axis('off')  # Turn off the axis for better visibility
     plt.show()
@@ -135,3 +136,10 @@ def translateToFullSheet(figures, offset_x=0, offset_y=0):
         figure.box[2] = figure.box[2] + offset_x
         figure.box[3] = figure.box[3] + offset_y
     return figures
+
+
+def saveFigures(image, figures, output_dir, start_from=0):
+    for i, figure in enumerate(figures):
+        crop = image.crop((figure.box[0], figure.box[1], figure.box[2], figure.box[3]))
+
+        crop.save(f"{output_dir}figure_{start_from + i + 1}.png", "PNG")
