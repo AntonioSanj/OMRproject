@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, models, transforms
 
@@ -10,16 +11,15 @@ from constants import myFiguresDataSet, figureModels
 data_dir = myFiguresDataSet  # Your dataset folder path
 
 # Hyperparameters
-batch_size = 32
-num_epochs = 10
-learning_rate = 0.001
+batch_size = 4
+num_epochs = 40
+learning_rate = 0.005
 validation_split = 0.2  # Percentage of data to use for validation
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Transforms
 transform = transforms.Compose([
     transforms.RandomResizedCrop(224),
-    transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
 ])
@@ -54,10 +54,14 @@ model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
+train_losses = []
+val_losses = []
+train_accuracies = []
+val_accuracies = []
+
 # Training loop
 for epoch in range(num_epochs):
     print(f"Epoch {epoch + 1}/{num_epochs}")
-    print("-" * 20)
 
     for phase in ["train", "val"]:
         if phase == "train":
@@ -89,8 +93,30 @@ for epoch in range(num_epochs):
         epoch_loss = running_loss / len(dataloaders[phase].dataset)
         epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
 
-        print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
+        if phase == "train":
+            train_losses.append(epoch_loss)
+            train_accuracies.append(epoch_acc.item())
+        else:
+            val_losses.append(epoch_loss)
+            val_accuracies.append(epoch_acc.item())
 
+        print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc*100:.2f}%")
+
+    print("")
     torch.save(model.state_dict(), figureModels + f"figure_classification_model{epoch + 1}.pth")
 
 print("Training complete.")
+
+# Plot accuracy and loss over epochs
+epochs = range(1, num_epochs + 1)
+
+# Accuracy plot
+plt.figure(figsize=(10, 5))
+plt.plot(epochs, train_accuracies, label="Training Accuracy")
+plt.plot(epochs, val_accuracies, label="Validation Accuracy")
+plt.ylim(0, 1)
+plt.title(f"LR: {learning_rate}. Batches: {batch_size}.")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()

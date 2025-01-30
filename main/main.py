@@ -5,7 +5,7 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, showPr
     translateToFullSheet, filterOutBorderFigures, saveFigures
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = myDataImg + '/image_10.png'
+imagePath = myDataImg + '/image_1.png'
 
 _, staves = getStaves(imagePath)
 
@@ -18,7 +18,7 @@ if len(staves) % 2 != 0:
 i = 0
 x_increment = int(SLICE_WIDTH / 3)
 
-model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10)
+model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_9.pth', 10)
 
 fullSheetFigures = []
 
@@ -53,4 +53,4 @@ fullSheetFigures = mergeFigures(fullSheetFigures, 0.3)
 
 showPredictions(image, fullSheetFigures)
 
-# saveFigures(image, fullSheetFigures, myFiguresDataSet, 555)
+saveFigures(image, fullSheetFigures, myFiguresDataSet, 0)
