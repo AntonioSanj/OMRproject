@@ -2,7 +2,7 @@ import os
 
 from constants import myDataImg
 from utils.plotUtils import showImage
-from vision.staveDetection.ImageOperations import loadImageGrey
+from vision.imageUtils import loadImageGrey
 
 
 def showImages(sourcePath):
@@ -15,9 +15,6 @@ def showImages(sourcePath):
 
     # Get a list of all files in the source folder
     files = os.listdir(sourcePath)
-
-    # Counter for renaming
-    counter = 1
 
     for filename in files:
         # Check if the file is an image

@@ -1,4 +1,5 @@
-from vision.staveDetection.ImageOperations import *
+from vision.imageUtils import *
+from vision.staveDetection.staveOperations import *
 from utils.plotUtils import *
 
 

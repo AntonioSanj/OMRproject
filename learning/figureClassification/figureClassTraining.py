@@ -1,20 +1,23 @@
+import json
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, models, transforms
 
-from constants import myFiguresDataSet, figureModels
+from constants import *
 
 # Directory
 data_dir = myFiguresDataSet  # Your dataset folder path
 
 # Hyperparameters
 batch_size = 4
-num_epochs = 40
 learning_rate = 0.005
 validation_split = 0.2  # Percentage of data to use for validation
+patience = 500
+max_epochs = 500
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Transforms
@@ -59,9 +62,15 @@ val_losses = []
 train_accuracies = []
 val_accuracies = []
 
+best_val_loss = float("inf")
+epochs_without_improvement = 0
+
+stop = False
+epoch = 0
+
 # Training loop
-for epoch in range(num_epochs):
-    print(f"Epoch {epoch + 1}/{num_epochs}")
+while not stop:
+    print(f"Epoch {epoch + 1}:")
 
     for phase in ["train", "val"]:
         if phase == "train":
@@ -100,23 +109,34 @@ for epoch in range(num_epochs):
             val_losses.append(epoch_loss)
             val_accuracies.append(epoch_acc.item())
 
-        print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc*100:.2f}%")
+            if epoch_loss < best_val_loss:
+                best_val_loss = epoch_loss
+                epochs_without_improvement = 0
+            else:
+                epochs_without_improvement += 1
 
+        print(f"{phase}\t Loss: {epoch_loss:.4f} Acc: {epoch_acc * 100:.2f}%")
+
+    epoch += 1
+
+    if epochs_without_improvement >= patience:
+        print(f"TRAINING STOPPED. {patience} epochs with no improvement.")
+        stop = True
+    if epoch >= max_epochs:
+        print(f"\nTRAINING STOPPED. Max epoch number reached: {max_epochs}.")
+        stop = True
     print("")
-    torch.save(model.state_dict(), figureModels + f"figure_classification_model{epoch + 1}.pth")
 
-print("Training complete.")
+torch.save(model.state_dict(), figureModels + f"figure_classification_model{epoch}.pth")
 
-# Plot accuracy and loss over epochs
-epochs = range(1, num_epochs + 1)
+performance_data = {
+    "train_accuracies": train_accuracies,
+    "val_accuracies": val_accuracies,
+    "train_losses": train_losses,
+    "val_losses": val_losses
+}
 
-# Accuracy plot
-plt.figure(figsize=(10, 5))
-plt.plot(epochs, train_accuracies, label="Training Accuracy")
-plt.plot(epochs, val_accuracies, label="Validation Accuracy")
-plt.ylim(0, 1)
-plt.title(f"LR: {learning_rate}. Batches: {batch_size}.")
-plt.xlabel("Epoch")
-plt.ylabel("Accuracy")
-plt.legend()
-plt.show()
+with open(figuresPerformanceDataJson, "w") as f:
+    json.dump(performance_data, f, indent=4)
+
+print(f"Performance data saved")

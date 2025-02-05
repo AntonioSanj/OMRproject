@@ -7,22 +7,6 @@ from objectTypes.Stave import Stave
 from utils.plotUtils import showImage
 
 
-def loadImageGrey(image_path):
-    # load image
-    img = cv2.imread(image_path)
-
-    # gray scale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    return img, gray
-
-
-def thresh(grayImage, threshold):
-    # apply threshold to image
-    _, umbralized_image = cv2.threshold(grayImage, threshold, 255, cv2.THRESH_BINARY)
-    return umbralized_image
-
-
 def cannyEdges(image, dilate_kernel_radius):
     # compute edges
     edges = cv2.Canny(image, 50, 200, apertureSize=3)
