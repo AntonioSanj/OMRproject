@@ -15,8 +15,8 @@ data_dir = myFiguresDataSet  # Your dataset folder path
 batch_size = 4
 learning_rate = 0.005
 validation_split = 0.2  # Percentage of data to use for validation
-patience = 500
-max_epochs = 500
+patience = 1000
+max_epochs = 1000
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -112,6 +112,7 @@ while not stop:
             if epoch_loss < best_val_loss:
                 best_val_loss = epoch_loss
                 epochs_without_improvement = 0
+                torch.save(model.state_dict(), figureModels + f"figure_classification_model.pth")
             else:
                 epochs_without_improvement += 1
 
@@ -127,8 +128,6 @@ while not stop:
         stop = True
     print("")
 
-torch.save(model.state_dict(), figureModels + f"figure_classification_model{epoch}.pth")
-
 performance_data = {
     "train_accuracies": train_accuracies,
     "val_accuracies": val_accuracies,
@@ -136,7 +135,7 @@ performance_data = {
     "val_losses": val_losses
 }
 
-with open(figuresPerformanceDataJson, "w") as f:
+with open(figuresPerformanceDataJson2, "w") as f:
     json.dump(performance_data, f, indent=4)
 
 print(f"Performance data saved")

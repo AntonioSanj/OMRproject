@@ -44,4 +44,4 @@ def testProcessImage(sourceDir, outputDir, show=False, printData=False, maxData=
     return
 
 
-testProcessImage(myDataImg, outputVision, True, True)
+testProcessImage(fullsheetsDir, outputVision, True, True)

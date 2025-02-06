@@ -1,15 +1,15 @@
 import cv2
 import numpy as np
 
-from utils.plotUtils import showImage
-from vision.imageUtils import loadImageGrey, thresh
 from constants import *
+from utils.plotUtils import showImage
+from vision.figureDetection.figureDetectionUtils import filterClosePoints
+from vision.imageUtils import loadImageGrey
 
 
-def getPointModifications(image_path, meanGap):
+def getPointModifications(image_path, show=False, print_points=False):
     img, imgGrey = loadImageGrey(image_path)
     _, binary = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    showImage(binary)
 
     kernel = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -26,18 +26,22 @@ def getPointModifications(image_path, meanGap):
 
     result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED)
 
-    # Define threshold for matches
-    threshold = 0.8  # Adjust based on your needs
-    locations = np.where(result >= threshold)
-    # Draw rectangles on the matches
-    img_color = cv2.cvtColor(binary, cv2.COLOR_GRAY2BGR)
-    w, h = kernel.shape[::-1]
+    threshold = 0.8
+    locations = np.where(result >= threshold)  # (y_coords, x_coords)
 
-    for pt in zip(*locations[::-1]):  # Swap x and y
-        cv2.rectangle(img_color, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 1)
+    # Convert to list of (x, y) coordinates
+    points = list(zip(locations[1], locations[0]))
 
-    showImage(img_color, "Matched Points")
+    points = filterClosePoints(points, 5)
+
+    if print_points:
+        print(f'{len(points)} POINTS FOUND:\n{points}')
+
+    if show:
+        for point in points:
+            cv2.rectangle(binary, point, (point[0] + kernel.shape[1], point[1] + kernel.shape[0]), 255, 2)
+        showImage(binary)
     return
 
 
-getPointModifications(myDataImg + '/image_13.png', 10)
+getPointModifications(myDataImg + '/image_13.png', True, True)
