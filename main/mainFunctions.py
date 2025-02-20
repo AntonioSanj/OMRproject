@@ -1,13 +1,13 @@
 import math
-
 import torch
-from PIL import ImageDraw
+import torch.nn as nn
+from PIL import ImageDraw, ImageFont
 from matplotlib import pyplot as plt
-
-from constants import SLICE_HEIGHT, SLICE_WIDTH
-from learning.FasterRCNN.getModel import get_model
+from torchvision import models, transforms
+from torchvision.models import ResNet18_Weights
 from torchvision.transforms import functional as F
-
+from constants import *
+from learning.FasterRCNN.getModel import get_model
 from objectTypes.Figure import Figure
 
 
@@ -68,7 +68,7 @@ def getPredictions(slicedImage, model, threshold, device):
 def filterOutBorderFigures(figures, borderSeparation=30):
     res = []
     for figure in figures:
-        if figure.box[0] > borderSeparation and figure.box[2] < SLICE_WIDTH - borderSeparation\
+        if figure.box[0] > borderSeparation and figure.box[2] < SLICE_WIDTH - borderSeparation \
                 and figure.box[1] > borderSeparation and figure.box[3] < SLICE_HEIGHT - borderSeparation:
             res.append(figure)
     return res
@@ -143,3 +143,64 @@ def saveFigures(image, figures, output_dir, start_from=0):
         crop = image.crop((figure.box[0], figure.box[1], figure.box[2], figure.box[3]))
 
         crop.save(f"{output_dir}figure_{start_from + i + 1}.png", "PNG")
+
+
+def startFiguresModel(model_dir, num_classes=9):
+    model = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+    model.fc = nn.Linear(model.fc.in_features, num_classes)  # Ensure it matches the saved model
+    model.load_state_dict(torch.load(model_dir, map_location=torch.device('cpu')))  # Load weights
+    model.eval()
+    return model
+
+
+def classifyFigure(image, model):
+    preprocess = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+    input_tensor = preprocess(image)
+    input_batch = input_tensor.unsqueeze(0)  # Add batch dimension
+
+    # Perform inference
+    with torch.no_grad():
+        output = model(input_batch)
+
+    # Get the predicted class
+    _, predicted_class = output.max(1)
+
+    # Define class names (Ensure these match your training data)
+    class_names = ['double', 'fClef', 'four', 'gClef', 'half', 'one', 'quarter', 'restHalf', 'restOne']
+
+    prediction = class_names[predicted_class.item()]
+
+    return prediction
+
+
+def classifyFigures(figures, model, image):
+    for figure in figures:
+        figure_img = image.crop((figure.box[0], figure.box[1], figure.box[2], figure.box[3]))
+        prediction = classifyFigure(figure_img, model)
+        figure.image = figure_img
+        figure.type = prediction
+
+    return figures
+
+
+def showPredictionsWithLabels(image, figures):
+    imageCopy = image.copy()
+    draw = ImageDraw.Draw(imageCopy)
+
+    font = ImageFont.truetype("arial.ttf", 20)
+
+    for figure in figures:
+        box = figure.box
+        draw.rectangle(box, outline="red", width=1)
+        draw.text((box[0], box[1] - 20), figure.type, fill="red", font=font)
+
+    # Display using matplotlib
+    plt.figure(figsize=(10, 16))
+    plt.imshow(imageCopy)
+    plt.axis('off')  # Turn off the axis for better visibility
+    plt.show()

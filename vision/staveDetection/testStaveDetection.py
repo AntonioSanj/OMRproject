@@ -5,7 +5,7 @@ from staveDetection import getStaves
 import os
 
 
-def testProcessImage(sourceDir, outputDir, show=False, printData=False, maxData=-1, debug=False):
+def testStaveDetection(sourceDir, outputDir, show=False, printData=False, maxData=-1, debug=False):
     # check sourceDir exists
     if not os.path.exists(sourceDir):
         raise FileNotFoundError(f"Source directory '{sourceDir}' does not exist.")
@@ -44,4 +44,4 @@ def testProcessImage(sourceDir, outputDir, show=False, printData=False, maxData=
     return
 
 
-testProcessImage(fullsheetsDir, outputVision, True, True)
+testStaveDetection(fullsheetsDir, outputVision, True, True)

@@ -7,18 +7,6 @@ from objectTypes.Stave import Stave
 from utils.plotUtils import showImage
 
 
-def cannyEdges(image, dilate_kernel_radius):
-    # compute edges
-    edges = cv2.Canny(image, 50, 200, apertureSize=3)
-
-    if dilate_kernel_radius != 0:
-        # dilate canny edges for easing line detection
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (dilate_kernel_radius, dilate_kernel_radius))
-        edges = cv2.dilate(edges, kernel, iterations=1)
-
-    return edges
-
-
 def rotateAdjustImage(edges, original, showLines=False):
     # detect lines of pentagram
     minLineLength = 1000

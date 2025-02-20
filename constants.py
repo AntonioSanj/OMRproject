@@ -50,7 +50,8 @@ slicedModelsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/Fas
 fullsheetsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/dataset/fullsheets/'
 
 # figure classifier
-myFiguresDataSet = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/dataset/myFiguresDataSet/'
+myFiguresDataSet = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/dataset/myFiguresDataSet/train/'
+myFiguresDataSetTest = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/dataset/myFiguresDataSet/test/'
 figureModels = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figureClassification/models/'
 figuresPerformanceDataJson = r'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figureClassification/performance_data/performance_data.json'
 figuresPerformanceDataJson2 = r'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figureClassification/performance_data/performance_data2.json'

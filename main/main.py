@@ -2,7 +2,8 @@ from PIL import Image
 
 from constants import *
 from mainFunctions import obtainSliceHeights, getPredictions, startModel, showPredictions, mergeFigures, \
-    translateToFullSheet, filterOutBorderFigures, saveFigures
+    translateToFullSheet, filterOutBorderFigures, saveFigures, startFiguresModel, classifyFigures, \
+    showPredictionsWithLabels
 from vision.staveDetection.staveDetection import getStaves
 
 imagePath = myDataImg + '/image_1.png'
@@ -54,3 +55,10 @@ fullSheetFigures = mergeFigures(fullSheetFigures, 0.3)
 showPredictions(image, fullSheetFigures)
 
 saveFigures(image, fullSheetFigures, myFiguresDataSet, 0)
+
+figureClassificationModel = startFiguresModel(figureModels + 'figure_classification_model.pth')
+
+figures = classifyFigures(fullSheetFigures, figureClassificationModel, image)
+
+showPredictionsWithLabels(image, figures)
+
