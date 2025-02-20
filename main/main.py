@@ -54,7 +54,7 @@ fullSheetFigures = mergeFigures(fullSheetFigures, 0.3)
 
 showPredictions(image, fullSheetFigures)
 
-saveFigures(image, fullSheetFigures, myFiguresDataSet, 0)
+# saveFigures(image, fullSheetFigures, myFiguresDataSet, 0)
 
 figureClassificationModel = startFiguresModel(figureModels + 'figure_classification_model.pth')
 

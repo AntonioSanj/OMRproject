@@ -10,11 +10,10 @@ from constants import *
 
 
 def startClassModel(model_path, num_classes=9):
-    # Load the saved model with the correct final layer
     model = models.resnet18(weights=ResNet18_Weights.DEFAULT)
-    model.fc = nn.Linear(model.fc.in_features, num_classes)  # Ensure it matches the saved model
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))  # Load weights
-    model.eval()  # Set to evaluation mode
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.eval()
     return model
 
 
@@ -22,8 +21,7 @@ def classifyFigure(image_path, model):
     # Image preprocessing
     image = Image.open(image_path)
     preprocess = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
@@ -46,14 +44,13 @@ def classifyFigure(image_path, model):
 
 
 def classify_all_figures(dataset_path, model):
-    class_correct = {}  # Stores correct predictions per class
-    class_total = {}  # Stores total images per class
-    total_correct = 0  # Overall correct predictions
-    total_images = 0  # Overall images
-
+    class_correct = {}
+    class_total = {}
+    total_correct = 0
+    total_images = 0
     for category in os.listdir(dataset_path):
         category_path = os.path.join(dataset_path, category)
-        if os.path.isdir(category_path):  # Ensure it's a directory
+        if os.path.isdir(category_path):
             class_correct[category] = 0
             class_total[category] = 0
 
@@ -74,7 +71,16 @@ def classify_all_figures(dataset_path, model):
     for category in class_correct:
         accuracy = (class_correct[category] / class_total[category]) * 100 if class_total[category] > 0 else 0
         print(f'{category.upper()}: {accuracy:.2f}% ({class_correct[category]}/{class_total[category]})')
+
+    # print overall accuracy
+    overall_accuracy = (total_correct / total_images) * 100 if total_images > 0 else 0
+    print(f"\nOverall Accuracy: {overall_accuracy:.2f}% ({total_correct}/{total_images})")
     print("")
+
+
+def testFigureClassification(model_dir, image_dir):
+    model = startClassModel(model_dir)
+    classify_all_figures(image_dir, model)
 
 
 modelFigureClass = startClassModel(figureModels + 'figure_classification_model.pth')

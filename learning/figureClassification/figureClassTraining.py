@@ -7,6 +7,8 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, models, transforms
 
 from constants import *
+from learning.figureClassification.testFigureClassifier import testFigureClassification
+from sklearn.model_selection import train_test_split
 
 # Directory
 data_dir = myFiguresDataSet  # Your dataset folder path
@@ -22,7 +24,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Transforms
 transform = transforms.Compose([
-    transforms.RandomResizedCrop(224),
+    transforms.Resize((224, 224)),  # Resize all images to 224x224
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
 ])
@@ -32,11 +34,11 @@ full_dataset = datasets.ImageFolder(data_dir, transform=transform)
 num_classes = len(full_dataset.classes)  # Number of class folders
 
 # Split dataset into training and validation
-dataset_size = len(full_dataset)
-val_size = int(validation_split * dataset_size)
-train_size = dataset_size - val_size
+indices = list(range(len(full_dataset)))
+train_indices, val_indices = train_test_split(indices, test_size=validation_split, random_state=42)
 
-train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
+train_dataset = torch.utils.data.Subset(full_dataset, train_indices)
+val_dataset = torch.utils.data.Subset(full_dataset, val_indices)
 
 # Create DataLoaders
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -119,6 +121,10 @@ while not stop:
         print(f"{phase}\t Loss: {epoch_loss:.4f} Acc: {epoch_acc * 100:.2f}%")
 
     epoch += 1
+
+    if epoch % 5 == 0:
+        print("\nSTARTING EVALUATION TEST")
+        testFigureClassification(figureModels + 'figure_classification_model.pth', myFiguresDataSetTest)
 
     if epochs_without_improvement >= patience:
         print(f"TRAINING STOPPED. {patience} epochs with no improvement.")
