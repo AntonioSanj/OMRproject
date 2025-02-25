@@ -6,7 +6,7 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, showPr
     showPredictionsWithLabels
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = myDataImg + '/image_1.png'
+imagePath = fullsheetsDir + '/roar1.png'
 
 _, staves = getStaves(imagePath)
 
@@ -14,7 +14,7 @@ image = Image.open(imagePath).convert("RGB")
 
 # verify number of staves is even
 if len(staves) % 2 != 0:
-    raise ValueError(f"Stave detetection went wrong. Staves detected: {len(staves)}")
+    raise ValueError(f"Stave detection went wrong. Staves detected: {len(staves)}")
 
 i = 0
 x_increment = int(SLICE_WIDTH / 3)

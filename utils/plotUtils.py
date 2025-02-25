@@ -13,14 +13,14 @@ def showImage(image, title=None):
     plt.show()
 
 
-def compareToOg(image, original):
+def showCompareImages(image, image2, title=None):
     plt.figure(figsize=(10, 9))
     plt.subplot(121)
     plt.imshow(image, cmap='gray')
-    plt.title('Processed')
+    plt.title('Untitled' if title is None else title)
 
     plt.subplot(122)
-    plt.imshow(original, cmap='gray')
+    plt.imshow(image2, cmap='gray')
     plt.title('Original')
 
     plt.tight_layout()

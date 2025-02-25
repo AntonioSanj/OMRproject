@@ -2,7 +2,7 @@ import os
 
 from constants import myDataImg
 from utils.plotUtils import showImage
-from vision.imageUtils import loadImageGrey
+from vision.visionUtils import loadImageGrey
 
 
 def showImages(sourcePath):

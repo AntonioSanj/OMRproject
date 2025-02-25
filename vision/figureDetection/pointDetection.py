@@ -4,7 +4,7 @@ import numpy as np
 from constants import *
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetectionUtils import filterClosePoints
-from vision.imageUtils import loadImageGrey
+from vision.visionUtils import loadImageGrey
 
 
 def getPointModifications(image_path, show=False, print_points=False):

@@ -1,4 +1,4 @@
-from vision.imageUtils import *
+from vision.visionUtils import *
 from vision.staveDetection.staveOperations import *
 from utils.plotUtils import *
 
@@ -35,6 +35,6 @@ def getStaves(imagePath, show=False, printData=False, debug=False):
         printStaves(staves)
 
     if show:
-        compareToOg(result, gray)
+        showCompareImages(result, gray)
 
     return result, staves

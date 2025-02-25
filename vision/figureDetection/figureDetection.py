@@ -3,23 +3,19 @@ import numpy as np
 
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetectionUtils import filterClosePoints
-from vision.imageUtils import loadImageGrey
+from vision.visionUtils import loadImageGrey, createKernelFromImage
 from constants import *
-
-
-def createKernel(image_path):
-    img, imgGrey = loadImageGrey(image_path)  # Load the image in grayscale
-    _, kernel = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    return kernel
 
 
 def extractFigureLocations(image_path, figure_path, threshold=0.7, show=False, print_points=False):
     img, imgGrey = loadImageGrey(image_path)
     _, binary = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-    kernel = createKernel(figure_path)
+    kernel = createKernelFromImage(figure_path)
 
     result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED)
+
+    showImage(result)
 
     locations = np.where(result >= threshold)  # (y_coords, x_coords)
 
@@ -35,7 +31,7 @@ def extractFigureLocations(image_path, figure_path, threshold=0.7, show=False, p
         for point in points:
             cv2.rectangle(binary, point, (point[0] + kernel.shape[1], point[1] + kernel.shape[0]), 255, 2)
         showImage(binary)
-    return
+    return points
 
 
 extractFigureLocations(fullsheetsDir + 'this_is_me1.png', sharpFigure, 0.65, True, True)

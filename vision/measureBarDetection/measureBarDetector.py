@@ -1,6 +1,6 @@
 from constants import *
 from utils.plotUtils import showImage
-from vision.imageUtils import loadImageGrey, thresh
+from vision.visionUtils import loadImageGrey, thresh
 from vision.measureBarDetection.measureBarDetectionOperations import getVerticalLines, sobelFilter, filterVerticalEdges, \
     mergeLines, drawLines
 
