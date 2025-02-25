@@ -1,22 +1,38 @@
 import os
+import random
+
 from PIL import Image
 
 from constants import myFiguresDataSet
 from vision.noteHeadDetection.noteHeadDetector import getNoteHead
 
 
-def testNoteHeadDetectionFolder(folderDir):
+def testNoteHeadDetectionFolder(folderDir, noteType=''):
     for file in os.listdir(folderDir):
         if file.lower().endswith('.png'):
-            testNoteHeadDetection(os.path.join(folderDir, file), file)
+            testNoteHeadDetection(os.path.join(folderDir, file), noteType=noteType, fileName=file)
 
 
-def testNoteHeadDetection(imagePath, fileName="Note head detection"):
+def testNoteHeadDetectionRandomPicks(folderDir, noteType='', num_images=10):
+    image_files = [file for file in os.listdir(folderDir) if file.lower().endswith('.png')]
+
+    if num_images < len(image_files):
+        image_files = random.sample(image_files, num_images)  # select random images
+
+    for file in image_files:
+        testNoteHeadDetection(os.path.join(folderDir, file), noteType=noteType, fileName=file)
+
+
+def testNoteHeadDetection(imagePath, noteType='', fileName="Note head detection"):
     img = Image.open(imagePath).convert("RGB")
-    getNoteHead(img, True, fileName)
+    getNoteHead(img, noteType=noteType, show=True, fileName=fileName)
 
 
-testNoteHeadDetection(myFiguresDataSet + '/one/figure_17.png')
-testNoteHeadDetection(myFiguresDataSet + '/double/figure_4.png')
-testNoteHeadDetection(myFiguresDataSet + '/quarter/figure_2.png')
-testNoteHeadDetectionFolder(myFiguresDataSet + '/quarter')
+# testNoteHeadDetection(myFiguresDataSet + '/double/figure_108.png', 'double')
+# testNoteHeadDetection(myFiguresDataSet + '/quarter/figure_103.png')
+# testNoteHeadDetection(myFiguresDataSet + '/quarter/figure_113.png')
+# testNoteHeadDetectionFolder(myFiguresDataSet + '/double', 'double')
+testNoteHeadDetectionRandomPicks(myFiguresDataSet + '/half', 'half', 10)
+testNoteHeadDetectionRandomPicks(myFiguresDataSet + '/one', 'one', 10)
+testNoteHeadDetectionRandomPicks(myFiguresDataSet + '/double', 'double', 10)
+testNoteHeadDetectionRandomPicks(myFiguresDataSet + '/quarter', 'quarter', 10)

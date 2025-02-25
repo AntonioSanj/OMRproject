@@ -26,9 +26,10 @@ def floodRegion(image, x, y):
 
 
 def cleanLines(image):
-    kernel = np.array([[0, 1, 0],
-                       [1, 1, 1],
-                       [0, 1, 0]]).astype(np.uint8)
+    # some note sticks are 3 pixels wide
+    kernel = np.array([[0, 1, 1, 0],
+                       [1, 1, 1, 1],
+                       [0, 1, 1, 0]]).astype(np.uint8)
     noLines = closing(image, kernel)
     return noLines
 
@@ -56,7 +57,7 @@ def getQuaverBarArea(image):
     return quaverBarArea.astype(bool)
 
 
-def findLocalMax(headLocations, windowHeight=20, threshold=0.4):
+def findLocalMax(headLocations, windowHeight=13, threshold=0.4):
     height, width = headLocations.shape
 
     # mask two store the local maxima points
@@ -125,7 +126,6 @@ def consolidatePoints(noteHeadPoints, threshold=10):
     pointValues = noteHeadPoints[noteHeadPoints > 0]
     # point => ((x_pos, y_pos), value)
     points = [((x, y), value) for (y, x), value in zip(pointCoords, pointValues)]
-    print(points)
 
     filteredPoints = []
     for (x, y), value in points:
