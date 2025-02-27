@@ -29,7 +29,10 @@ def cannyEdges(image, dilate_kernel_radius):
     return edges
 
 
-def createKernelFromImage(image_path):
+def createKernelFromImage(image_path, invert=False):
     img, imgGrey = loadImageGrey(image_path)  # Load the image in grayscale
-    _, kernel = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    if invert:
+        _, kernel = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    else:
+        _, kernel = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return kernel

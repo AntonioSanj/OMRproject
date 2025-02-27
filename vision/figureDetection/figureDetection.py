@@ -11,7 +11,7 @@ def extractFigureLocations(image_path, figure_path, threshold=0.7, show=False, p
     img, imgGrey = loadImageGrey(image_path)
     _, binary = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-    kernel = createKernelFromImage(figure_path)
+    kernel = createKernelFromImage(figure_path, invert=True)
 
     result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED)
 

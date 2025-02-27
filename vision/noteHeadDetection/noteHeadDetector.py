@@ -1,13 +1,15 @@
 import cv2
 import numpy as np
 
-from constants import noteHeadTemplate
+from constants import noteHeadTemplate, fourHeadTemplate
 from utils.plotUtils import showImage, showCompareImages
 from vision.visionUtils import thresh, createKernelFromImage
 from vision.noteHeadDetection.noteHeadDetectionOperations import closing, getQuaverBarArea, fillWhiteHoles, \
-    findLocalMax, findEnclosedWhiteRegions, cleanLines, cleanCorners, consolidatePoints, drawPoints
+    findLocalMax, findEnclosedWhiteRegions, cleanLines, cleanCorners, consolidatePoints, drawPoints, \
+    drawSingleLineUpAndDown, findLocalMaxFour
 
 
+# getNoteHead works with classes: one, double, half and quarter
 def getNoteHead(image, noteType='None', show=False, fileName="Note head detection"):
     og = image.copy()
 
@@ -21,7 +23,7 @@ def getNoteHead(image, noteType='None', show=False, fileName="Note head detectio
     quaverBarMask = getQuaverBarArea(image)
     image[quaverBarMask] = 255.  # removes the quaver bar
 
-    smallWhiteAreasMask = np.zeros_like(image, dtype=np.uint8)
+    smallWhiteAreasMask = np.zeros_like(image, dtype=np.uint8)  # not actually needed but prevents a warning
 
     # this conditional part would not be necessary if it weren't because of individual half figures
     # originally it was intended to make the same code for all one, half, quarter and double class
@@ -54,11 +56,11 @@ def getNoteHead(image, noteType='None', show=False, fileName="Note head detectio
     # look for note head template match
     headLocations = cv2.matchTemplate(image, headTemplate, cv2.TM_CCOEFF_NORMED)
 
-    noteHeadPoints = findLocalMax(headLocations, 13, 0.4)
+    noteHeadPointsMask = findLocalMax(headLocations, 13, 0.4)
 
     # when max point is in window border more than two points can be created
     # then, when two points are too close only pick the brightest
-    noteHeadPoints = consolidatePoints(noteHeadPoints, 10)
+    noteHeadPoints = consolidatePoints(noteHeadPointsMask, 10)
 
     # translate matching point to center of template
     noteHeadPoints = [((x + headTemplate.shape[1] // 2, y + headTemplate.shape[0] // 2), value) for ((x, y), value) in
@@ -69,4 +71,41 @@ def getNoteHead(image, noteType='None', show=False, fileName="Note head detectio
 
     # adjust the kernel template to meangap if needed
 
-    return image
+    return noteHeadPoints
+
+
+# getFourHeadCenters works with the class: four
+def getFourHeadCenters(image, show=False, fileName='Four Head Detection'):
+    og = image.copy()
+
+    # convert to gray scale
+    image = np.array(image)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+    image = thresh(image, 160)
+
+    # sometimes the head is too close to the border and the inner white circle is not closed (figure391)
+    # drawing a black 1pixel thick horizontal line closes the inner white circle in that scenario
+    image = drawSingleLineUpAndDown(image)
+
+    # filling the middle white circle helps with template matching
+    image = fillWhiteHoles(image)
+
+    # look for template match
+    fourTemplate = createKernelFromImage(fourHeadTemplate)
+    headLocations = cv2.matchTemplate(image, fourTemplate, cv2.TM_CCOEFF_NORMED)
+
+    # find local maxima
+    noteHeadPointsMask = findLocalMaxFour(headLocations, 13, 0.45)
+
+    noteHeadPoints = consolidatePoints(noteHeadPointsMask, 10)
+
+    # translate matching point to center of template
+    noteHeadPoints = [((x + fourTemplate.shape[1] // 2, y + fourTemplate.shape[0] // 2), value) for ((x, y), value) in
+                      noteHeadPoints]
+
+    if show:
+        drawPoints(noteHeadPoints, og, fileName)
+
+    return noteHeadPoints
+

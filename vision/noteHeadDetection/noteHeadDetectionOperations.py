@@ -162,3 +162,36 @@ def drawPoints(noteHeadPoints, image, filename="Note head detection"):
     showImage(imgCopy, filename)
     return
 
+
+def drawSingleLineUpAndDown(image):
+    # draws a black line on the first and last row
+    image[0, :] = 0
+    image[-1, :] = 0
+
+    return image
+
+
+def findLocalMaxFour(headLocations, windowHeight=13, threshold=0.4):
+    height, width = headLocations.shape
+
+    # mask two store the local maxima points
+    mask = np.zeros_like(headLocations, dtype=np.uint8)
+
+    # iterate through image from top to bottom in two separate windows
+    # as heads can be either on the right or left
+    for y in range(0, height, windowHeight // 2):
+        # ensure we get the final rows
+        y_end = min(y + windowHeight, height)
+
+        # extract the window
+        window = headLocations[y:y_end, :]
+
+        # Find maximum value in the window
+        _, maxValue, _, maxLocation = cv2.minMaxLoc(window)
+
+        # Evaluate threshold and update mask
+        if maxValue > threshold:
+            point = (maxLocation[0], y + maxLocation[1])  # Convert to global coordinates
+            mask[point[1], point[0]] = maxValue * 255  # Paint max point
+
+    return mask
