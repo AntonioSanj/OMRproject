@@ -3,6 +3,8 @@ class Figure:
         self.box = [int(coord) for coord in box]
         self.type = label
         self.score = score
+        self.image = None
+        self.noteHeads = []
 
     def toString(self):
         print(f"BOX: {self.box}\tTYPE: {self.type}")

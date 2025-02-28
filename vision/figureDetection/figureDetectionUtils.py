@@ -3,7 +3,6 @@ import numpy as np
 
 def filterClosePoints(points, min_distance=5):
     filtered_points = []  # List to store selected points
-
     for current_point in points:
         too_close = False
 

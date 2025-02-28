@@ -3,7 +3,8 @@ from PIL import Image
 from constants import *
 from mainFunctions import obtainSliceHeights, getPredictions, startModel, showPredictions, mergeFigures, \
     translateToFullSheet, filterOutBorderFigures, saveFigures, startFiguresModel, classifyFigures, \
-    showPredictionsWithLabels
+    getNoteHeadCenters, detectTemplateFigures
+from vision.figureDetection.figureDetection import extractFigureLocations
 from vision.staveDetection.staveDetection import getStaves
 
 imagePath = fullsheetsDir + '/roar1.png'
@@ -21,7 +22,7 @@ x_increment = int(SLICE_WIDTH / 3)
 
 model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_9.pth', 10)
 
-fullSheetFigures = []
+figures = []
 
 while i < (len(staves)):
     print(f"ANALYSING STAVE PAIR {int(i / 2) + 1} ", end="")
@@ -42,7 +43,7 @@ while i < (len(staves)):
 
         sliceFigures = translateToFullSheet(sliceFigures, j, sliceTop)
 
-        fullSheetFigures = fullSheetFigures + sliceFigures
+        figures = figures + sliceFigures
 
         j = j + x_increment
 
@@ -50,15 +51,21 @@ while i < (len(staves)):
 
     print("  COMPLETED")
 
-fullSheetFigures = mergeFigures(fullSheetFigures, 0.3)
-
-showPredictions(image, fullSheetFigures)
+figures = mergeFigures(figures, 0.3)
 
 # saveFigures(image, fullSheetFigures, myFiguresDataSet, 0)
+print('Running figure classification..... ', end='')
 
 figureClassificationModel = startFiguresModel(figureModels + 'figure_classification_model.pth')
 
-figures = classifyFigures(fullSheetFigures, figureClassificationModel, image)
+figures = classifyFigures(figures, figureClassificationModel, image)
 
-showPredictionsWithLabels(image, figures)
+print('\t\tCOMPLETED')
+
+figures = getNoteHeadCenters(figures)
+
+figures = detectTemplateFigures(imagePath, figures)
+
+showPredictions(image, figures)
+
 

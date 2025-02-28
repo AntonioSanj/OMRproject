@@ -4,7 +4,7 @@ import random
 from PIL import Image
 
 from constants import myFiguresDataSet
-from vision.noteHeadDetection.noteHeadDetector import getNoteHead, getFourHeadCenters
+from vision.noteHeadDetection.noteHeadDetector import getNoteHeads, getNoteHeadsFour
 
 
 def testNoteHeadDetectionFolder(folderDir, noteType=''):
@@ -25,12 +25,12 @@ def testNoteHeadDetectionRandomPicks(folderDir, noteType='', num_images=10):
 
 def testNoteHeadDetection(imagePath, noteType='', fileName='Note head detection'):
     img = Image.open(imagePath).convert("RGB")
-    getNoteHead(img, noteType=noteType, show=True, fileName=fileName)
+    getNoteHeads(img, noteType=noteType, show=True, fileName=fileName)
 
 
 def testGetFourHeadCenters(imagePath, fileName=''):
     img = Image.open(imagePath).convert("RGB")
-    getFourHeadCenters(img, show=True, fileName=fileName)
+    getNoteHeadsFour(img, show=True, fileName=fileName)
 
 
 def testGetFourHeadCentersRandomPick(folderDir, num_images=10):
@@ -51,4 +51,4 @@ def testGetFourHeadCentersRandomPick(folderDir, num_images=10):
 # testNoteHeadDetectionRandomPicks(myFiguresDataSet + '/one', 'one', 10)
 # testNoteHeadDetectionRandomPicks(myFiguresDataSet + '/double', 'double', 10)
 # testNoteHeadDetectionRandomPicks(myFiguresDataSet + '/quarter', 'quarter', 10)
-testGetFourHeadCentersRandomPick(myFiguresDataSet + '/four', 10)
+# testGetFourHeadCentersRandomPick(myFiguresDataSet + '/four', 10)

@@ -7,15 +7,20 @@ from vision.visionUtils import loadImageGrey, createKernelFromImage
 from constants import *
 
 
-def extractFigureLocations(image_path, figure_path, threshold=0.7, show=False, print_points=False):
+def extractFigureLocations(image_path, figure_path, threshold=0.7, templateMask_path=None, show=False, print_points=False):
+
     img, imgGrey = loadImageGrey(image_path)
-    _, binary = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    _, binary = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-    kernel = createKernelFromImage(figure_path, invert=True)
+    kernel = createKernelFromImage(figure_path)
 
-    result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED)
+    if templateMask_path is None:
+        result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED)
+    else:
+        kernelMask = createKernelFromImage(templateMask_path)
+        result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED, mask=kernelMask)
 
-    showImage(result)
+        showImage(result)
 
     locations = np.where(result >= threshold)  # (y_coords, x_coords)
 
@@ -24,15 +29,17 @@ def extractFigureLocations(image_path, figure_path, threshold=0.7, show=False, p
 
     points = filterClosePoints(points, 5)
 
-    if print_points:
-        print(f'{len(points)} FIGURES FOUND:\n{points}')
+    boxLocations = []
+    for point in points:
+        box = (point[0], point[1], point[0] + kernel.shape[1], point[1] + kernel.shape[0])
+        boxLocations.append(box)
 
     if show:
-        for point in points:
-            cv2.rectangle(binary, point, (point[0] + kernel.shape[1], point[1] + kernel.shape[0]), 255, 2)
-        showImage(binary)
-    return points
+        for box in boxLocations:
+            cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), (255, 0, 0), 2)
+        showImage(img)
 
+    if print_points:
+        print(f'{len(points)} FIGURES FOUND:\n{boxLocations}')
 
-extractFigureLocations(fullsheetsDir + 'this_is_me1.png', sharpFigure, 0.65, True, True)
-extractFigureLocations(fullsheetsDir + 'walk_on_by1.png', flatFigure, 0.7, True, True)
+    return boxLocations

@@ -110,11 +110,11 @@ def findEnclosedWhiteRegions(binary_image, max_area=20):
     return mask.astype(bool)
 
 
-def cleanCorners(image):
+def removeBlackAreas(image, max_area=50):
     # corners are black so we invert the image
     inverse = cv2.bitwise_not(image)
     # then remove small white areas (previously black)
-    mask = findEnclosedWhiteRegions(inverse, 20).astype(bool)
+    mask = findEnclosedWhiteRegions(inverse, max_area=max_area).astype(bool)
     # apply the mask
     image[mask] = 255.
 
@@ -154,7 +154,7 @@ def drawPoints(noteHeadPoints, image, filename="Note head detection"):
 
     imgArray = np.array(image)
 
-    for (x, y), _ in noteHeadPoints:
+    for (x, y) in noteHeadPoints:
         imgArray[y, x] = (255, 0, 255)
 
     imgCopy = Image.fromarray(imgArray)

@@ -9,6 +9,9 @@ from torchvision.transforms import functional as F
 from constants import *
 from learning.FasterRCNN.getModel import get_model
 from objectTypes.Figure import Figure
+from utils.plotUtils import showImage
+from vision.figureDetection.figureDetection import extractFigureLocations
+from vision.noteHeadDetection.noteHeadDetector import getNoteHeads, getNoteHeadsFour
 
 
 def obtainSliceHeights(stave1, stave2):
@@ -72,21 +75,6 @@ def filterOutBorderFigures(figures, borderSeparation=30):
                 and figure.box[1] > borderSeparation and figure.box[3] < SLICE_HEIGHT - borderSeparation:
             res.append(figure)
     return res
-
-
-def showPredictions(image, figures):
-    imageCopy = image.copy()
-    draw = ImageDraw.Draw(imageCopy)
-
-    for figure in figures:
-        box = figure.box
-        draw.rectangle(box, outline="red", width=1)
-
-    # Display using matplotlib
-    plt.figure(figsize=(10, 16))
-    plt.imshow(imageCopy)
-    plt.axis('off')  # Turn off the axis for better visibility
-    plt.show()
 
 
 def iou(box1, box2):
@@ -187,7 +175,7 @@ def classifyFigures(figures, model, image):
     return figures
 
 
-def showPredictionsWithLabels(image, figures):
+def showPredictions(image, figures):
     imageCopy = image.copy()
     draw = ImageDraw.Draw(imageCopy)
 
@@ -198,8 +186,56 @@ def showPredictionsWithLabels(image, figures):
         draw.rectangle(box, outline="red", width=1)
         draw.text((box[0], box[1] - 20), figure.type, fill="red", font=font)
 
+        for noteHead in figure.noteHeads:
+            x, y = noteHead
+            draw.point((x, y), fill="magenta")
+
     # Display using matplotlib
     plt.figure(figsize=(10, 16))
     plt.imshow(imageCopy)
     plt.axis('off')  # Turn off the axis for better visibility
     plt.show()
+
+
+def getNoteHeadCenters(figures):
+    # assign to each figure its note head centers relatively to the big image
+    for figure in figures:
+        x1, y1, _, _ = figure.box
+
+        if figure.type == 'double':
+            heads = getNoteHeads(figure.image, 'double')
+            figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
+
+        elif figure.type == 'four':
+            heads = getNoteHeadsFour(figure.image)
+            figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
+
+        elif figure.type in ['one', 'half', 'quarter']:
+            heads = getNoteHeads(figure.image)
+            figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
+
+    return figures
+
+
+def detectTemplateFigures(imagePath, figures):
+    sharpLocations = extractFigureLocations(imagePath, sharpFigure, 0.65)
+    flatLocations = extractFigureLocations(imagePath, flatFigure, 0.6, templateMask_path=flatFigureMask)
+    restDoubleLocations = extractFigureLocations(imagePath, restDoubleFigure, 0.8)
+
+    for location in sharpLocations:
+        figure = Figure(location, 'sharp', 1)
+        figures.append(figure)
+
+    for location in flatLocations:
+        figure = Figure(location, 'flat', 1)
+        figures.append(figure)
+
+    for location in restDoubleLocations:
+        figure = Figure(location, 'restDouble', 1)
+        figures.append(figure)
+
+    return figures
+
+
+def distributeFiguresInStaves(figures, staves):
+    return
