@@ -1,10 +1,10 @@
 from PIL import Image
 
 from constants import *
-from mainFunctions import obtainSliceHeights, getPredictions, startModel, showPredictions, mergeFigures, \
-    translateToFullSheet, filterOutBorderFigures, saveFigures, startFiguresModel, classifyFigures, \
-    getNoteHeadCenters, detectTemplateFigures
-from vision.figureDetection.figureDetection import extractFigureLocations
+from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeFigures, \
+    translateToFullSheet, filterOutBorderFigures, startFiguresModel, classifyFigures, \
+    getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
+    showPredictionsFigures, handleCorrections, showPredictionsStaves
 from vision.staveDetection.staveDetection import getStaves
 
 imagePath = fullsheetsDir + '/roar1.png'
@@ -66,6 +66,14 @@ figures = getNoteHeadCenters(figures)
 
 figures = detectTemplateFigures(imagePath, figures)
 
-showPredictions(image, figures)
+figures = detectMeasureBarLines(imagePath, figures)
+
+figures = detectPoints(imagePath, figures)
+
+staves = distributeFiguresInStaves(figures, staves)
+
+staves = handleCorrections(staves)
+
+showPredictionsStaves(image, staves)
 
 

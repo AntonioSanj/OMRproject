@@ -27,7 +27,9 @@ class Clef(Enum):
 flatFigure = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/figureDetection/figure_templates/flat_figure.png'
 sharpFigure = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/figureDetection/figure_templates/sharp_figure.png'
 restDoubleFigure = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/figureDetection/figure_templates/restDouble_figure.png'
+
 flatFigureMask = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/figureDetection/figure_templates/flat_figure_mask.png'
+FLAT_FIGURE_HEAD_HEIGHT = 27
 noteHeadTemplate = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/noteHeadDetection/notehead_template.png'
 fourHeadTemplate = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/noteHeadDetection/four_head_template.png'
 outputVision = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\output\staveDetection_output'

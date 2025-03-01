@@ -7,7 +7,7 @@ class Stave:
         self.lineHeights = []
         self.topLine = -1
         self.bottomLine = -1
-        self.clef = Clef.UNDEFINED
+        self.figures = []
 
     def setLineHeights(self, lineHeights):
         self.lineHeights = lineHeights
@@ -18,9 +18,6 @@ class Stave:
     def setBottomLine(self, value):
         self.bottomLine = value
 
-    def setClef(self, clef):
-        self.clef = clef
-
     def addLineHeight(self, value):
         self.lineHeights.append(value)
 
@@ -29,9 +26,11 @@ class Stave:
         if sortTrigger:
             self.lineHeights.sort()
 
+    def getHeightCenter(self):
+        return self.topLine + (self.bottomLine - self.topLine) // 2
+
     def print(self):
         print(f"Stave {self.staveIndex}:")
-        print(f"\tClef: {self.clef.value}")
         print(f"\tTopLine: {self.topLine}.")
         print(f"\tBottomLine: {self.bottomLine}.")
         print(f"\tLines at: {self.lineHeights}.")

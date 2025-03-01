@@ -20,7 +20,6 @@ def extractFigureLocations(image_path, figure_path, threshold=0.7, templateMask_
         kernelMask = createKernelFromImage(templateMask_path)
         result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED, mask=kernelMask)
 
-        showImage(result)
 
     locations = np.where(result >= threshold)  # (y_coords, x_coords)
 

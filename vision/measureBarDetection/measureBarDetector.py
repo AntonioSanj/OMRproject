@@ -9,19 +9,23 @@ def getMeasureBars(imagePath, show=False):
     img, gray = loadImageGrey(imagePath)
 
     thresh_image = thresh(gray, 160)
-    # showImage(thresh_image, 'threshold')
 
     vertical_edges = sobelFilter(thresh_image)
-    # showImage(vertical_edges, 'vertical edges')
 
     thresh_edges = thresh(vertical_edges, 160)
 
     filtered_vertical_edges = filterVerticalEdges(thresh_edges)
-    # showImage(filtered_vertical_edges, 'filtered edges')
 
     lines = getVerticalLines(filtered_vertical_edges, 100, 20, 10)
 
     lines = mergeLines(lines)
+
+    lineTuples = [tuple(arr.flatten()) for arr in lines]
+
+    # highest point first (x1, y1, x2, y2) ensure y1 < y2
+    lineTuples = [
+        (x1, y1, x2, y2) if y1 < y2 else (x1, y2, x2, y1) for x1, y1, x2, y2 in lineTuples
+    ]
 
     linesImage = drawLines(lines, img, thickness=5)
 
@@ -29,7 +33,4 @@ def getMeasureBars(imagePath, show=False):
         print('Number of measure bars found:', len(lines))
         showImage(linesImage)
 
-    lineTuples = [tuple(arr.flatten()) for arr in lines]
-    print(lineTuples)
-    return
-
+    return lineTuples

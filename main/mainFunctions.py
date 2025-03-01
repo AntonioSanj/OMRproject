@@ -11,6 +11,8 @@ from learning.FasterRCNN.getModel import get_model
 from objectTypes.Figure import Figure
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetection import extractFigureLocations
+from vision.figureDetection.pointDetection import getPointModifications
+from vision.measureBarDetection.measureBarDetector import getMeasureBars
 from vision.noteHeadDetection.noteHeadDetector import getNoteHeads, getNoteHeadsFour
 
 
@@ -175,7 +177,7 @@ def classifyFigures(figures, model, image):
     return figures
 
 
-def showPredictions(image, figures):
+def showPredictionsFigures(image, figures):
     imageCopy = image.copy()
     draw = ImageDraw.Draw(imageCopy)
 
@@ -190,11 +192,7 @@ def showPredictions(image, figures):
             x, y = noteHead
             draw.point((x, y), fill="magenta")
 
-    # Display using matplotlib
-    plt.figure(figsize=(10, 16))
-    plt.imshow(imageCopy)
-    plt.axis('off')  # Turn off the axis for better visibility
-    plt.show()
+    showImage(imageCopy, 'Predicted figures')
 
 
 def getNoteHeadCenters(figures):
@@ -224,18 +222,122 @@ def detectTemplateFigures(imagePath, figures):
 
     for location in sharpLocations:
         figure = Figure(location, 'sharp', 1)
+        figure.noteHeads = [(location[0] + figure.width // 2, location[1] + figure.height // 2)]
         figures.append(figure)
 
     for location in flatLocations:
         figure = Figure(location, 'flat', 1)
+        figure.noteHeads = [(location[0] + figure.width // 2, location[1] + FLAT_FIGURE_HEAD_HEIGHT)]
         figures.append(figure)
 
     for location in restDoubleLocations:
         figure = Figure(location, 'restDouble', 1)
+        figure.noteHeads = [(location[0] + figure.width // 2, location[1] + figure.height // 2)]
         figures.append(figure)
 
     return figures
 
 
+def detectMeasureBarLines(imagePath, figures):
+    measureBarLines = getMeasureBars(imagePath)
+
+    for line in measureBarLines:
+        figure = Figure((line[0] - 5, line[1], line[2] + 5, line[3]), 'bar', 1)
+        figures.append(figure)
+    return figures
+
+
+def detectPoints(imagePath, figures):
+    points = getPointModifications(imagePath)
+
+    for point in points:
+        figure = Figure((point[0] - 7, point[1] - 7, point[0] + 7, point[1] + 7), 'dot', 1)
+        figures.append(figure)
+    return figures
+
+
 def distributeFiguresInStaves(figures, staves):
-    return
+    # assign each figure to the closest stave based on the box center
+    for figure in figures:
+
+        _, y = figure.getCenter()
+
+        if figure.type != 'bar':
+            closest_stave = min(staves, key=lambda stave: abs(y - stave.getHeightCenter()))
+            closest_stave.figures.append(figure)
+
+        else:
+            # measure bars will be split in their two staves
+            sorted_staves = sorted(staves, key=lambda stave: abs(y - stave.getHeightCenter()))
+            top_stave, bottom_stave = sorted_staves[:2]  # get the two closest staves
+
+            # create new figures for the part of the measure bar in that stave
+            top_stave.figures.append(
+                Figure((figure.box[0], top_stave.topLine - 7, figure.box[2], top_stave.bottomLine + 7), 'bar', 1))
+            bottom_stave.figures.append(
+                Figure((figure.box[0], bottom_stave.topLine - 7, figure.box[2], bottom_stave.bottomLine + 7), 'bar', 1))
+
+    # sort figures in based on the starting x of the box
+    for stv in staves:
+        stv.figures.sort(key=lambda fig: fig.box[0])
+
+    return staves
+
+
+def showPredictionsStaves(image, staves):
+    imageCopy = image.copy()
+    draw = ImageDraw.Draw(imageCopy)
+
+    font = ImageFont.truetype("arial.ttf", 20)
+
+    colors = ["red", "blue", "green", "orange"]
+
+    for i, stave in enumerate(staves):
+
+        color = colors[i % len(colors)]
+
+        for figure in stave.figures:
+            box = figure.box
+            draw.rectangle(box, outline=color, width=1)
+            draw.text((box[0], box[1] - 20), figure.type, fill=color, font=font)
+
+            for noteHead in figure.noteHeads:
+                x, y = noteHead
+                draw.point((x, y), fill="magenta")
+
+    showImage(imageCopy, 'Predictions in staves')
+
+
+def overlapRatio(box1, box2):
+    # evaluates how much of box 1 intersects with box 2
+    fig1_x1, fig1_y1, fig1_x2, fig1_y2 = box1
+    fig2_x1, fig2_y1, fig2_x2, fig2_y2 = box2
+
+    # calculate intersection area
+    overlapWidth = max(0, min(fig1_x2, fig2_x2) - max(fig1_x1, fig2_x1))
+    overlapHeight = max(0, min(fig1_y2, fig2_y2) - max(fig1_y1, fig2_y1))
+    overlapArea = overlapWidth * overlapHeight
+
+    box1Area = (fig1_x2 - fig1_x1) * (fig1_y2 - fig1_y1)
+
+    return (overlapArea / box1Area) if box1Area > 0 else 0
+
+
+def handleCorrections(staves):
+    for stave in staves:
+        for figure in stave.figures:
+            # sometimes clef armor is detected by the fastRCNN
+            if figure.type == 'flat':
+                # check if there is a gClef or fClef to the left
+                has_clef_to_left = any(
+                    clef.type in ["gClef", "fClef"] and clef.box[2] <= figure.box[0] and (
+                                figure.box[0] - clef.box[2]) <= 150
+                    for clef in stave.figures
+                )
+                if has_clef_to_left:
+                    # filter out figures that overlap too much with the flat figure
+                    stave.figures[:] = [
+                        fig for fig in stave.figures
+                        if fig is figure or overlapRatio(figure.box, fig.box) < 0.9
+                    ]
+    return staves
