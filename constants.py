@@ -10,8 +10,15 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 COLORS = [(237, 161, 223), (31, 255, 154), (255, 0, 0), (0, 0, 255)]
 
-# recognition engine
-NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
+noteLabels = {
+    1: 'C',
+    2: 'D',
+    3: 'E',
+    4: 'F',
+    5: 'G',
+    6: 'A',
+    7: 'B'
+}
 
 
 class Clef(Enum):

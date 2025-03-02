@@ -2,8 +2,9 @@ from constants import Clef
 
 
 class Stave:
-    def __init__(self, staveIndex):
+    def __init__(self, staveIndex, meanGap):
         self.staveIndex = staveIndex
+        self.meanGap = meanGap
         self.lineHeights = []
         self.topLine = -1
         self.bottomLine = -1

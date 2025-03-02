@@ -7,6 +7,7 @@ class Figure:
         self.height = self.box[3] - self.box[1]
         self.image = None
         self.noteHeads = []
+        self.notes = []
 
     def toString(self):
         print(f"BOX: {self.box}\tTYPE: {self.type}")

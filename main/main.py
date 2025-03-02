@@ -4,10 +4,10 @@ from constants import *
 from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeFigures, \
     translateToFullSheet, filterOutBorderFigures, startFiguresModel, classifyFigures, \
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
-    showPredictionsFigures, handleCorrections, showPredictionsStaves
+    showPredictionsFigures, handleCorrections, showPredictionsStaves, assignNotes
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = fullsheetsDir + '/roar1.png'
+imagePath = fullsheetsDir + '/thinking_out_loud1.png'
 
 _, staves = getStaves(imagePath)
 
@@ -74,6 +74,8 @@ staves = distributeFiguresInStaves(figures, staves)
 
 staves = handleCorrections(staves)
 
-showPredictionsStaves(image, staves)
+staves = assignNotes(staves)
+
+showPredictionsStaves(image, staves, True)
 
 

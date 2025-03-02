@@ -27,7 +27,8 @@ def getStaves(imagePath, show=False, printData=False, debug=False):
 
     consolidatedLines = consolidateLines(lineHeights, meanGap, 5)
 
-    staves = generateStaves(consolidatedLines, meanGap, 0)
+    # one extra line is added up and below (C and A assuming gClef)
+    staves = generateStaves(consolidatedLines, meanGap, 1)
 
     result = drawLineHeights(staves, rotatedImage, 2)
 

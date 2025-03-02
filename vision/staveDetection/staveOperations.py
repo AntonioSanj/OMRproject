@@ -184,7 +184,7 @@ def generateStaves(lineHeights, meanGap, extraLines=2):
 
     i = 1
     staveIndex = 0
-    currentStave = Stave(staveIndex)
+    currentStave = Stave(staveIndex, meanGap)
 
     while i < len(lineHeights) - 1:
 
@@ -206,7 +206,7 @@ def generateStaves(lineHeights, meanGap, extraLines=2):
             # store current stave before resetting values
             staves.append(currentStave)
             staveIndex += 1
-            currentStave = Stave(staveIndex)
+            currentStave = Stave(staveIndex, meanGap)
 
         i += 1
 
