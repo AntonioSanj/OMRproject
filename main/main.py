@@ -4,12 +4,16 @@ from constants import *
 from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeFigures, \
     translateToFullSheet, filterOutBorderFigures, startFiguresModel, classifyFigures, \
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
-    showPredictionsFigures, handleCorrections, showPredictionsStaves, assignNotes
+    handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
+    applyKeySignature
+from utils.plotUtils import showImage
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = fullsheetsDir + '/thinking_out_loud1.png'
+imagePath = fullsheetsDir + '/minuet_in_d.png'
 
-_, staves = getStaves(imagePath)
+staveLinesImage, staves = getStaves(imagePath)
+
+showImage(staveLinesImage)
 
 image = Image.open(imagePath).convert("RGB")
 
@@ -62,6 +66,8 @@ figures = classifyFigures(figures, figureClassificationModel, image)
 
 print('\t\tCOMPLETED')
 
+figures = assignObjectTypes(figures)
+
 figures = getNoteHeadCenters(figures)
 
 figures = detectTemplateFigures(imagePath, figures)
@@ -75,6 +81,12 @@ staves = distributeFiguresInStaves(figures, staves)
 staves = handleCorrections(staves)
 
 staves = assignNotes(staves)
+
+staves = getKeySignatures(staves)
+
+staves = applyKeySignature(staves)
+
+staves = applyAccidentals(staves)
 
 showPredictionsStaves(image, staves, True)
 

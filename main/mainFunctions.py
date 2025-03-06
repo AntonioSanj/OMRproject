@@ -1,14 +1,16 @@
 import math
+
 import torch
 import torch.nn as nn
 from PIL import ImageDraw, ImageFont
-from matplotlib import pyplot as plt
 from torchvision import models, transforms
 from torchvision.models import ResNet18_Weights
 from torchvision.transforms import functional as F
+
 from constants import *
 from learning.FasterRCNN.getModel import get_model
-from objectTypes.Figure import Figure
+from objectTypes.Figure import Figure, ClefFigure, NoteFigure
+from objectTypes.Note import Note
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetection import extractFigureLocations
 from vision.figureDetection.pointDetection import getPointModifications
@@ -195,9 +197,30 @@ def showPredictionsFigures(image, figures):
     showImage(imageCopy, 'Predicted figures')
 
 
+def isClef(label):
+    return label in ['gClef', 'fClef']
+
+
+def isNote(label):
+    return label in ['one', 'double', 'four', 'half', 'quarter']
+
+
+def isAccidental(label):
+    return label in ['sharp', 'flat']
+
+
+def assignObjectTypes(figures):
+    for i, figure in enumerate(figures):
+        if isClef(figure.type):
+            figures[i] = ClefFigure.fromFigure(figure)
+        elif isNote(figure.type):
+            figures[i] = NoteFigure.fromFigure(figure)
+    return figures
+
+
 def getNoteHeadCenters(figures):
     # assign to each figure its note head centers relatively to the big image
-    for figure in figures:
+    for i, figure in enumerate(figures):  # Keep track of the index
         x1, y1, _, _ = figure.box
 
         if figure.type == 'double':
@@ -216,17 +239,17 @@ def getNoteHeadCenters(figures):
 
 
 def detectTemplateFigures(imagePath, figures):
-    sharpLocations = extractFigureLocations(imagePath, sharpFigure, 0.65)
+    sharpLocations = extractFigureLocations(imagePath, sharpFigure, 0.6)
     flatLocations = extractFigureLocations(imagePath, flatFigure, 0.6, templateMask_path=flatFigureMask)
     restDoubleLocations = extractFigureLocations(imagePath, restDoubleFigure, 0.8)
 
     for location in sharpLocations:
-        figure = Figure(location, 'sharp', 1)
+        figure = NoteFigure(location, 'sharp', 1)
         figure.noteHeads = [(location[0] + figure.width // 2, location[1] + figure.height // 2)]
         figures.append(figure)
 
     for location in flatLocations:
-        figure = Figure(location, 'flat', 1)
+        figure = NoteFigure(location, 'flat', 1)
         figure.noteHeads = [(location[0] + figure.width // 2, location[1] + FLAT_FIGURE_HEAD_HEIGHT)]
         figures.append(figure)
 
@@ -279,7 +302,7 @@ def distributeFiguresInStaves(figures, staves):
 
     # sort figures in based on the starting x of the box
     for stv in staves:
-        stv.figures.sort(key=lambda fig: fig.box[0])
+        stv.figures.sort(key=lambda fig: fig.getCenter()[0])
 
     return staves
 
@@ -290,26 +313,26 @@ def showPredictionsStaves(image, staves, notes=False):
 
     font = ImageFont.truetype("arial.ttf", 20)
 
-    colors = ["red", "blue", "green", "orange"]
-
-    for i, stave in enumerate(staves):
-
-        color = colors[i % len(colors)]
-
+    for stave in staves:
         for figure in stave.figures:
+            color = classColors[figure.type]
             box = figure.box
             draw.rectangle(box, outline=color, width=1)
 
-            if notes:
-                tagText = "".join(noteLabels[pitch] + str(octave) for (pitch, octave) in figure.notes)
+            if notes and isinstance(figure, NoteFigure):
+                tagText = "".join(
+                    notePitchLabels[note.pitch] + str(note.octave) +
+                    (note.accidental if note.accidental != 'n' else '')
+                    for note in figure.notes)
             else:
                 tagText = figure.type
 
             draw.text((box[0], box[1] - 20), tagText, fill=color, font=font)
 
-            for noteHead in figure.noteHeads:
-                x, y = noteHead
-                draw.point((x, y), fill="magenta")
+            if isinstance(figure, NoteFigure):
+                for noteHead in figure.noteHeads:
+                    x, y = noteHead
+                    draw.point((x, y), fill="magenta")
 
     showImage(imageCopy, 'Predictions in staves')
 
@@ -329,32 +352,54 @@ def overlapRatio(box1, box2):
     return (overlapArea / box1Area) if box1Area > 0 else 0
 
 
-def existsFigureAtTheLeft(figure, stave, types, distanceToSearch=999999):
-    # checks if figure <figure> has in the stave <stave> any other figures of type in <types>
-    # within a distance to the left of <distanceToSearch>
-    return any(
-        fig2.type in types and  # fig2 is the searched type
-        fig2.getCenter()[0] <= figure.getCenter()[0] and  # fig2 is to the left
-        (figure.getCenter()[0] - fig2.getCenter()[0]) <= distanceToSearch  # fig2 is inside the distance threshold
-        for fig2 in stave.figures
-    )
+def isPartOfSignature(figure, stave):
+    figuresToLeft = [
+        fig2 for fig2 in stave.figures
+        if fig2.getCenter()[0] < figure.getCenter()[0]  # fig2 is to the left
+    ]
+
+    figuresToLeft.sort(key=lambda fig: fig.getCenter()[0], reverse=True)  # order figures from right to left
+
+    for fig2 in figuresToLeft:
+        if isClef(fig2.type):
+            return True
+        if isNote(fig2.type):
+            return False
 
 
 def handleCorrections(staves):
     for stave in staves:
+        if stave.staveIndex == 0:
+            # filter out the bpm and rhythm figures if any on top of stave 1
+            stave.figures[:] = [
+                fig2 for fig2 in stave.figures
+                if abs(fig2.getCenter()[1] - stave.getHeightCenter()) < 100
+            ]
+
         for figure in stave.figures:
-            # sometimes clef armor is detected by the fastRCNN
-            if figure.type == 'flat':
 
-                # check if there is a gClef or fClef to the left in a distance
-                clefToTheLeft = existsFigureAtTheLeft(figure, stave, ['gClef', 'fClef'], 150)
+            # sometimes key signature is detected by the fastRCNN as other figure types
+            if isAccidental(figure.type):
 
-                if clefToTheLeft:
-                    # filter out figures that overlap too much with the flat figure
+                # check if the accidental is part of the key signature
+                isSignature = isPartOfSignature(figure, stave)
+
+                if isSignature:
+                    # filter out figures that overlap too much with the key signature accidentals
                     stave.figures[:] = [
-                        fig for fig in stave.figures
-                        if fig is figure or overlapRatio(figure.box, fig.box) < 0.9
+                        fig2 for fig2 in stave.figures
+                        if fig2.type == figure.type
+                           or overlapRatio(figure.box, fig2.box) < 0.5
                     ]
+
+            # fClef figures has to dots that might be detected as 'dot' figures, filter those out
+            if figure.type == 'fClef':
+                stave.figures[:] = [
+                    fig2 for fig2 in stave.figures
+                    if fig2.type != 'dot'  # filter out dots
+                       or fig2.getCenter()[0] < figure.getCenter()[0]  # that are to the right of the fClef
+                       or overlapRatio(fig2.box, figure.box) < 0.5  # where dot area overlaps more than 0.5 with fClef
+                ]
     return staves
 
 
@@ -376,12 +421,12 @@ def mapNote(n, pitchOffset=0, octaveOffset=4):
 
     if n < 0:
         pitch = (7 + (n % 7)) % 7 or 7  # if 0
-        octave = int(n // 7)  # decreases every 7 steps
+        octave = n // 7  # decreases every 7 steps
     else:
         pitch = (n - 1) % 7 + 1  # pitch is integers from 1 to 7
-        octave = int((n - 1) // 7)  # increments every 7 steps
+        octave = (n - 1) // 7  # increments every 7 steps
 
-    return pitch, octave + octaveOffset
+    return Note(int(pitch), int(octave) + octaveOffset)  # return a note object
 
 
 def getClef(figure, stave):
@@ -390,17 +435,14 @@ def getClef(figure, stave):
 
     clefsToLeft = [
         fig for fig in stave.figures
-        if fig.type in ['gClef', 'fClef'] and
-        fig.getCenter()[0] < figure.getCenter()[0]
+        if isClef(fig.type)
+           and fig.getCenter()[0] < figure.getCenter()[0]
     ]  # list of clefs to the left
-
-    if len(clefsToLeft) == 0:
-        return 'gClef'  # if no clefs found return gClef (most common)
 
     # get the closest clef
     closestClef = max(clefsToLeft, key=lambda clef: clef.getCenter()[0])
 
-    return closestClef.type
+    return closestClef
 
 
 def assignNotes(staves):
@@ -408,16 +450,16 @@ def assignNotes(staves):
         # bottom line which has the highest value in y must be index 0
         staveLines = sorted(stave.lineHeights, reverse=True)
         for figure in stave.figures:
-            if figure.type in ['double', 'one', 'half', 'quarter', 'four', 'sharp', 'flat']:
+            if isNote(figure.type) or isAccidental(figure.type):
 
-                clef = getClef(figure, stave)  # obtain clef for later pitch assignation
+                clef = getClef(figure, stave).type  # obtain clef for later pitch assignation
 
                 for (_, figureHead_y) in figure.noteHeads:
 
                     # find the closest lines above and below
                     # lower line is the minimum of the lines below
                     # upper line is the maximum of lines above
-                    lower_line = min([line for line in staveLines if line >= figureHead_y], default=None)
+                    lower_line = min([line for line in staveLines if line > figureHead_y], default=None)
                     upper_line = max([line for line in staveLines if line <= figureHead_y], default=None)
 
                     # note head is inside the stave
@@ -459,9 +501,9 @@ def assignNotes(staves):
                         # head is still in the C line, just 1 or 2 pixels below (assuming gClef)
                         if abs(upper_line - figureHead_y) < stave.meanGap // 4:
                             if clef == 'gClef':
-                                note = 1, 4  # C is pitch 1 and octave 4 in gClef (C4)
+                                note = Note(1, 4)  # C is pitch 1 and octave 4 in gClef (C4)
                             elif clef == 'fClef':
-                                note = 3, 2  # E2 is the equivalent in fClef to C4 in gClef
+                                note = Note(3, 2)  # E2 is the equivalent in fClef to C4 in gClef
                         else:
                             dist = abs(figureHead_y - upper_line)
                             halfStepsBelow = round(dist / (stave.meanGap / 2))  # count half-steps
@@ -481,9 +523,9 @@ def assignNotes(staves):
                         # head is still in the A line, just 1 or 2 pixels above (assuming gClef)
                         if abs(lower_line - figureHead_y) < stave.meanGap // 4:
                             if clef == 'gClef':
-                                note = 6, 5  # A is pitch 6, octave 5 in gClef (A5)
+                                note = Note(6, 5)  # A is pitch 6, octave 5 in gClef (A5)
                             elif clef == 'fClef':
-                                note = 1, 4  # C4 is the equivalent in fClef to A5 in gClef
+                                note = Note(1, 4)  # C4 is the equivalent in fClef to A5 in gClef
                         else:
                             dist = abs(lower_line - figureHead_y)  # distance from A
                             halfStepsAbove = round(dist / (stave.meanGap / 2))  # count half-steps
@@ -500,6 +542,77 @@ def assignNotes(staves):
                     figure.notes.append(note)
 
                 # order the notes increasingly with octave as the first criteria
-                figure.notes.sort(key=lambda noteTuple: (noteTuple[1], noteTuple[0]))
+                figure.notes.sort(key=lambda noteObj: (noteObj.octave, noteObj.pitch))
+
+    return staves
+
+
+def getKeySignatures(staves):
+    for stave in staves:
+        previousSignature = ['n', 'n', 'n', 'n', 'n', 'n', 'n']  # Default all naturals
+        for i, figure in enumerate(stave.figures):
+            if isClef(figure.type):
+
+                # all naturals by default (index 0 -> C, index 6 -> B)
+                signatureAccidentals = ['n', 'n', 'n', 'n', 'n', 'n', 'n']
+
+                j = i + 1  # Start from the first figure to the right
+
+                hasSignature = False
+                while j < len(stave.figures) and isAccidental(stave.figures[j].type):
+                    hasSignature = True
+                    accNote = stave.figures[j].notes[0].pitch
+                    stave.figures[j].isSignature = True  # mark that the accidental is part of the signature
+
+                    if stave.figures[j].type == 'sharp':
+                        signatureAccidentals[accNote - 1] = '#'  # Modify based on pitch
+                    elif stave.figures[j].type == 'flat':
+                        signatureAccidentals[accNote - 1] = 'b'
+
+                    j += 1
+
+                # no signature found -> inherit from previous
+                if not hasSignature:
+                    signatureAccidentals = previousSignature.copy()
+
+                figure.signature = signatureAccidentals
+                previousSignature = signatureAccidentals  # update the new previous
+
+    return staves
+
+
+def applyKeySignature(staves):
+    for stave in staves:
+        for figure in stave.figures:
+
+            if isNote(figure.type):
+
+                clefSignature = getClef(figure, stave).signature
+
+                for note in figure.notes:
+                    note.accidental = clefSignature[note.pitch - 1]
+
+    return staves
+
+
+def applyAccidentals(staves):
+    for stave in staves:
+        for i, figure in enumerate(stave.figures):
+            if isAccidental(figure.type) and not figure.isSignature:
+                # figures to the right
+                for j in range(i + 1, len(stave.figures)):
+                    next_figure = stave.figures[j]
+
+                    if isNote(next_figure.type):
+                        for note in next_figure.notes:
+                            if note.pitch == figure.notes[0].pitch:
+                                if figure.type == 'flat':
+                                    note.accidental = 'b'
+                                elif figure.type == 'sharp':
+                                    note.accidental = '#'
+
+                    # accidentals only apply to the measure if not in signature
+                    if next_figure.type == 'bar':
+                        break
 
     return staves

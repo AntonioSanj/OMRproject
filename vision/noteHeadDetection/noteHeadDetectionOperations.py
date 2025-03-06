@@ -29,6 +29,7 @@ def cleanLines(image):
     # some note sticks are 3 pixels wide
     kernel = np.array([[0, 1, 1, 0],
                        [1, 1, 1, 1],
+                       [1, 1, 1, 1],
                        [0, 1, 1, 0]]).astype(np.uint8)
     noLines = closing(image, kernel)
     return noLines

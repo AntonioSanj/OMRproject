@@ -1,5 +1,3 @@
-from constants import Clef
-
 
 class Stave:
     def __init__(self, staveIndex, meanGap):

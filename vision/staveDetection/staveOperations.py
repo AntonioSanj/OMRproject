@@ -110,7 +110,7 @@ def getLineHeights(lines, minGap):
         candidates.append(heights[i])
         gap = heights[i + 1] - heights[i]
         if gap > minGap:
-            lineHeights.append(chooseCandidate(candidates))
+            lineHeights.append(chooseCandidate(candidates, 'med'))
             candidates = []
 
     # add last line

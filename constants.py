@@ -10,7 +10,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 COLORS = [(237, 161, 223), (31, 255, 154), (255, 0, 0), (0, 0, 255)]
 
-noteLabels = {
+notePitchLabels = {
     1: 'C',
     2: 'D',
     3: 'E',
@@ -20,13 +20,22 @@ noteLabels = {
     7: 'B'
 }
 
-
-class Clef(Enum):
-    G = 'G'
-    F = 'F'
-    C = 'C'
-    UNDEFINED = '_'
-
+classColors = {
+    'gClef': 'red',
+    'fClef': 'green',
+    'one': 'blue',
+    'half': 'yellow',
+    'double': 'pink',
+    'quarter': 'orange',
+    'restHalf': 'brown',
+    'four': 'magenta',
+    'restOne': 'cyan',
+    'restDouble': 'purple',
+    'flat': 'lime',
+    'sharp': 'lime',
+    'bar': 'teal',
+    'dot': 'lime',
+}
 
 # DIRECTORIES
 
