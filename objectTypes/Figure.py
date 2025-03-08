@@ -55,3 +55,8 @@ class Accidental(Figure):
         self.noteHead = None
         self.note = None
 
+
+class Dot(Figure):
+    def __init__(self, box, label, score):
+        super().__init__(box, label, score)
+        self.used = False

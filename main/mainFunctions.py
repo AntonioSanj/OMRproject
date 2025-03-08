@@ -9,7 +9,7 @@ from torchvision.transforms import functional as F
 
 from constants import *
 from learning.FasterRCNN.getModel import get_model
-from objectTypes.Figure import Figure, ClefFigure, NoteFigure, RestFigure, Accidental
+from objectTypes.Figure import Figure, ClefFigure, NoteFigure, RestFigure, Accidental, Dot
 from objectTypes.Note import Note
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetection import extractFigureLocations
@@ -279,7 +279,7 @@ def detectPoints(imagePath, figures):
     points = getPointModifications(imagePath)
 
     for point in points:
-        figure = Figure((point[0] - 7, point[1] - 7, point[0] + 7, point[1] + 7), 'dot', 1)
+        figure = Dot((point[0] - 7, point[1] - 7, point[0] + 7, point[1] + 7), 'dot', 1)
         figures.append(figure)
     return figures
 
@@ -476,7 +476,6 @@ def getClef(figure, stave):
 
 
 def getNote(figureHead_y, staveLines, clefType, meanGap):
-
     # find the closest lines above and below
     # lower line is the minimum of the lines below
     # upper line is the maximum of lines above
@@ -572,7 +571,6 @@ def assignNotes(staves):
                 clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
 
                 for (figureHead_x, figureHead_y) in figure.noteHeads:
-
                     note = getNote(figureHead_y, staveLines, clefType, stave.meanGap)
 
                     note.noteHead = (figureHead_x, figureHead_y)
@@ -582,7 +580,6 @@ def assignNotes(staves):
                 figure.notes.sort(key=lambda noteObj: (noteObj.octave, noteObj.pitch))
 
             if isAccidental(figure):
-
                 clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
 
                 note = getNote(figure.noteHead[1], staveLines, clefType, stave.meanGap)
@@ -686,44 +683,63 @@ def doAngle(p1, p2):
     #  180 -- · -- 0
     #         |
     #        -90
-    angle = math.atan2(p2[1] - p1[1], p2[0] - p1[0]) * (180 / math.pi)
+
+    # y-axis is inverted because y values in python are inverted
+    angle = math.atan2(-(p2[1] - p1[1]), p2[0] - p1[0]) * (180 / math.pi)
     return angle
 
 
-def getDotsNearBy(figure, stave, maxDist=100):
+def getBestDot(point, stave, maxDist=50):
+    # dot must be over the note head
+    #      .
+    #  <0>-.  -> here is very exaggerated but this point is the closest
+    #  <0>--     for both notes and the other point will be unused and later removed
+    #  |----
+    #  |----
+    #
+
     dots = [dot for dot in stave.figures
             if dot.type == 'dot'
-            and doDistance(dot.getCenter(), figure.getCenter()) <= maxDist]
+            and doDistance(dot.getCenter(), point) <= maxDist
+            and (-10 < doAngle(point, dot.getCenter()) < 120 or -120 < doAngle(point, dot.getCenter()) < -60)]
 
-    return dots
+    if len(dots) > 0:  # 301, 1551, 315, 1565
+        closestDot = min(dots, key=lambda d: doDistance(d.getCenter(), point))
+    else:
+        closestDot = None
+
+    return closestDot
 
 
 def applyDots(staves):
     for stave in staves:
         for figure in stave.figures:
             if isNote(figure):
-                closeDots = getDotsNearBy(figure, stave)
-                if len(closeDots) > 0:
-                    for note in figure.notes:
-                        closestDot = min(closeDots, key=lambda d: doDistance(d.getCenter(), figure.getCenter()))
-                        if doDistance(note.noteHead, closestDot.getCenter()) <= 50:
-                            angle = doAngle(note.noteHead, closestDot.getCenter())
-                            if -35 < angle < 35:
-                                # point is to the right -> extend duration
-                                note.duration = note.duration + note.duration * 0.5
-
-                            elif 60 < angle < 120 or -120 < angle < -60:
-                                # point is on top or below -> staccato articulation
-                                figure.articulation = 's'
+                for note in figure.notes:
+                    if note.noteHead == (289, 1567):
+                        print('a')
+                    bestDot = getBestDot(note.noteHead, stave, 50)
+                    if bestDot is not None:
+                        angle = doAngle(note.noteHead, bestDot.getCenter())
+                        if -45 < angle < 50:
+                            # point is to the right -> extend duration
+                            note.duration = note.duration + note.duration * 0.5
+                            bestDot.used = True
+                        elif 60 < angle < 120 or -120 < angle < -60:
+                            # point is on top or below -> staccato articulation
+                            figure.articulation = 's'
+                            bestDot.used = True
 
             if isRest(figure):
-                closeDots = getDotsNearBy(figure, stave)
-                if len(closeDots) > 0:
-                    closestDot = min(closeDots, key=lambda d: doDistance(d.getCenter(), figure.getCenter()))
-                    angle = doAngle(figure.getCenter(), closestDot.getCenter())
-                    dist = doDistance(figure.getCenter(), closestDot.getCenter())
-
-                    if -50 < angle < 50 and dist <= 70:
+                bestDot = getBestDot(figure.getCenter(), stave, 60)
+                if bestDot is not None:
+                    angle = doAngle(figure.getCenter(), bestDot.getCenter())
+                    if -50 < angle < 50:
                         figure.duration = figure.duration + figure.duration * 0.5
+                        bestDot.used = True
+
+    # remove unused dots, they might be points on 'i' letters or other random places
+    for stave in staves:
+        stave.figures = [figure for figure in stave.figures if not (figure.type == 'dot' and not figure.used)]
 
     return staves

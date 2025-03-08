@@ -90,9 +90,11 @@ staves = applyAccidentals(staves)
 
 staves = assignNoteDurations(staves)
 
+showPredictionsStaves(image, staves, 'types')
+
 staves = applyDots(staves)
 
-showPredictionsStaves(image, staves, 'types')
+
 showPredictionsStaves(image, staves, 'notes')
 showPredictionsStaves(image, staves, 'duration')
 
