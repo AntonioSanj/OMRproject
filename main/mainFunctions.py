@@ -9,7 +9,7 @@ from torchvision.transforms import functional as F
 
 from constants import *
 from learning.FasterRCNN.getModel import get_model
-from objectTypes.Figure import Figure, ClefFigure, NoteFigure, RestFigure
+from objectTypes.Figure import Figure, ClefFigure, NoteFigure, RestFigure, Accidental
 from objectTypes.Note import Note
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetection import extractFigureLocations
@@ -250,13 +250,13 @@ def detectTemplateFigures(imagePath, figures):
     restDoubleLocations = extractFigureLocations(imagePath, restDoubleFigure, 0.8)
 
     for location in sharpLocations:
-        figure = NoteFigure(location, 'sharp', 1)
-        figure.noteHeads = [(location[0] + figure.width // 2, location[1] + figure.height // 2)]
+        figure = Accidental(location, 'sharp', 1)
+        figure.noteHead = (location[0] + figure.width // 2, location[1] + figure.height // 2)
         figures.append(figure)
 
     for location in flatLocations:
-        figure = NoteFigure(location, 'flat', 1)
-        figure.noteHeads = [(location[0] + figure.width // 2, location[1] + FLAT_FIGURE_HEAD_HEIGHT)]
+        figure = Accidental(location, 'flat', 1)
+        figure.noteHead = (location[0] + figure.width // 2, location[1] + FLAT_FIGURE_HEAD_HEIGHT)
         figures.append(figure)
 
     for location in restDoubleLocations:
@@ -332,11 +332,14 @@ def showPredictionsStaves(image, staves, labeling='type', coloring=None):
             draw.rectangle(box, outline=color, width=1)
 
             tagText = ''
-            if labeling == 'notes' and isNote(figure):
-                tagText = "".join(
-                    notePitchLabels[note.pitch] + str(note.octave) +
-                    (note.accidental if note.accidental != 'n' else '')
-                    for note in figure.notes)
+            if labeling == 'notes':
+                if isNote(figure):
+                    tagText = "".join(
+                        notePitchLabels[note.pitch] + str(note.octave) +
+                        (note.accidental if note.accidental != 'n' else '')
+                        for note in figure.notes)
+                if isAccidental(figure):
+                    tagText = notePitchLabels[figure.note.pitch] + str(figure.note.octave)
 
             elif labeling == 'types':
                 tagText = figure.type
@@ -430,7 +433,7 @@ def handleCorrections(staves):
     return staves
 
 
-def mapNote(n, pitchOffset=0, octaveOffset=4):
+def mapNoteFromLine(n, pitchOffset=0, octaveOffset=4):
     #                             line           |   n   ->  line in the half step scale
     #                             ....           | ...
     #                              --            |  15
@@ -472,105 +475,119 @@ def getClef(figure, stave):
     return closestClef
 
 
+def getNote(figureHead_y, staveLines, clefType, meanGap):
+
+    # find the closest lines above and below
+    # lower line is the minimum of the lines below
+    # upper line is the maximum of lines above
+    lower_line = min([line for line in staveLines if line > figureHead_y], default=None)
+    upper_line = max([line for line in staveLines if line <= figureHead_y], default=None)
+
+    # note head is inside the stave
+    if lower_line is not None and upper_line is not None:
+        # compute the midline (notes can be in the space between lines)
+        midline = (lower_line + upper_line) / 2
+        closestLine = min([lower_line, upper_line, midline], key=lambda x: abs(x - figureHead_y))
+
+        if closestLine == midline:
+            # line from gClef C. (C is line 1, D is 1.5, E is 2...)
+            lineFromC = staveLines.index(lower_line) + 1 + 0.5
+
+            # convert to half steps scale (assuming gClef):
+            # 1.0 -> 1(C), 1.5 -> 2(D), 2 -> 3(E), 2.5 -> 4(F), 4.5 -> 8(C in the next octave)...
+            halfStepFromC = int(2 * lineFromC - 1)
+
+            if clefType == 'gClef':
+                note = mapNoteFromLine(halfStepFromC)
+            elif clefType == 'fClef':
+                # gClef C is equivalent to E in octave 2 in fClef
+                note = mapNoteFromLine(halfStepFromC, 2, 2)
+
+        else:
+            # line from gClef C. (C is line 1)
+            lineFromC = staveLines.index(closestLine) + 1
+
+            # convert to half steps scale (assuming gClef):
+            # 1.0 -> 1(C), 1.5 -> 2(D), 2 -> 3(E), 2.5 -> 4(F)...
+            halfStepFromC = 2 * lineFromC - 1
+
+            if clefType == 'gClef':
+                note = mapNoteFromLine(halfStepFromC)
+            elif clefType == 'fClef':
+                # gClef C is equivalent to E in octave 2 in fClef
+                note = mapNoteFromLine(halfStepFromC, 2, 2)
+
+    # head is below the stave
+    elif lower_line is None:
+        # head is still in the C line, just 1 or 2 pixels below (assuming gClef)
+        if abs(upper_line - figureHead_y) < meanGap // 4:
+            if clefType == 'gClef':
+                note = Note(1, 4)  # C is pitch 1 and octave 4 in gClef (C4)
+            elif clefType == 'fClef':
+                note = Note(3, 2)  # E2 is the equivalent in fClef to C4 in gClef
+        else:
+            dist = abs(figureHead_y - upper_line)
+            halfStepsBelow = round(dist / (meanGap / 2))  # count half-steps
+            # line from gClef C
+            lineFromC = -0.5 * halfStepsBelow + 1
+            # half step from gClef C
+            halfStepFromC = 2 * lineFromC - 1
+
+            if clefType == 'gClef':
+                note = mapNoteFromLine(halfStepFromC)
+            elif clefType == 'fClef':
+                # gClef C is equivalent to E in octave 2 in fClef
+                note = mapNoteFromLine(halfStepFromC, 2, 2)
+
+    # head is above the stave
+    elif upper_line is None:
+        # head is still in the A line, just 1 or 2 pixels above (assuming gClef)
+        if abs(lower_line - figureHead_y) < meanGap // 4:
+            if clefType == 'gClef':
+                note = Note(6, 5)  # A is pitch 6, octave 5 in gClef (A5)
+            elif clefType == 'fClef':
+                note = Note(1, 4)  # C4 is the equivalent in fClef to A5 in gClef
+        else:
+            dist = abs(lower_line - figureHead_y)  # distance from A
+            halfStepsAbove = round(dist / (meanGap / 2))  # count half-steps
+            # line from gClef A
+            lineFromA = 0.5 * halfStepsAbove
+            # half step scale from gClef A
+            halfStepFromA = 2 * lineFromA
+
+            if clefType == 'gClef':
+                note = mapNoteFromLine(halfStepFromA, 6, 5)  # starting point is A5 in gClef scale (A is note 6)
+            elif clefType == 'fClef':
+                note = mapNoteFromLine(halfStepFromA, 1, 4)  # C4 in fClef is equivalent to A5 in gClef
+    return note
+
+
 def assignNotes(staves):
     for stave in staves:
         # bottom line which has the highest value in y must be index 0
         staveLines = sorted(stave.lineHeights, reverse=True)
         for figure in stave.figures:
-            if isNote(figure) or isAccidental(figure):
+            if isNote(figure):
 
-                clef = getClef(figure, stave).type  # obtain clef for later pitch assignation
+                clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
 
                 for (figureHead_x, figureHead_y) in figure.noteHeads:
 
-                    # find the closest lines above and below
-                    # lower line is the minimum of the lines below
-                    # upper line is the maximum of lines above
-                    lower_line = min([line for line in staveLines if line > figureHead_y], default=None)
-                    upper_line = max([line for line in staveLines if line <= figureHead_y], default=None)
-
-                    # note head is inside the stave
-                    if lower_line is not None and upper_line is not None:
-                        # compute the midline (notes can be in the space between lines)
-                        midline = (lower_line + upper_line) / 2
-                        closestLine = min([lower_line, upper_line, midline], key=lambda x: abs(x - figureHead_y))
-
-                        if closestLine == midline:
-                            # line from gClef C. (C is line 1, D is 1.5, E is 2...)
-                            lineFromC = staveLines.index(lower_line) + 1 + 0.5
-
-                            # convert to half steps scale (assuming gClef):
-                            # 1.0 -> 1(C), 1.5 -> 2(D), 2 -> 3(E), 2.5 -> 4(F), 4.5 -> 8(C in the next octave)...
-                            halfStepFromC = int(2 * lineFromC - 1)
-
-                            if clef == 'gClef':
-                                note = mapNote(halfStepFromC)
-                            elif clef == 'fClef':
-                                # gClef C is equivalent to E in octave 2 in fClef
-                                note = mapNote(halfStepFromC, 2, 2)
-
-                        else:
-                            # line from gClef C. (C is line 1)
-                            lineFromC = staveLines.index(closestLine) + 1
-
-                            # convert to half steps scale (assuming gClef):
-                            # 1.0 -> 1(C), 1.5 -> 2(D), 2 -> 3(E), 2.5 -> 4(F)...
-                            halfStepFromC = 2 * lineFromC - 1
-
-                            if clef == 'gClef':
-                                note = mapNote(halfStepFromC)
-                            elif clef == 'fClef':
-                                # gClef C is equivalent to E in octave 2 in fClef
-                                note = mapNote(halfStepFromC, 2, 2)
-
-                    # head is below the stave
-                    elif lower_line is None:
-                        # head is still in the C line, just 1 or 2 pixels below (assuming gClef)
-                        if abs(upper_line - figureHead_y) < stave.meanGap // 4:
-                            if clef == 'gClef':
-                                note = Note(1, 4)  # C is pitch 1 and octave 4 in gClef (C4)
-                            elif clef == 'fClef':
-                                note = Note(3, 2)  # E2 is the equivalent in fClef to C4 in gClef
-                        else:
-                            dist = abs(figureHead_y - upper_line)
-                            halfStepsBelow = round(dist / (stave.meanGap / 2))  # count half-steps
-                            # line from gClef C
-                            lineFromC = -0.5 * halfStepsBelow + 1
-                            # half step from gClef C
-                            halfStepFromC = 2 * lineFromC - 1
-
-                            if clef == 'gClef':
-                                note = mapNote(halfStepFromC)
-                            elif clef == 'fClef':
-                                # gClef C is equivalent to E in octave 2 in fClef
-                                note = mapNote(halfStepFromC, 2, 2)
-
-                    # head is above the stave
-                    elif upper_line is None:
-                        # head is still in the A line, just 1 or 2 pixels above (assuming gClef)
-                        if abs(lower_line - figureHead_y) < stave.meanGap // 4:
-                            if clef == 'gClef':
-                                note = Note(6, 5)  # A is pitch 6, octave 5 in gClef (A5)
-                            elif clef == 'fClef':
-                                note = Note(1, 4)  # C4 is the equivalent in fClef to A5 in gClef
-                        else:
-                            dist = abs(lower_line - figureHead_y)  # distance from A
-                            halfStepsAbove = round(dist / (stave.meanGap / 2))  # count half-steps
-                            # line from gClef A
-                            lineFromA = 0.5 * halfStepsAbove
-                            # half step scale from gClef A
-                            halfStepFromA = 2 * lineFromA
-
-                            if clef == 'gClef':
-                                note = mapNote(halfStepFromA, 6, 5)  # starting point is A5 in gClef scale (A is note 6)
-                            elif clef == 'fClef':
-                                note = mapNote(halfStepFromA, 1, 4)  # C4 in fClef is equivalent to A5 in gClef
+                    note = getNote(figureHead_y, staveLines, clefType, stave.meanGap)
 
                     note.noteHead = (figureHead_x, figureHead_y)
                     figure.notes.append(note)
 
                 # order the notes increasingly with octave as the first criteria
                 figure.notes.sort(key=lambda noteObj: (noteObj.octave, noteObj.pitch))
+
+            if isAccidental(figure):
+
+                clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
+
+                note = getNote(figure.noteHead[1], staveLines, clefType, stave.meanGap)
+                note.noteHead = (figure.noteHead[0], figure.noteHead[1])
+                figure.note = note
 
     return staves
 
@@ -589,7 +606,7 @@ def getKeySignatures(staves):
                 hasSignature = False
                 while j < len(stave.figures) and isAccidental(stave.figures[j]):
                     hasSignature = True
-                    accNote = stave.figures[j].notes[0].pitch
+                    accNote = stave.figures[j].note.pitch
                     stave.figures[j].isSignature = True  # mark that the accidental is part of the signature
 
                     if stave.figures[j].type == 'sharp':
@@ -633,7 +650,7 @@ def applyAccidentals(staves):
 
                     if isNote(next_figure):
                         for note in next_figure.notes:
-                            if note.pitch == figure.notes[0].pitch:
+                            if note.pitch == figure.note.pitch:
                                 if figure.type == 'flat':
                                     note.accidental = 'b'
                                 elif figure.type == 'sharp':
@@ -664,6 +681,11 @@ def doDistance(p1, p2):
 def doAngle(p1, p2):
     # assumed center of the circle is p1
     # assumed p2 is in the circumference line
+    #        90
+    #         |
+    #  180 -- · -- 0
+    #         |
+    #        -90
     angle = math.atan2(p2[1] - p1[1], p2[0] - p1[0]) * (180 / math.pi)
     return angle
 

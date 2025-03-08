@@ -9,7 +9,7 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
 from utils.plotUtils import showImage
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = fullsheetsDir + '/minuet_in_d.png'
+imagePath = fullsheetsDir + '/thinking_out_loud1.png'
 
 staveLinesImage, staves = getStaves(imagePath)
 

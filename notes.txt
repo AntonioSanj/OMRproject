@@ -1,3 +1,6 @@
 minuet_in_d:
-fast RCNN struggles when notes are too big
+fast RCNN struggles when notes are too big, also classification may struggle with a few half's and say they are quarters in these cases
+fast RCNN may detect letters mf or f as figures, usually get classified as restOne
 sometimes notehead is not detected
+improve accidentals detection
+include natural accidental

@@ -20,7 +20,6 @@ class NoteFigure(Figure):
         self.noteHeads = []
         self.notes = []
         self.articulation = 'n'  # 'n' for natural, 's' for staccato
-        self.isSignature = False
 
     @classmethod
     def fromFigure(cls, figure):
@@ -47,3 +46,12 @@ class RestFigure(Figure):
     @classmethod
     def fromFigure(cls, figure):
         return cls(figure.box, figure.type, figure.score)
+
+
+class Accidental(Figure):
+    def __init__(self, box, label, score):
+        super().__init__(box, label, score)
+        self.isSignature = False
+        self.noteHead = None
+        self.note = None
+
