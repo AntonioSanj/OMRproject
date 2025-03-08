@@ -5,7 +5,7 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
     translateToFullSheet, filterOutBorderFigures, startFiguresModel, classifyFigures, \
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
-    applyKeySignature
+    applyKeySignature, assignNoteDurations, applyDots
 from utils.plotUtils import showImage
 from vision.staveDetection.staveDetection import getStaves
 
@@ -13,7 +13,7 @@ imagePath = fullsheetsDir + '/minuet_in_d.png'
 
 staveLinesImage, staves = getStaves(imagePath)
 
-showImage(staveLinesImage)
+showImage(staveLinesImage, 'Staves found')
 
 image = Image.open(imagePath).convert("RGB")
 
@@ -88,6 +88,12 @@ staves = applyKeySignature(staves)
 
 staves = applyAccidentals(staves)
 
-showPredictionsStaves(image, staves, True)
+staves = assignNoteDurations(staves)
+
+staves = applyDots(staves)
+
+showPredictionsStaves(image, staves, 'types')
+showPredictionsStaves(image, staves, 'notes')
+showPredictionsStaves(image, staves, 'duration')
 
 

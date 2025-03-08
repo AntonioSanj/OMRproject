@@ -20,6 +20,17 @@ notePitchLabels = {
     7: 'B'
 }
 
+noteDurations = {
+    'one': 1,
+    'half': 0.5,
+    'double': 2,
+    'quarter': 0.25,
+    'restHalf': 0.5,
+    'four': 4,
+    'restOne': 1,
+    'restDouble': 2,
+}
+
 classColors = {
     'gClef': 'red',
     'fClef': 'green',

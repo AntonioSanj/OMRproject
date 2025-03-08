@@ -4,4 +4,5 @@ class Note:
         self.pitch = pitch
         self.octave = octave
         self.duration = 0
-        self.accidental = 'n'    # n for natural, 'b' for flat or '#' for sharp
+        self.accidental = 'n'    # 'n' for natural, 'b' for flat or '#' for sharp
+        self.noteHead = (0, 0)

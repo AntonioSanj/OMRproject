@@ -19,6 +19,7 @@ class NoteFigure(Figure):
         super().__init__(box, label, score, image)
         self.noteHeads = []
         self.notes = []
+        self.articulation = 'n'  # 'n' for natural, 's' for staccato
         self.isSignature = False
 
     @classmethod
@@ -35,4 +36,14 @@ class ClefFigure(Figure):
     @classmethod
     def fromFigure(cls, figure):
         # class convertion method
+        return cls(figure.box, figure.type, figure.score)
+
+
+class RestFigure(Figure):
+    def __init__(self, box, label, score):
+        super().__init__(box, label, score)
+        self.duration = 0
+
+    @classmethod
+    def fromFigure(cls, figure):
         return cls(figure.box, figure.type, figure.score)

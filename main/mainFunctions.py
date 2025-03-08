@@ -9,7 +9,7 @@ from torchvision.transforms import functional as F
 
 from constants import *
 from learning.FasterRCNN.getModel import get_model
-from objectTypes.Figure import Figure, ClefFigure, NoteFigure
+from objectTypes.Figure import Figure, ClefFigure, NoteFigure, RestFigure
 from objectTypes.Note import Note
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetection import extractFigureLocations
@@ -197,24 +197,30 @@ def showPredictionsFigures(image, figures):
     showImage(imageCopy, 'Predicted figures')
 
 
-def isClef(label):
-    return label in ['gClef', 'fClef']
+def isClef(figure):
+    return figure.type in ['gClef', 'fClef']
 
 
-def isNote(label):
-    return label in ['one', 'double', 'four', 'half', 'quarter']
+def isNote(figure):
+    return figure.type in ['one', 'double', 'four', 'half', 'quarter']
 
 
-def isAccidental(label):
-    return label in ['sharp', 'flat']
+def isAccidental(figure):
+    return figure.type in ['sharp', 'flat']
+
+
+def isRest(figure):
+    return figure.type in ['restOne', 'restDouble', 'restHalf']
 
 
 def assignObjectTypes(figures):
     for i, figure in enumerate(figures):
-        if isClef(figure.type):
+        if isClef(figure):
             figures[i] = ClefFigure.fromFigure(figure)
-        elif isNote(figure.type):
+        elif isNote(figure):
             figures[i] = NoteFigure.fromFigure(figure)
+        elif isRest(figure):
+            figures[i] = RestFigure.fromFigure(figure)
     return figures
 
 
@@ -254,8 +260,7 @@ def detectTemplateFigures(imagePath, figures):
         figures.append(figure)
 
     for location in restDoubleLocations:
-        figure = Figure(location, 'restDouble', 1)
-        figure.noteHeads = [(location[0] + figure.width // 2, location[1] + figure.height // 2)]
+        figure = RestFigure(location, 'restDouble', 1)
         figures.append(figure)
 
     return figures
@@ -307,32 +312,54 @@ def distributeFiguresInStaves(figures, staves):
     return staves
 
 
-def showPredictionsStaves(image, staves, notes=False):
+def showPredictionsStaves(image, staves, labeling='type', coloring=None):
     imageCopy = image.copy()
     draw = ImageDraw.Draw(imageCopy)
 
     font = ImageFont.truetype("arial.ttf", 20)
+    colors = ["red", "blue", "green", "orange"]
 
-    for stave in staves:
+    for i, stave in enumerate(staves):
+
+        color = colors[i % len(colors)]
+
         for figure in stave.figures:
-            color = classColors[figure.type]
+
+            if coloring == 'type':
+                color = classColors[figure.type]
+
             box = figure.box
             draw.rectangle(box, outline=color, width=1)
 
-            if notes and isinstance(figure, NoteFigure):
+            tagText = ''
+            if labeling == 'notes' and isNote(figure):
                 tagText = "".join(
                     notePitchLabels[note.pitch] + str(note.octave) +
                     (note.accidental if note.accidental != 'n' else '')
                     for note in figure.notes)
-            else:
+
+            elif labeling == 'types':
                 tagText = figure.type
+
+            elif labeling == 'duration':
+                if isNote(figure):
+                    tagText = "".join(
+                        str(note.duration) +
+                        (figure.articulation if figure.articulation != 'n' else '') + ' '
+                        for note in figure.notes)
+                if isRest(figure):
+                    tagText = str(figure.duration)
 
             draw.text((box[0], box[1] - 20), tagText, fill=color, font=font)
 
-            if isinstance(figure, NoteFigure):
+            if isNote(figure):
                 for noteHead in figure.noteHeads:
                     x, y = noteHead
                     draw.point((x, y), fill="magenta")
+                    draw.point((x, y - 1), fill="magenta")
+                    draw.point((x, y + 1), fill="magenta")
+                    draw.point((x - 1, y), fill="magenta")
+                    draw.point((x + 1, y), fill="magenta")
 
     showImage(imageCopy, 'Predictions in staves')
 
@@ -361,9 +388,9 @@ def isPartOfSignature(figure, stave):
     figuresToLeft.sort(key=lambda fig: fig.getCenter()[0], reverse=True)  # order figures from right to left
 
     for fig2 in figuresToLeft:
-        if isClef(fig2.type):
+        if isClef(fig2):
             return True
-        if isNote(fig2.type):
+        if isNote(fig2):
             return False
 
 
@@ -379,7 +406,7 @@ def handleCorrections(staves):
         for figure in stave.figures:
 
             # sometimes key signature is detected by the fastRCNN as other figure types
-            if isAccidental(figure.type):
+            if isAccidental(figure):
 
                 # check if the accidental is part of the key signature
                 isSignature = isPartOfSignature(figure, stave)
@@ -435,7 +462,7 @@ def getClef(figure, stave):
 
     clefsToLeft = [
         fig for fig in stave.figures
-        if isClef(fig.type)
+        if isClef(fig)
            and fig.getCenter()[0] < figure.getCenter()[0]
     ]  # list of clefs to the left
 
@@ -450,11 +477,11 @@ def assignNotes(staves):
         # bottom line which has the highest value in y must be index 0
         staveLines = sorted(stave.lineHeights, reverse=True)
         for figure in stave.figures:
-            if isNote(figure.type) or isAccidental(figure.type):
+            if isNote(figure) or isAccidental(figure):
 
                 clef = getClef(figure, stave).type  # obtain clef for later pitch assignation
 
-                for (_, figureHead_y) in figure.noteHeads:
+                for (figureHead_x, figureHead_y) in figure.noteHeads:
 
                     # find the closest lines above and below
                     # lower line is the minimum of the lines below
@@ -539,6 +566,7 @@ def assignNotes(staves):
                             elif clef == 'fClef':
                                 note = mapNote(halfStepFromA, 1, 4)  # C4 in fClef is equivalent to A5 in gClef
 
+                    note.noteHead = (figureHead_x, figureHead_y)
                     figure.notes.append(note)
 
                 # order the notes increasingly with octave as the first criteria
@@ -551,7 +579,7 @@ def getKeySignatures(staves):
     for stave in staves:
         previousSignature = ['n', 'n', 'n', 'n', 'n', 'n', 'n']  # Default all naturals
         for i, figure in enumerate(stave.figures):
-            if isClef(figure.type):
+            if isClef(figure):
 
                 # all naturals by default (index 0 -> C, index 6 -> B)
                 signatureAccidentals = ['n', 'n', 'n', 'n', 'n', 'n', 'n']
@@ -559,7 +587,7 @@ def getKeySignatures(staves):
                 j = i + 1  # Start from the first figure to the right
 
                 hasSignature = False
-                while j < len(stave.figures) and isAccidental(stave.figures[j].type):
+                while j < len(stave.figures) and isAccidental(stave.figures[j]):
                     hasSignature = True
                     accNote = stave.figures[j].notes[0].pitch
                     stave.figures[j].isSignature = True  # mark that the accidental is part of the signature
@@ -585,7 +613,7 @@ def applyKeySignature(staves):
     for stave in staves:
         for figure in stave.figures:
 
-            if isNote(figure.type):
+            if isNote(figure):
 
                 clefSignature = getClef(figure, stave).signature
 
@@ -598,12 +626,12 @@ def applyKeySignature(staves):
 def applyAccidentals(staves):
     for stave in staves:
         for i, figure in enumerate(stave.figures):
-            if isAccidental(figure.type) and not figure.isSignature:
+            if isAccidental(figure) and not figure.isSignature:
                 # figures to the right
                 for j in range(i + 1, len(stave.figures)):
                     next_figure = stave.figures[j]
 
-                    if isNote(next_figure.type):
+                    if isNote(next_figure):
                         for note in next_figure.notes:
                             if note.pitch == figure.notes[0].pitch:
                                 if figure.type == 'flat':
@@ -614,5 +642,66 @@ def applyAccidentals(staves):
                     # accidentals only apply to the measure if not in signature
                     if next_figure.type == 'bar':
                         break
+
+    return staves
+
+
+def assignNoteDurations(staves):
+    for stave in staves:
+        for figure in stave.figures:
+            if isNote(figure):
+                for note in figure.notes:
+                    note.duration = noteDurations[figure.type]
+            if isRest(figure):
+                figure.duration = noteDurations[figure.type]
+    return staves
+
+
+def doDistance(p1, p2):
+    return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+
+
+def doAngle(p1, p2):
+    # assumed center of the circle is p1
+    # assumed p2 is in the circumference line
+    angle = math.atan2(p2[1] - p1[1], p2[0] - p1[0]) * (180 / math.pi)
+    return angle
+
+
+def getDotsNearBy(figure, stave, maxDist=100):
+    dots = [dot for dot in stave.figures
+            if dot.type == 'dot'
+            and doDistance(dot.getCenter(), figure.getCenter()) <= maxDist]
+
+    return dots
+
+
+def applyDots(staves):
+    for stave in staves:
+        for figure in stave.figures:
+            if isNote(figure):
+                closeDots = getDotsNearBy(figure, stave)
+                if len(closeDots) > 0:
+                    for note in figure.notes:
+                        closestDot = min(closeDots, key=lambda d: doDistance(d.getCenter(), figure.getCenter()))
+                        if doDistance(note.noteHead, closestDot.getCenter()) <= 50:
+                            angle = doAngle(note.noteHead, closestDot.getCenter())
+                            if -35 < angle < 35:
+                                # point is to the right -> extend duration
+                                note.duration = note.duration + note.duration * 0.5
+
+                            elif 60 < angle < 120 or -120 < angle < -60:
+                                # point is on top or below -> staccato articulation
+                                figure.articulation = 's'
+
+            if isRest(figure):
+                closeDots = getDotsNearBy(figure, stave)
+                if len(closeDots) > 0:
+                    closestDot = min(closeDots, key=lambda d: doDistance(d.getCenter(), figure.getCenter()))
+                    angle = doAngle(figure.getCenter(), closestDot.getCenter())
+                    dist = doDistance(figure.getCenter(), closestDot.getCenter())
+
+                    if -50 < angle < 50 and dist <= 70:
+                        figure.duration = figure.duration + figure.duration * 0.5
 
     return staves
