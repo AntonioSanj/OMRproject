@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 import torch
 import torch.nn as nn
 from PIL import ImageDraw, ImageFont
@@ -10,7 +11,9 @@ from torchvision.transforms import functional as F
 from constants import *
 from learning.FasterRCNN.getModel import get_model
 from objectTypes.Figure import Figure, ClefFigure, NoteFigure, RestFigure, Accidental, Dot
+from objectTypes.Measure import Measure
 from objectTypes.Note import Note
+from objectTypes.SoundDTO import SoundDTO, Song, MultiSound
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetection import extractFigureLocations
 from vision.figureDetection.pointDetection import getPointModifications
@@ -664,8 +667,15 @@ def assignNoteDurations(staves):
     for stave in staves:
         for figure in stave.figures:
             if isNote(figure):
-                for note in figure.notes:
-                    note.duration = noteDurations[figure.type]
+                if len(figure.notes) > 0:
+                    for note in figure.notes:
+                        note.duration = noteDurations[figure.type]
+                    # take the max of the notes, will be used for adjusting measures to beat
+                    figure.duration = max([note.duration for note in figure.notes])
+                else:
+                    # note heads not detected
+                    figure.duration = noteDurations[figure.type]
+
             if isRest(figure):
                 figure.duration = noteDurations[figure.type]
     return staves
@@ -716,19 +726,20 @@ def applyDots(staves):
         for figure in stave.figures:
             if isNote(figure):
                 for note in figure.notes:
-                    if note.noteHead == (289, 1567):
-                        print('a')
                     bestDot = getBestDot(note.noteHead, stave, 50)
                     if bestDot is not None:
                         angle = doAngle(note.noteHead, bestDot.getCenter())
                         if -45 < angle < 50:
                             # point is to the right -> extend duration
-                            note.duration = note.duration + note.duration * 0.5
+                            note.duration += note.duration * 0.5
                             bestDot.used = True
                         elif 60 < angle < 120 or -120 < angle < -60:
                             # point is on top or below -> staccato articulation
                             figure.articulation = 's'
                             bestDot.used = True
+
+                # update global duration
+                figure.duration = max([note.duration for note in figure.notes])
 
             if isRest(figure):
                 bestDot = getBestDot(figure.getCenter(), stave, 60)
@@ -743,3 +754,114 @@ def applyDots(staves):
         stave.figures = [figure for figure in stave.figures if not (figure.type == 'dot' and not figure.used)]
 
     return staves
+
+
+def convertToMeasures(staves):
+
+    measures = []
+
+    # distribute figures in measures
+    for staveIndex, stave in enumerate(staves):
+        currentMeasureFigures = []
+        for figure in stave.figures:
+            if figure.type == 'bar':
+                if currentMeasureFigures:  # add if there are figures in the measure
+                    measures.append(Measure(staveIndex, currentMeasureFigures))
+                currentMeasureFigures = []
+            elif isNote(figure):
+                currentMeasureFigures.append(figure)
+            elif isRest(figure):
+                currentMeasureFigures.append(figure)
+
+        # get last measure if it doesn't end with a bar line
+        if currentMeasureFigures:
+            measures.append(Measure(staveIndex, currentMeasureFigures))
+
+    # Find the most common measure duration
+    durations = [measure.duration for measure in measures]
+    measureDuration = max(set(durations), key=durations.count)
+
+    return measures, measureDuration
+
+
+def adjustMeasuresToBeat(measures, realBeats):
+    for measure in measures:
+
+        beatDiff = measure.duration - realBeats
+
+        if beatDiff != 0:
+            if beatDiff > 0:  # more duration than expected -> cut down
+                # decrease duration
+                while beatDiff > 0 and measure.figures:
+                    last_fig = measure.figures[-1]
+                    if last_fig.duration > beatDiff:
+                        last_fig.duration -= beatDiff
+                        beatDiff = 0
+                        if isNote(last_fig):
+                            for note in last_fig.notes:
+                                note.duration -= beatDiff
+                                if note.duration < 0:
+                                    note.duration = 0
+                    else:
+                        beatDiff -= last_fig.duration
+                        measure.figures.pop()
+
+            elif beatDiff < 0:  # less duration than expected -> extend
+                measure.figures[-1].duration += -beatDiff
+
+    return measures
+
+
+def showPredictionMeasures(image, measures):
+    imageCopy = image.copy()
+    draw = ImageDraw.Draw(imageCopy)
+
+    font = ImageFont.truetype("arial.ttf", 20)
+
+    colors = ["red", "blue", "green", "orange"]
+
+    for mi, measure in enumerate(measures):
+        color = colors[mi % len(colors)]
+        for fi, figure in enumerate(measure.figures):
+            box = figure.box
+            draw.rectangle(box, outline=color, width=2)
+            draw.text((box[0], box[1] - 20), f"{mi + 1}, {fi + 1}: {figure.duration}", fill=color, font=font)
+
+    showImage(imageCopy, 'Predictions Measures')
+
+    return
+
+
+def createSong(measures, beats, bpm):
+
+    song = Song(beats, bpm)
+
+    for measure in measures:
+        startPulse = 0
+        for figure in measure.figures:
+            multiSound = MultiSound(startPulse, figure.duration)
+
+            if isNote(figure):
+                if len(figure.notes) > 0:
+                    for note in figure.notes:
+                        sound = notePitchLabels[note.pitch] + str(note.octave) + (
+                            note.accidental if note.accidental != 'n' else '')
+                        soundDTO = SoundDTO(sound, note.duration)
+                        multiSound.sounds.append(soundDTO)
+                else:
+                    # no noteHeads in the figure
+                    soundDTO = SoundDTO('rest', figure.duration)
+                    multiSound.sounds.append(soundDTO)
+
+            elif isRest(figure):
+                soundDTO = SoundDTO('rest', figure.duration)
+                multiSound.sounds.append(soundDTO)
+
+            if measure.staveIndex % 2 == 0:
+                song.measuresUp.append(multiSound)
+            else:
+                song.measuresDown.append(multiSound)
+
+            startPulse += figure.duration
+
+    return song

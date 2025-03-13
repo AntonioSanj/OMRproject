@@ -19,6 +19,7 @@ class NoteFigure(Figure):
         super().__init__(box, label, score, image)
         self.noteHeads = []
         self.notes = []
+        self.duration = 0
         self.articulation = 'n'  # 'n' for natural, 's' for staccato
 
     @classmethod

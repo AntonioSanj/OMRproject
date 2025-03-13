@@ -5,7 +5,8 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
     translateToFullSheet, filterOutBorderFigures, startFiguresModel, classifyFigures, \
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
-    applyKeySignature, assignNoteDurations, applyDots
+    applyKeySignature, assignNoteDurations, applyDots, convertToMeasures, adjustMeasuresToBeat, \
+    showPredictionMeasures, createSong
 from utils.plotUtils import showImage
 from vision.staveDetection.staveDetection import getStaves
 
@@ -90,12 +91,27 @@ staves = applyAccidentals(staves)
 
 staves = assignNoteDurations(staves)
 
-showPredictionsStaves(image, staves, 'types')
-
 staves = applyDots(staves)
 
-
+showPredictionsStaves(image, staves, 'types')
 showPredictionsStaves(image, staves, 'notes')
 showPredictionsStaves(image, staves, 'duration')
 
+# --------------------------------------------------------------------------------------
+# END OF IMAGE RECOGNITION
+# STARTING REPRODUCTION PROCESS
+# --------------------------------------------------------------------------------------
 
+measures, measureBeats = convertToMeasures(staves)
+
+print(measureBeats)
+
+showPredictionMeasures(image, measures)
+
+measures = adjustMeasuresToBeat(measures, measureBeats)
+
+showPredictionMeasures(image, measures)
+
+song = createSong(measures, measureBeats, 100)
+
+print(song.toString())
