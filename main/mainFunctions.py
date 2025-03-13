@@ -757,7 +757,6 @@ def applyDots(staves):
 
 
 def convertToMeasures(staves):
-
     measures = []
 
     # distribute figures in measures
@@ -833,7 +832,6 @@ def showPredictionMeasures(image, measures):
 
 
 def createSong(measures, beats, bpm):
-
     song = Song(beats, bpm)
 
     for measure in measures:
@@ -844,8 +842,24 @@ def createSong(measures, beats, bpm):
             if isNote(figure):
                 if len(figure.notes) > 0:
                     for note in figure.notes:
-                        sound = notePitchLabels[note.pitch] + str(note.octave) + (
-                            note.accidental if note.accidental != 'n' else '')
+                        # turn flats to their sharp equivalents
+                        if note.accidental == 'b':
+                            if note.pitch == 1:
+                                sound = notePitchLabels[7] + str(note.octave - 1)
+                            elif note.pitch == 4:
+                                sound = notePitchLabels[3] + str(note.octave)
+                            else:
+                                sound = notePitchLabels[note.pitch - 1] + str(note.octave) + '#'
+                        elif note.accidental == '#':
+                            if note.pitch == 7:
+                                sound = notePitchLabels[1] + str(note.octave + 1)
+                            elif note.pitch == 3:
+                                sound = notePitchLabels[4] + str(note.octave)
+                            else:
+                                sound = notePitchLabels[note.pitch] + str(note.octave) + '#'
+                        else:  # natural note
+                            sound = notePitchLabels[note.pitch] + str(note.octave)
+
                         soundDTO = SoundDTO(sound, note.duration)
                         multiSound.sounds.append(soundDTO)
                 else:
@@ -857,6 +871,7 @@ def createSong(measures, beats, bpm):
                 soundDTO = SoundDTO('rest', figure.duration)
                 multiSound.sounds.append(soundDTO)
 
+            # assign track
             if measure.staveIndex % 2 == 0:
                 song.measuresUp.append(multiSound)
             else:
