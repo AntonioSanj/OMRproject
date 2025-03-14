@@ -1,5 +1,3 @@
-from enum import Enum
-
 # image data
 IMAGE_WIDTH = 1960
 IMAGE_HEIGHT = 2772
@@ -89,5 +87,6 @@ figureModels = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figure
 figuresPerformanceDataJson = r'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figureClassification/performance_data/performance_data.json'
 figuresPerformanceDataJson2 = r'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figureClassification/performance_data/performance_data2.json'
 
-
+# sound files
+soundFilesDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/resources/sounds'
 

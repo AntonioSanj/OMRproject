@@ -832,12 +832,13 @@ def showPredictionMeasures(image, measures):
 
 
 def createSong(measures, beats, bpm):
-    song = Song(beats, bpm)
+    song = Song([], [], beats, bpm)
 
     for measure in measures:
         startPulse = 0
         for figure in measure.figures:
-            multiSound = MultiSound(startPulse, figure.duration)
+
+            multiSound = MultiSound([], startPulse, figure.duration)
 
             if isNote(figure):
                 if len(figure.notes) > 0:
@@ -873,9 +874,9 @@ def createSong(measures, beats, bpm):
 
             # assign track
             if measure.staveIndex % 2 == 0:
-                song.measuresUp.append(multiSound)
+                song.upperTrack.append(multiSound)
             else:
-                song.measuresDown.append(multiSound)
+                song.lowerTrack.append(multiSound)
 
             startPulse += figure.duration
 

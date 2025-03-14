@@ -7,6 +7,7 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
     applyKeySignature, assignNoteDurations, applyDots, convertToMeasures, adjustMeasuresToBeat, \
     showPredictionMeasures, createSong
+from reproduction.playSong import playSong
 from utils.plotUtils import showImage
 from vision.staveDetection.staveDetection import getStaves
 
@@ -112,6 +113,7 @@ measures = adjustMeasuresToBeat(measures, measureBeats)
 
 showPredictionMeasures(image, measures)
 
-song = createSong(measures, measureBeats, 100)
+song = createSong(measures, measureBeats, 80)
 
-print(song.toString())
+playSong(song)
+

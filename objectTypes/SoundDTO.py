@@ -10,25 +10,25 @@ class SoundDTO:
 
 class MultiSound:
     # may contain more than one soundDTO that will start to play at the same time
-    def __init__(self, start, duration):
-        self.sounds = []
+    def __init__(self, sounds, start, duration):
+        self.sounds = sounds
         self.start = start
         self.duration = duration
 
     def toString(self):
-        return '[' + ''.join([sound.toString() for sound in self.sounds]) + ']'
+        return '[' + ''.join([sound.toString() for sound in self.sounds]) + '], ' + str(self.start) + ', ' + str(self.duration)
 
 
 class Song:
-    def __init__(self, mb, bpm):
-        self.measuresUp = []
-        self.measuresDown = []
+    def __init__(self, upperTrack, lowerTrack, mb, bpm):
+        self.upperTrack = upperTrack
+        self.lowerTrack = lowerTrack
         self.measureBeats = mb
         self.bpm = bpm
 
     def toString(self):
         return (
                 f"Song: {self.measureBeats} beats per measure, {self.bpm} BPM\n\n"
-                f"Upper Sounds:\n" + "\n".join(ms.toString() for ms in self.measuresUp) + "\n\n"
-                f"Lower Sounds:\n" + "\n".join(ms.toString() for ms in self.measuresDown)
+                f"Upper Sounds:\n" + "\n".join(ms.toString() for ms in self.upperTrack) + "\n\n"
+                f"Lower Sounds:\n" + "\n".join(ms.toString() for ms in self.lowerTrack)
         )
