@@ -9,7 +9,6 @@ from constants import soundFilesDir
 def playSong(song):
     # Initialize the pygame mixer
     pygame.mixer.init()
-    """Plays the entire song with upper and lower tracks."""
     print("Playing song...")
 
     # Create threads for both tracks so they play in parallel
@@ -23,9 +22,6 @@ def playSong(song):
     lower_thread.join()
 
     return
-
-
-
 
 
 def play_track(track, bpm):
@@ -71,4 +67,8 @@ def play_sound(soundName, duration):
         time.sleep(duration)  # Keep playing for the duration
         sound.stop()
     else:
-        raise ValueError(f"Sound file for {soundPath} not found")
+        soundPath = soundFilesDir + '/' + 'rest.wav'
+        sound = pygame.mixer.Sound(soundPath)
+        sound.play()
+        time.sleep(duration)  # Keep playing for the duration
+        sound.stop()

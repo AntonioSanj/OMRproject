@@ -6,12 +6,14 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
     applyKeySignature, assignNoteDurations, applyDots, convertToMeasures, adjustMeasuresToBeat, \
-    showPredictionMeasures, createSong
+    showPredictionMeasures, createSong, showPredictionsFigures
 from reproduction.playSong import playSong
 from utils.plotUtils import showImage
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = fullsheetsDir + '/thinking_out_loud1.png'
+imagePath = fullsheetsDir + '/the_chesire_cat.png'
+# imagePath = myDataImg + '/image_7.png'
+bpm = 124
 
 staveLinesImage, staves = getStaves(imagePath)
 
@@ -74,6 +76,8 @@ figures = getNoteHeadCenters(figures)
 
 figures = detectTemplateFigures(imagePath, figures)
 
+showPredictionsFigures(image,figures)
+
 figures = detectMeasureBarLines(imagePath, figures)
 
 figures = detectPoints(imagePath, figures)
@@ -111,9 +115,11 @@ showPredictionMeasures(image, measures)
 
 measures = adjustMeasuresToBeat(measures, measureBeats)
 
-showPredictionMeasures(image, measures)
+song = createSong(measures, measureBeats, bpm)
 
-song = createSong(measures, measureBeats, 80)
+print(song.toString())
+
+showPredictionMeasures(image, measures)
 
 playSong(song)
 

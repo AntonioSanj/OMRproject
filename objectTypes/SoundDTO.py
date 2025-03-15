@@ -16,7 +16,7 @@ class MultiSound:
         self.duration = duration
 
     def toString(self):
-        return '[' + ''.join([sound.toString() for sound in self.sounds]) + '], ' + str(self.start) + ', ' + str(self.duration)
+        return '[' + ''.join([sound.toString() for sound in self.sounds]) + ']'
 
 
 class Song:
@@ -29,6 +29,6 @@ class Song:
     def toString(self):
         return (
                 f"Song: {self.measureBeats} beats per measure, {self.bpm} BPM\n\n"
-                f"Upper Sounds:\n" + "\n".join(ms.toString() for ms in self.upperTrack) + "\n\n"
-                f"Lower Sounds:\n" + "\n".join(ms.toString() for ms in self.lowerTrack)
+                f"Upper Sounds: " + " ".join(ms.toString() for ms in self.upperTrack) + "\n"
+                f"Lower Sounds: " + " ".join(ms.toString() for ms in self.lowerTrack)
         )

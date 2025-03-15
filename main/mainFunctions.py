@@ -192,10 +192,10 @@ def showPredictionsFigures(image, figures):
         box = figure.box
         draw.rectangle(box, outline="red", width=1)
         draw.text((box[0], box[1] - 20), figure.type, fill="red", font=font)
-
-        for noteHead in figure.noteHeads:
-            x, y = noteHead
-            draw.point((x, y), fill="magenta")
+        if isNote(figure):
+            for noteHead in figure.noteHeads:
+                x, y = noteHead
+                draw.point((x, y), fill="magenta")
 
     showImage(imageCopy, 'Predicted figures')
 
@@ -385,21 +385,6 @@ def overlapRatio(box1, box2):
     return (overlapArea / box1Area) if box1Area > 0 else 0
 
 
-def isPartOfSignature(figure, stave):
-    figuresToLeft = [
-        fig2 for fig2 in stave.figures
-        if fig2.getCenter()[0] < figure.getCenter()[0]  # fig2 is to the left
-    ]
-
-    figuresToLeft.sort(key=lambda fig: fig.getCenter()[0], reverse=True)  # order figures from right to left
-
-    for fig2 in figuresToLeft:
-        if isClef(fig2):
-            return True
-        if isNote(fig2):
-            return False
-
-
 def handleCorrections(staves):
     for stave in staves:
         if stave.staveIndex == 0:
@@ -415,9 +400,9 @@ def handleCorrections(staves):
             if isAccidental(figure):
 
                 # check if the accidental is part of the key signature
-                isSignature = isPartOfSignature(figure, stave)
+                clef = getClef(figure, stave)
 
-                if isSignature:
+                if abs(clef.getCenter()[0] - figure.getCenter()[0]) <= 100:
                     # filter out figures that overlap too much with the key signature accidentals
                     stave.figures[:] = [
                         fig2 for fig2 in stave.figures
@@ -724,7 +709,7 @@ def getBestDot(point, stave, maxDist=50):
 def applyDots(staves):
     for stave in staves:
         for figure in stave.figures:
-            if isNote(figure):
+            if isNote(figure) and figure.notes:
                 for note in figure.notes:
                     bestDot = getBestDot(note.noteHead, stave, 50)
                     if bestDot is not None:
