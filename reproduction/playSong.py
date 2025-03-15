@@ -4,6 +4,7 @@ import time
 import pygame
 
 from constants import soundFilesDir
+from reproduction.PulseClock import PulseClock
 
 
 def playSong(song):
@@ -11,9 +12,14 @@ def playSong(song):
     pygame.mixer.init()
     print("Playing song...")
 
+    # Create and start the global clock
+    clock = PulseClock(song.bpm)
+    clock_thread = threading.Thread(target=clock.start)
+    clock_thread.start()
+
     # Create threads for both tracks so they play in parallel
-    upper_thread = threading.Thread(target=play_track, args=(song.upperTrack, song.bpm))
-    lower_thread = threading.Thread(target=play_track, args=(song.lowerTrack, song.bpm))
+    upper_thread = threading.Thread(target=play_track, args=(song.upperTrack, clock))
+    lower_thread = threading.Thread(target=play_track, args=(song.lowerTrack, clock))
 
     upper_thread.start()
     lower_thread.start()
@@ -21,54 +27,34 @@ def playSong(song):
     upper_thread.join()
     lower_thread.join()
 
+    # Stop the clock once the song finishes
+    clock.stop()
+    clock_thread.join()
+
     return
 
 
-def play_track(track, bpm):
-    start_time = time.time()
-
+def play_track(track, clock):
     for multisound in track:
-        current_time = time.time()
-        elapsed_time = current_time - start_time
+        while True:
+            current_pulse = clock.get_pulse()
+            if current_pulse >= multisound.start:
+                break  # play the multisound
+            time.sleep(0.001)  # keep waiting
 
-        # Convert start (in beats) to seconds
-        start_seconds = multisound.start * (60 / bpm)
-
-        wait_time = start_seconds - elapsed_time
-
-        if wait_time > 0:
-            time.sleep(wait_time)  # Wait until the correct pulse time
-
-        play_multisound(multisound, bpm)
+        play_multisound(multisound)
 
 
-def play_multisound(multisound, bpm):
-    threads = []
-
+def play_multisound(multisound):
     for sound_dto in multisound.sounds:
-        duration_in_seconds = (sound_dto.duration / bpm) * 60  # Convert beats to seconds
-
-        # Start a thread to play each sound independently
-        thread = threading.Thread(target=play_sound, args=(sound_dto.sound, duration_in_seconds))
-        threads.append(thread)
-        thread.start()
-
-    # Ensure all sounds in the MultiSound finish before continuing
-    for thread in threads:
-        thread.join()
+        threading.Thread(target=play_sound, args=(sound_dto.sound, sound_dto.duration), daemon=True).start()
 
 
 def play_sound(soundName, duration):
-    """Loads and plays a sound file for the specified duration."""
-    soundPath = soundFilesDir + '/' + soundName + '.wav'
-    if os.path.exists(soundPath):
-        sound = pygame.mixer.Sound(soundPath)
-        sound.play()
-        time.sleep(duration)  # Keep playing for the duration
-        sound.stop()
-    else:
-        soundPath = soundFilesDir + '/' + 'rest.wav'
-        sound = pygame.mixer.Sound(soundPath)
-        sound.play()
-        time.sleep(duration)  # Keep playing for the duration
-        sound.stop()
+    soundPath = os.path.join(soundFilesDir, f"{soundName}.wav")
+
+    if not os.path.exists(soundPath):
+        soundPath = os.path.join(soundFilesDir, "rest.wav")
+
+    sound = pygame.mixer.Sound(soundPath)
+    sound.play(maxtime=int(duration * 1000))

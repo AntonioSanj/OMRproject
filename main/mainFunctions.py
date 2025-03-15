@@ -741,8 +741,10 @@ def applyDots(staves):
     return staves
 
 
-def convertToMeasures(staves):
-    measures = []
+def convertToTracks(staves):
+    tracks = []
+    measuresUp = []
+    measuresDown = []
 
     # distribute figures in measures
     for staveIndex, stave in enumerate(staves):
@@ -750,7 +752,10 @@ def convertToMeasures(staves):
         for figure in stave.figures:
             if figure.type == 'bar':
                 if currentMeasureFigures:  # add if there are figures in the measure
-                    measures.append(Measure(staveIndex, currentMeasureFigures))
+                    if staveIndex % 2 == 0:
+                        measuresUp.append(Measure(staveIndex, currentMeasureFigures))
+                    else:
+                        measuresDown.append(Measure(staveIndex, currentMeasureFigures))
                 currentMeasureFigures = []
             elif isNote(figure):
                 currentMeasureFigures.append(figure)
@@ -759,110 +764,116 @@ def convertToMeasures(staves):
 
         # get last measure if it doesn't end with a bar line
         if currentMeasureFigures:
-            measures.append(Measure(staveIndex, currentMeasureFigures))
+            if staveIndex % 2 == 0:
+                measuresUp.append(Measure(staveIndex, currentMeasureFigures))
+            else:
+                measuresDown.append(Measure(staveIndex, currentMeasureFigures))
 
     # Find the most common measure duration
-    durations = [measure.duration for measure in measures]
+    durations = [measure.duration for measure in measuresDown + measuresUp]
     measureDuration = max(set(durations), key=durations.count)
 
-    return measures, measureDuration
+    tracks.append(measuresUp)
+    tracks.append(measuresDown)
+
+    return tracks, measureDuration
 
 
-def adjustMeasuresToBeat(measures, realBeats):
-    for measure in measures:
+def adjustMeasuresToBeat(tracks, realBeats):
+    for track in tracks:
+        for measure in track:
 
-        beatDiff = measure.duration - realBeats
+            beatDiff = measure.duration - realBeats
 
-        if beatDiff != 0:
-            if beatDiff > 0:  # more duration than expected -> cut down
-                # decrease duration
-                while beatDiff > 0 and measure.figures:
-                    last_fig = measure.figures[-1]
-                    if last_fig.duration > beatDiff:
-                        last_fig.duration -= beatDiff
-                        beatDiff = 0
-                        if isNote(last_fig):
-                            for note in last_fig.notes:
-                                note.duration -= beatDiff
-                                if note.duration < 0:
-                                    note.duration = 0
-                    else:
-                        beatDiff -= last_fig.duration
-                        measure.figures.pop()
+            if beatDiff != 0:
+                if beatDiff > 0:  # more duration than expected -> cut down
+                    # decrease duration
+                    while beatDiff > 0 and measure.figures:
+                        last_fig = measure.figures[-1]
+                        if last_fig.duration > beatDiff:
+                            last_fig.duration -= beatDiff
+                            beatDiff = 0
+                            if isNote(last_fig):
+                                for note in last_fig.notes:
+                                    note.duration -= beatDiff
+                                    if note.duration < 0:
+                                        note.duration = 0
+                        else:
+                            beatDiff -= last_fig.duration
+                            measure.figures.pop()
 
-            elif beatDiff < 0:  # less duration than expected -> extend
-                measure.figures[-1].duration += -beatDiff
+                elif beatDiff < 0:  # less duration than expected -> extend
+                    measure.figures[-1].duration += -beatDiff
 
-    return measures
+    return tracks
 
 
-def showPredictionMeasures(image, measures):
+def showPredictionMeasures(image, tracks):
     imageCopy = image.copy()
     draw = ImageDraw.Draw(imageCopy)
 
     font = ImageFont.truetype("arial.ttf", 20)
 
     colors = ["red", "blue", "green", "orange"]
-
-    for mi, measure in enumerate(measures):
-        color = colors[mi % len(colors)]
-        for fi, figure in enumerate(measure.figures):
-            box = figure.box
-            draw.rectangle(box, outline=color, width=2)
-            draw.text((box[0], box[1] - 20), f"{mi + 1}, {fi + 1}: {figure.duration}", fill=color, font=font)
+    for track in tracks:
+        for mi, measure in enumerate(track):
+            color = colors[mi % len(colors)]
+            for fi, figure in enumerate(measure.figures):
+                box = figure.box
+                draw.rectangle(box, outline=color, width=2)
+                draw.text((box[0], box[1] - 20), f"{mi}, {fi}: {figure.duration}", fill=color, font=font)
 
     showImage(imageCopy, 'Predictions Measures')
 
     return
 
 
-def createSong(measures, beats, bpm):
+def createSong(tracks, beats, bpm):
     song = Song([], [], beats, bpm)
-
-    for measure in measures:
+    for ti, track in enumerate(tracks):
         startPulse = 0
-        for figure in measure.figures:
+        for measure in track:
+            for figure in measure.figures:
 
-            multiSound = MultiSound([], startPulse, figure.duration)
+                multiSound = MultiSound([], startPulse, figure.duration)
 
-            if isNote(figure):
-                if len(figure.notes) > 0:
-                    for note in figure.notes:
-                        # turn flats to their sharp equivalents
-                        if note.accidental == 'b':
-                            if note.pitch == 1:
-                                sound = notePitchLabels[7] + str(note.octave - 1)
-                            elif note.pitch == 4:
-                                sound = notePitchLabels[3] + str(note.octave)
-                            else:
-                                sound = notePitchLabels[note.pitch - 1] + str(note.octave) + '#'
-                        elif note.accidental == '#':
-                            if note.pitch == 7:
-                                sound = notePitchLabels[1] + str(note.octave + 1)
-                            elif note.pitch == 3:
-                                sound = notePitchLabels[4] + str(note.octave)
-                            else:
-                                sound = notePitchLabels[note.pitch] + str(note.octave) + '#'
-                        else:  # natural note
-                            sound = notePitchLabels[note.pitch] + str(note.octave)
+                if isNote(figure):
+                    if len(figure.notes) > 0:
+                        for note in figure.notes:
+                            # turn flats to their sharp equivalents
+                            if note.accidental == 'b':
+                                if note.pitch == 1:
+                                    sound = notePitchLabels[7] + str(note.octave - 1)
+                                elif note.pitch == 4:
+                                    sound = notePitchLabels[3] + str(note.octave)
+                                else:
+                                    sound = notePitchLabels[note.pitch - 1] + str(note.octave) + '#'
+                            elif note.accidental == '#':
+                                if note.pitch == 7:
+                                    sound = notePitchLabels[1] + str(note.octave + 1)
+                                elif note.pitch == 3:
+                                    sound = notePitchLabels[4] + str(note.octave)
+                                else:
+                                    sound = notePitchLabels[note.pitch] + str(note.octave) + '#'
+                            else:  # natural note
+                                sound = notePitchLabels[note.pitch] + str(note.octave)
 
-                        soundDTO = SoundDTO(sound, note.duration)
+                            soundDTO = SoundDTO(sound, note.duration)
+                            multiSound.sounds.append(soundDTO)
+                    else:
+                        # no noteHeads in the figure
+                        soundDTO = SoundDTO('rest', figure.duration)
                         multiSound.sounds.append(soundDTO)
-                else:
-                    # no noteHeads in the figure
+
+                elif isRest(figure):
                     soundDTO = SoundDTO('rest', figure.duration)
                     multiSound.sounds.append(soundDTO)
 
-            elif isRest(figure):
-                soundDTO = SoundDTO('rest', figure.duration)
-                multiSound.sounds.append(soundDTO)
-
-            # assign track
-            if measure.staveIndex % 2 == 0:
-                song.upperTrack.append(multiSound)
-            else:
-                song.lowerTrack.append(multiSound)
-
-            startPulse += figure.duration
+                # assign to track
+                if ti == 0:
+                    song.upperTrack.append(multiSound)
+                else:
+                    song.lowerTrack.append(multiSound)
+                startPulse += figure.duration
 
     return song

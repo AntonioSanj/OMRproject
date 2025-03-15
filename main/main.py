@@ -5,14 +5,14 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
     translateToFullSheet, filterOutBorderFigures, startFiguresModel, classifyFigures, \
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
-    applyKeySignature, assignNoteDurations, applyDots, convertToMeasures, adjustMeasuresToBeat, \
-    showPredictionMeasures, createSong, showPredictionsFigures
+    applyKeySignature, assignNoteDurations, applyDots, adjustMeasuresToBeat, \
+    showPredictionMeasures, createSong, showPredictionsFigures, convertToTracks
 from reproduction.playSong import playSong
 from utils.plotUtils import showImage
 from vision.staveDetection.staveDetection import getStaves
 
 imagePath = fullsheetsDir + '/the_chesire_cat.png'
-# imagePath = myDataImg + '/image_7.png'
+# imagePath = myDataImg + '/image_9.png'
 bpm = 124
 
 staveLinesImage, staves = getStaves(imagePath)
@@ -76,8 +76,6 @@ figures = getNoteHeadCenters(figures)
 
 figures = detectTemplateFigures(imagePath, figures)
 
-showPredictionsFigures(image,figures)
-
 figures = detectMeasureBarLines(imagePath, figures)
 
 figures = detectPoints(imagePath, figures)
@@ -107,19 +105,19 @@ showPredictionsStaves(image, staves, 'duration')
 # STARTING REPRODUCTION PROCESS
 # --------------------------------------------------------------------------------------
 
-measures, measureBeats = convertToMeasures(staves)
+tracks, measureBeats = convertToTracks(staves)
 
 print(measureBeats)
 
-showPredictionMeasures(image, measures)
+showPredictionMeasures(image, tracks)
 
-measures = adjustMeasuresToBeat(measures, measureBeats)
+tracks = adjustMeasuresToBeat(tracks, measureBeats)
 
-song = createSong(measures, measureBeats, bpm)
+song = createSong(tracks, measureBeats, bpm)
 
 print(song.toString())
 
-showPredictionMeasures(image, measures)
+showPredictionMeasures(image, tracks)
 
 playSong(song)
 

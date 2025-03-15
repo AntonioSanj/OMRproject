@@ -7,8 +7,8 @@ from vision.visionUtils import loadImageGrey, createKernelFromImage
 from constants import *
 
 
-def extractFigureLocations(image_path, figure_path, threshold=0.7, templateMask_path=None, show=False, print_points=False):
-
+def extractFigureLocations(image_path, figure_path, threshold=0.7, templateMask_path=None, show=False,
+                           print_points=False):
     img, imgGrey = loadImageGrey(image_path)
     _, binary = cv2.threshold(imgGrey, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
@@ -19,7 +19,6 @@ def extractFigureLocations(image_path, figure_path, threshold=0.7, templateMask_
     else:
         kernelMask = createKernelFromImage(templateMask_path)
         result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED, mask=kernelMask)
-
 
     locations = np.where(result >= threshold)  # (y_coords, x_coords)
 
