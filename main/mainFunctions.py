@@ -30,6 +30,8 @@ def initSheetsWithStaves(sheetDirs):
         image = Image.open(sheetPath).convert("RGB")
         sheets.append(MusicSheet(i, sheetPath, image, staves))
 
+    print('Staves found!\n')
+
     return sheets
 
 
@@ -259,6 +261,8 @@ def getNoteHeadCenters(sheets):
             elif figure.type in ['one', 'half', 'quarter']:
                 heads = getNoteHeads(figure.image)
                 figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
+
+    print('Note heads found!')
 
     return sheets
 

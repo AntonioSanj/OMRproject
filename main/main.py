@@ -12,6 +12,8 @@ from utils.plotUtils import showImage
 
 
 def readAndPlay(sheetPaths, bpm, show=False):
+    print(f'Reading {len(sheetPaths)} sheets:\n' + ''.join(sh + '\n' for sh in sheetPaths))
+
     sheets = initSheetsWithStaves(sheetPaths)
 
     model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_9.pth', 10)
@@ -26,7 +28,7 @@ def readAndPlay(sheetPaths, bpm, show=False):
         figures = []
 
         while i < (len(sheet.staves)):
-            print(f"ANALYSING STAVE PAIR {int(i / 2) + 1} ", end="")
+            print(f"Analysing stave pair {int(i / 2) + 1} ", end="")
             sliceTop, sliceBottom = obtainSliceHeights(sheet.staves[i], sheet.staves[i + 1])
             j = 0
             while j < IMAGE_WIDTH - SLICE_WIDTH:
@@ -68,11 +70,16 @@ def readAndPlay(sheetPaths, bpm, show=False):
 
     sheets = getNoteHeadCenters(sheets)
 
+    print('Detecting template figures......', end='')
+
     sheets = detectTemplateFigures(sheets)
 
     sheets = detectMeasureBarLines(sheets)
 
     sheets = detectPoints(sheets)
+
+    print('\t\tCOMPLETED')
+    print('Computing dependencies.....', end='')
 
     sheets = distributeFiguresInStaves(sheets)
 
@@ -90,6 +97,8 @@ def readAndPlay(sheetPaths, bpm, show=False):
 
     sheets = applyDots(sheets)
 
+    print('\t\t\t\tCOMPLETED')
+
     if show:
         showPredictionsStaves(sheets, 'types')
         showPredictionsStaves(sheets, 'notes')
@@ -100,9 +109,10 @@ def readAndPlay(sheetPaths, bpm, show=False):
     # STARTING REPRODUCTION PROCESS
     # --------------------------------------------------------------------------------------
 
+    print('Wrapping data for reproduction...', end='')
+
     tracks, measureBeats = convertToTracks(sheets)
 
-    print(measureBeats)
     if show:
         showPredictionMeasures(sheets, tracks)
 
@@ -110,14 +120,17 @@ def readAndPlay(sheetPaths, bpm, show=False):
 
     song = createSong(tracks, measureBeats, bpm)
 
+    print('\t\tCOMPLETED\n')
+
     print(song.toString())
 
     if show:
         showPredictionMeasures(sheets, tracks)
 
     playSong(song)
+    print('\n\n')
 
 
-# readAndPlay([fullsheetsDir + '/roar1.png', fullsheetsDir + '/roar2.png'], 90)
+readAndPlay([fullsheetsDir + '/roar1.png', fullsheetsDir + '/roar2.png'], 90)
 readAndPlay([myDataImg + '/image_9.png', myDataImg + '/image_10.png'], 70)
 readAndPlay([fullsheetsDir + '/thinking_out_loud1.png', fullsheetsDir + '/thinking_out_loud2.png'], 80)
