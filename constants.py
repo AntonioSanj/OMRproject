@@ -49,11 +49,11 @@ classColors = {
 # DIRECTORIES
 
 # stave and figure detection
-flatFigure = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/figureDetection/figure_templates/flat_figure.png'
-sharpFigure = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/figureDetection/figure_templates/sharp_figure.png'
-restDoubleFigure = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/figureDetection/figure_templates/restDouble_figure.png'
+flatFigureTemplates = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/resources/figure_templates/flat'
+sharpFigureTemplates = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/resources/figure_templates/sharp'
+restDoubleTemplates = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/resources/figure_templates/restDouble'
 
-flatFigureMask = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/figureDetection/figure_templates/flat_figure_mask.png'
+flatFigureMask = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/resources/figure_templates/flat_mask.png'
 FLAT_FIGURE_HEAD_HEIGHT = 27
 noteHeadTemplate = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/noteHeadDetection/notehead_template.png'
 fourHeadTemplate = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/noteHeadDetection/four_head_template.png'

@@ -15,4 +15,4 @@ it is assumed that the beats per stave is the same during the hole sheet
 key changes from a different key other than C to C are not supported
 symbols not detected: natural accidental, individual quarters, quarterRest, C clef
 triplets not supported
-when there are no figures found in a measure it does not recognise it and gets desyncronized
+when there are no figures found in a measure it does not recognise it and tracks get unsync

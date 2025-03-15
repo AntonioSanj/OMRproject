@@ -248,9 +248,9 @@ def getNoteHeadCenters(figures):
 
 
 def detectTemplateFigures(imagePath, figures):
-    sharpLocations = extractFigureLocations(imagePath, sharpFigure, 0.6)
-    flatLocations = extractFigureLocations(imagePath, flatFigure, 0.6, templateMask_path=flatFigureMask)
-    restDoubleLocations = extractFigureLocations(imagePath, restDoubleFigure, 0.8)
+    sharpLocations = extractFigureLocations(imagePath, sharpFigureTemplates, 0.6)
+    flatLocations = extractFigureLocations(imagePath, flatFigureTemplates, 0.6, templateMask_path=flatFigureMask)
+    restDoubleLocations = extractFigureLocations(imagePath, restDoubleTemplates, 0.8)
 
     for location in sharpLocations:
         figure = Accidental(location, 'sharp', 1)
