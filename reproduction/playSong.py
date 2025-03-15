@@ -10,11 +10,12 @@ from reproduction.PulseClock import PulseClock
 def playSong(song):
     # Initialize the pygame mixer
     pygame.mixer.init()
+    pygame.mixer.set_num_channels(64)
     print("Playing song...")
 
     # Create and start the global clock
     clock = PulseClock(song.bpm)
-    clock_thread = threading.Thread(target=clock.start)
+    clock_thread = threading.Thread(target=clock.start, args=(song.measureBeats,))
     clock_thread.start()
 
     # Create threads for both tracks so they play in parallel
@@ -38,7 +39,7 @@ def play_track(track, clock):
     for multisound in track:
         while True:
             current_pulse = clock.get_pulse()
-            if current_pulse >= multisound.start:
+            if current_pulse >= multisound.start:  # allow some error margin
                 break  # play the multisound
             time.sleep(0.001)  # keep waiting
 
@@ -47,7 +48,9 @@ def play_track(track, clock):
 
 def play_multisound(multisound):
     for sound_dto in multisound.sounds:
-        threading.Thread(target=play_sound, args=(sound_dto.sound, sound_dto.duration), daemon=True).start()
+        sound_thread = threading.Thread(target=play_sound, args=(sound_dto.sound, sound_dto.duration),
+                                        daemon=True)
+        sound_thread.start()
 
 
 def play_sound(soundName, duration):
@@ -57,4 +60,5 @@ def play_sound(soundName, duration):
         soundPath = os.path.join(soundFilesDir, "rest.wav")
 
     sound = pygame.mixer.Sound(soundPath)
+
     sound.play(maxtime=int(duration * 1000))

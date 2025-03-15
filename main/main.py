@@ -11,113 +11,115 @@ from reproduction.playSong import playSong
 from utils.plotUtils import showImage
 from vision.staveDetection.staveDetection import getStaves
 
-imagePath = fullsheetsDir + '/the_chesire_cat.png'
-# imagePath = myDataImg + '/image_9.png'
-bpm = 124
 
-staveLinesImage, staves = getStaves(imagePath)
+def readAndPlay(imagePath, bpm, show=False):
 
-showImage(staveLinesImage, 'Staves found')
+    staveLinesImage, staves = getStaves(imagePath)
 
-image = Image.open(imagePath).convert("RGB")
+    if show:
+        showImage(staveLinesImage, 'Staves found')
 
-# verify number of staves is even
-if len(staves) % 2 != 0:
-    raise ValueError(f"Stave detection went wrong. Staves detected: {len(staves)}")
+    image = Image.open(imagePath).convert("RGB")
 
-i = 0
-x_increment = int(SLICE_WIDTH / 3)
+    # verify number of staves is even
+    if len(staves) % 2 != 0:
+        raise ValueError(f"Stave detection went wrong. Staves detected: {len(staves)}")
 
-model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_9.pth', 10)
+    i = 0
+    x_increment = int(SLICE_WIDTH / 3)
 
-figures = []
+    model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_9.pth', 10)
 
-while i < (len(staves)):
-    print(f"ANALYSING STAVE PAIR {int(i / 2) + 1} ", end="")
-    sliceTop, sliceBottom = obtainSliceHeights(staves[i], staves[i + 1])
-    j = 0
-    while j < IMAGE_WIDTH - SLICE_WIDTH:
-        print("::::::", end="")
+    figures = []
 
-        slicedImage = image.crop((j, sliceTop, j + SLICE_WIDTH, sliceBottom))
+    while i < (len(staves)):
+        print(f"ANALYSING STAVE PAIR {int(i / 2) + 1} ", end="")
+        sliceTop, sliceBottom = obtainSliceHeights(staves[i], staves[i + 1])
+        j = 0
+        while j < IMAGE_WIDTH - SLICE_WIDTH:
+            print("::::::", end="")
 
-        sliceFigures = getPredictions(slicedImage, model, 0.15, device)
+            slicedImage = image.crop((j, sliceTop, j + SLICE_WIDTH, sliceBottom))
 
-        sliceFigures = filterOutBorderFigures(sliceFigures, 30)
+            sliceFigures = getPredictions(slicedImage, model, 0.15, device)
 
-        # showPredictions(slicedImage, sliceFigures)
+            sliceFigures = filterOutBorderFigures(sliceFigures, 30)
 
-        sliceFigures = mergeFigures(sliceFigures)
+            # showPredictions(slicedImage, sliceFigures)
 
-        sliceFigures = translateToFullSheet(sliceFigures, j, sliceTop)
+            sliceFigures = mergeFigures(sliceFigures)
 
-        figures = figures + sliceFigures
+            sliceFigures = translateToFullSheet(sliceFigures, j, sliceTop)
 
-        j = j + x_increment
+            figures = figures + sliceFigures
 
-    i = i + 2
+            j = j + x_increment
 
-    print("  COMPLETED")
+        i = i + 2
 
-figures = mergeFigures(figures, 0.3)
+        print("  COMPLETED")
 
-# saveFigures(image, fullSheetFigures, myFiguresDataSet, 0)
-print('Running figure classification..... ', end='')
+    figures = mergeFigures(figures, 0.3)
 
-figureClassificationModel = startFiguresModel(figureModels + 'figure_classification_model.pth')
+    # saveFigures(image, fullSheetFigures, myFiguresDataSet, 0)
+    print('Running figure classification..... ', end='')
 
-figures = classifyFigures(figures, figureClassificationModel, image)
+    figureClassificationModel = startFiguresModel(figureModels + 'figure_classification_model.pth')
 
-print('\t\tCOMPLETED')
+    figures = classifyFigures(figures, figureClassificationModel, image)
 
-figures = assignObjectTypes(figures)
+    print('\t\tCOMPLETED')
 
-figures = getNoteHeadCenters(figures)
+    figures = assignObjectTypes(figures)
 
-figures = detectTemplateFigures(imagePath, figures)
+    figures = getNoteHeadCenters(figures)
 
-figures = detectMeasureBarLines(imagePath, figures)
+    figures = detectTemplateFigures(imagePath, figures)
 
-figures = detectPoints(imagePath, figures)
+    figures = detectMeasureBarLines(imagePath, figures)
 
-staves = distributeFiguresInStaves(figures, staves)
+    figures = detectPoints(imagePath, figures)
 
-staves = handleCorrections(staves)
+    staves = distributeFiguresInStaves(figures, staves)
 
-staves = assignNotes(staves)
+    staves = handleCorrections(staves)
 
-staves = getKeySignatures(staves)
+    staves = assignNotes(staves)
 
-staves = applyKeySignature(staves)
+    staves = getKeySignatures(staves)
 
-staves = applyAccidentals(staves)
+    staves = applyKeySignature(staves)
 
-staves = assignNoteDurations(staves)
+    staves = applyAccidentals(staves)
 
-staves = applyDots(staves)
+    staves = assignNoteDurations(staves)
 
-showPredictionsStaves(image, staves, 'types')
-showPredictionsStaves(image, staves, 'notes')
-showPredictionsStaves(image, staves, 'duration')
+    staves = applyDots(staves)
+    if show:
+        showPredictionsStaves(image, staves, 'types')
+        showPredictionsStaves(image, staves, 'notes')
+        showPredictionsStaves(image, staves, 'duration')
 
-# --------------------------------------------------------------------------------------
-# END OF IMAGE RECOGNITION
-# STARTING REPRODUCTION PROCESS
-# --------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------
+    # END OF IMAGE RECOGNITION
+    # STARTING REPRODUCTION PROCESS
+    # --------------------------------------------------------------------------------------
 
-tracks, measureBeats = convertToTracks(staves)
+    tracks, measureBeats = convertToTracks(staves)
 
-print(measureBeats)
+    print(measureBeats)
+    if show:
+        showPredictionMeasures(image, tracks)
 
-showPredictionMeasures(image, tracks)
+    tracks = adjustMeasuresToBeat(tracks, measureBeats)
 
-tracks = adjustMeasuresToBeat(tracks, measureBeats)
+    song = createSong(tracks, measureBeats, bpm)
 
-song = createSong(tracks, measureBeats, bpm)
+    print(song.toString())
+    if show:
+        showPredictionMeasures(image, tracks)
 
-print(song.toString())
+    playSong(song)
 
-showPredictionMeasures(image, tracks)
 
-playSong(song)
-
+readAndPlay(fullsheetsDir + '/thinking_out_loud1.png', 80)
