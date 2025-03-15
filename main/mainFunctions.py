@@ -1,9 +1,8 @@
 import math
 
-import numpy as np
 import torch
 import torch.nn as nn
-from PIL import ImageDraw, ImageFont
+from PIL import ImageDraw, ImageFont, Image
 from torchvision import models, transforms
 from torchvision.models import ResNet18_Weights
 from torchvision.transforms import functional as F
@@ -12,6 +11,7 @@ from constants import *
 from learning.FasterRCNN.getModel import get_model
 from objectTypes.Figure import Figure, ClefFigure, NoteFigure, RestFigure, Accidental, Dot
 from objectTypes.Measure import Measure
+from objectTypes.MusicSheet import MusicSheet
 from objectTypes.Note import Note
 from objectTypes.SoundDTO import SoundDTO, Song, MultiSound
 from utils.plotUtils import showImage
@@ -19,6 +19,18 @@ from vision.figureDetection.figureDetection import extractFigureLocations
 from vision.figureDetection.pointDetection import getPointModifications
 from vision.measureBarDetection.measureBarDetector import getMeasureBars
 from vision.noteHeadDetection.noteHeadDetector import getNoteHeads, getNoteHeadsFour
+from vision.staveDetection.staveDetection import getStaves
+
+
+def initSheetsWithStaves(sheetDirs):
+    sheets = []
+    for i, sheetPath in enumerate(sheetDirs):
+
+        linesImage, staves = getStaves(sheetPath, i)
+        image = Image.open(sheetPath).convert("RGB")
+        sheets.append(MusicSheet(i, sheetPath, image, staves))
+
+    return sheets
 
 
 def obtainSliceHeights(stave1, stave2):
@@ -172,32 +184,34 @@ def classifyFigure(image, model):
     return prediction
 
 
-def classifyFigures(figures, model, image):
-    for figure in figures:
-        figure_img = image.crop((figure.box[0], figure.box[1], figure.box[2], figure.box[3]))
-        prediction = classifyFigure(figure_img, model)
-        figure.image = figure_img
-        figure.type = prediction
+def classifyFigures(sheets, model):
+    for sheet in sheets:
+        for figure in sheet.figures:
+            figure_img = sheet.image.crop((figure.box[0], figure.box[1], figure.box[2], figure.box[3]))
+            prediction = classifyFigure(figure_img, model)
+            figure.image = figure_img
+            figure.type = prediction
 
-    return figures
+    return sheets
 
 
-def showPredictionsFigures(image, figures):
-    imageCopy = image.copy()
-    draw = ImageDraw.Draw(imageCopy)
+def showPredictionsFigures(sheets):
+    for sheet in sheets:
+        imageCopy = sheet.image.copy()
+        draw = ImageDraw.Draw(imageCopy)
 
-    font = ImageFont.truetype("arial.ttf", 20)
+        font = ImageFont.truetype("arial.ttf", 20)
 
-    for figure in figures:
-        box = figure.box
-        draw.rectangle(box, outline="red", width=1)
-        draw.text((box[0], box[1] - 20), figure.type, fill="red", font=font)
-        if isNote(figure):
-            for noteHead in figure.noteHeads:
-                x, y = noteHead
-                draw.point((x, y), fill="magenta")
+        for figure in sheet.figures:
+            box = figure.box
+            draw.rectangle(box, outline="red", width=1)
+            draw.text((box[0], box[1] - 20), figure.type, fill="red", font=font)
+            if isNote(figure):
+                for noteHead in figure.noteHeads:
+                    x, y = noteHead
+                    draw.point((x, y), fill="magenta")
 
-    showImage(imageCopy, 'Predicted figures')
+        showImage(imageCopy, 'Predicted figures')
 
 
 def isClef(figure):
@@ -216,158 +230,161 @@ def isRest(figure):
     return figure.type in ['restOne', 'restDouble', 'restHalf']
 
 
-def assignObjectTypes(figures):
-    for i, figure in enumerate(figures):
-        if isClef(figure):
-            figures[i] = ClefFigure.fromFigure(figure)
-        elif isNote(figure):
-            figures[i] = NoteFigure.fromFigure(figure)
-        elif isRest(figure):
-            figures[i] = RestFigure.fromFigure(figure)
-    return figures
+def assignObjectTypes(sheets):
+    for sheet in sheets:
+        for i, figure in enumerate(sheet.figures):
+            if isClef(figure):
+                sheet.figures[i] = ClefFigure.fromFigure(figure)
+            elif isNote(figure):
+                sheet.figures[i] = NoteFigure.fromFigure(figure)
+            elif isRest(figure):
+                sheet.figures[i] = RestFigure.fromFigure(figure)
+    return sheets
 
 
-def getNoteHeadCenters(figures):
+def getNoteHeadCenters(sheets):
     # assign to each figure its note head centers relatively to the big image
-    for i, figure in enumerate(figures):  # Keep track of the index
-        x1, y1, _, _ = figure.box
+    for sheet in sheets:
+        for i, figure in enumerate(sheet.figures):  # Keep track of the index
+            x1, y1, _, _ = figure.box
 
-        if figure.type == 'double':
-            heads = getNoteHeads(figure.image, 'double')
-            figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
+            if figure.type == 'double':
+                heads = getNoteHeads(figure.image, 'double')
+                figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
 
-        elif figure.type == 'four':
-            heads = getNoteHeadsFour(figure.image)
-            figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
+            elif figure.type == 'four':
+                heads = getNoteHeadsFour(figure.image)
+                figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
 
-        elif figure.type in ['one', 'half', 'quarter']:
-            heads = getNoteHeads(figure.image)
-            figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
+            elif figure.type in ['one', 'half', 'quarter']:
+                heads = getNoteHeads(figure.image)
+                figure.noteHeads = [(x + x1, y + y1) for (x, y) in heads]
 
-    return figures
-
-
-def detectTemplateFigures(imagePath, figures):
-    sharpLocations = extractFigureLocations(imagePath, sharpFigureTemplates, 0.6)
-    flatLocations = extractFigureLocations(imagePath, flatFigureTemplates, 0.6, templateMask_path=flatFigureMask)
-    restDoubleLocations = extractFigureLocations(imagePath, restDoubleTemplates, 0.8)
-
-    for location in sharpLocations:
-        figure = Accidental(location, 'sharp', 1)
-        figure.noteHead = (location[0] + figure.width // 2, location[1] + figure.height // 2)
-        figures.append(figure)
-
-    for location in flatLocations:
-        figure = Accidental(location, 'flat', 1)
-        figure.noteHead = (location[0] + figure.width // 2, location[1] + FLAT_FIGURE_HEAD_HEIGHT)
-        figures.append(figure)
-
-    for location in restDoubleLocations:
-        figure = RestFigure(location, 'restDouble', 1)
-        figures.append(figure)
-
-    return figures
+    return sheets
 
 
-def detectMeasureBarLines(imagePath, figures):
-    measureBarLines = getMeasureBars(imagePath)
+def detectTemplateFigures(sheets):
+    for sheet in sheets:
+        sharpLocations = extractFigureLocations(sheet.path, sharpFigureTemplates, 0.6)
+        flatLocations = extractFigureLocations(sheet.path, flatFigureTemplates, 0.6, templateMask_path=flatFigureMask)
+        restDoubleLocations = extractFigureLocations(sheet.path, restDoubleTemplates, 0.8)
 
-    for line in measureBarLines:
-        figure = Figure((line[0] - 5, line[1], line[2] + 5, line[3]), 'bar', 1)
-        figures.append(figure)
-    return figures
+        for location in sharpLocations:
+            figure = Accidental(location, 'sharp', 1)
+            figure.noteHead = (location[0] + figure.width // 2, location[1] + figure.height // 2)
+            sheet.figures.append(figure)
 
+        for location in flatLocations:
+            figure = Accidental(location, 'flat', 1)
+            figure.noteHead = (location[0] + figure.width // 2, location[1] + FLAT_FIGURE_HEAD_HEIGHT)
+            sheet.figures.append(figure)
 
-def detectPoints(imagePath, figures):
-    points = getPointModifications(imagePath)
+        for location in restDoubleLocations:
+            figure = RestFigure(location, 'restDouble', 1)
+            sheet.figures.append(figure)
 
-    for point in points:
-        figure = Dot((point[0] - 7, point[1] - 7, point[0] + 7, point[1] + 7), 'dot', 1)
-        figures.append(figure)
-    return figures
-
-
-def distributeFiguresInStaves(figures, staves):
-    # assign each figure to the closest stave based on the box center
-    for figure in figures:
-
-        _, y = figure.getCenter()
-
-        if figure.type != 'bar':
-            closest_stave = min(staves, key=lambda stave: abs(y - stave.getHeightCenter()))
-            closest_stave.figures.append(figure)
-
-        else:
-            # measure bars will be split in their two staves
-            sorted_staves = sorted(staves, key=lambda stave: abs(y - stave.getHeightCenter()))
-            top_stave, bottom_stave = sorted_staves[:2]  # get the two closest staves
-
-            # create new figures for the part of the measure bar in that stave
-            top_stave.figures.append(
-                Figure((figure.box[0], top_stave.topLine - 7, figure.box[2], top_stave.bottomLine + 7), 'bar', 1))
-            bottom_stave.figures.append(
-                Figure((figure.box[0], bottom_stave.topLine - 7, figure.box[2], bottom_stave.bottomLine + 7), 'bar', 1))
-
-    # sort figures in based on the starting x of the box
-    for stv in staves:
-        stv.figures.sort(key=lambda fig: fig.getCenter()[0])
-
-    return staves
+    return sheets
 
 
-def showPredictionsStaves(image, staves, labeling='type', coloring=None):
-    imageCopy = image.copy()
-    draw = ImageDraw.Draw(imageCopy)
+def detectMeasureBarLines(sheets):
+    for sheet in sheets:
+        measureBarLines = getMeasureBars(sheet.path)
 
-    font = ImageFont.truetype("arial.ttf", 20)
-    colors = ["red", "blue", "green", "orange"]
+        for line in measureBarLines:
+            figure = Figure((line[0] - 5, line[1], line[2] + 5, line[3]), 'bar', 1)
+            sheet.figures.append(figure)
+    return sheets
 
-    for i, stave in enumerate(staves):
 
-        color = colors[i % len(colors)]
+def detectPoints(sheets):
+    for sheet in sheets:
+        points = getPointModifications(sheet.path)
 
-        for figure in stave.figures:
+        for point in points:
+            figure = Dot((point[0] - 7, point[1] - 7, point[0] + 7, point[1] + 7), 'dot', 1)
+            sheet.figures.append(figure)
+    return sheets
 
-            if coloring == 'type':
-                color = classColors[figure.type]
 
-            box = figure.box
-            draw.rectangle(box, outline=color, width=1)
+def distributeFiguresInStaves(sheets):
+    for sheet in sheets:
+        # assign each figure to the closest stave based on the box center
+        for figure in sheet.figures:
 
-            tagText = ''
-            if labeling == 'notes':
+            _, y = figure.getCenter()
+
+            if figure.type != 'bar':
+                closest_stave = min(sheet.staves, key=lambda stave: abs(y - stave.getHeightCenter()))
+                closest_stave.figures.append(figure)
+
+            else:
+                # measure bars will be split in their two staves
+                sorted_staves = sorted(sheet.staves, key=lambda stave: abs(y - stave.getHeightCenter()))
+                top_stave, bottom_stave = sorted_staves[:2]  # get the two closest staves
+
+                # create new figures for the part of the measure bar in that stave
+                top_stave.figures.append(
+                    Figure((figure.box[0], top_stave.topLine - 7, figure.box[2], top_stave.bottomLine + 7), 'bar', 1))
+                bottom_stave.figures.append(
+                    Figure((figure.box[0], bottom_stave.topLine - 7, figure.box[2], bottom_stave.bottomLine + 7), 'bar', 1))
+
+        # sort figures in based on center x of the box
+        for stv in sheet.staves:
+            stv.figures.sort(key=lambda fig: fig.getCenter()[0])
+
+    return sheets
+
+
+def showPredictionsStaves(sheets, labeling='type', coloring=None):
+    for sheet in sheets:
+        imageCopy = sheet.image.copy()
+        draw = ImageDraw.Draw(imageCopy)
+
+        font = ImageFont.truetype("arial.ttf", 20)
+        colors = ["red", "blue", "green", "orange"]
+
+        for i, stave in enumerate(sheet.staves):
+
+            color = colors[i % len(colors)]
+
+            for figure in stave.figures:
+
+                if coloring == 'type':
+                    color = classColors[figure.type]
+
+                box = figure.box
+                draw.rectangle(box, outline=color, width=1)
+
+                tagText = ''
+                if labeling == 'notes':
+                    if isNote(figure):
+                        tagText = "".join(
+                            notePitchLabels[note.pitch] + str(note.octave) +
+                            (note.accidental if note.accidental != 'n' else '')
+                            for note in figure.notes)
+                    if isAccidental(figure):
+                        tagText = notePitchLabels[figure.note.pitch] + str(figure.note.octave)
+
+                elif labeling == 'types':
+                    tagText = figure.type
+
+                elif labeling == 'duration':
+                    if isNote(figure):
+                        tagText = "".join(
+                            str(note.duration) +
+                            (figure.articulation if figure.articulation != 'n' else '') + ' '
+                            for note in figure.notes)
+                    if isRest(figure):
+                        tagText = str(figure.duration)
+
+                draw.text((box[0], box[1] - 20), tagText, fill=color, font=font)
+
                 if isNote(figure):
-                    tagText = "".join(
-                        notePitchLabels[note.pitch] + str(note.octave) +
-                        (note.accidental if note.accidental != 'n' else '')
-                        for note in figure.notes)
-                if isAccidental(figure):
-                    tagText = notePitchLabels[figure.note.pitch] + str(figure.note.octave)
+                    for noteHead in figure.noteHeads:
+                        x, y = noteHead
+                        draw.ellipse((x-1, y-1, x+1, y+1), fill="magenta")
 
-            elif labeling == 'types':
-                tagText = figure.type
-
-            elif labeling == 'duration':
-                if isNote(figure):
-                    tagText = "".join(
-                        str(note.duration) +
-                        (figure.articulation if figure.articulation != 'n' else '') + ' '
-                        for note in figure.notes)
-                if isRest(figure):
-                    tagText = str(figure.duration)
-
-            draw.text((box[0], box[1] - 20), tagText, fill=color, font=font)
-
-            if isNote(figure):
-                for noteHead in figure.noteHeads:
-                    x, y = noteHead
-                    draw.point((x, y), fill="magenta")
-                    draw.point((x, y - 1), fill="magenta")
-                    draw.point((x, y + 1), fill="magenta")
-                    draw.point((x - 1, y), fill="magenta")
-                    draw.point((x + 1, y), fill="magenta")
-
-    showImage(imageCopy, 'Predictions in staves')
+        showImage(imageCopy, 'Predictions in staves')
 
 
 def overlapRatio(box1, box2):
@@ -385,40 +402,41 @@ def overlapRatio(box1, box2):
     return (overlapArea / box1Area) if box1Area > 0 else 0
 
 
-def handleCorrections(staves):
-    for stave in staves:
-        if stave.staveIndex == 0:
-            # filter out the bpm and rhythm figures if any on top of stave 1
-            stave.figures[:] = [
-                fig2 for fig2 in stave.figures
-                if abs(fig2.getCenter()[1] - stave.getHeightCenter()) < 100
-            ]
-
-        for figure in stave.figures:
-
-            # sometimes key signature is detected by the fastRCNN as other figure types
-            if isAccidental(figure):
-
-                # check if the accidental is part of the key signature
-                clef = getClef(figure, stave)
-
-                if abs(clef.getCenter()[0] - figure.getCenter()[0]) <= 100:
-                    # filter out figures that overlap too much with the key signature accidentals
-                    stave.figures[:] = [
-                        fig2 for fig2 in stave.figures
-                        if fig2.type == figure.type
-                           or overlapRatio(figure.box, fig2.box) < 0.5
-                    ]
-
-            # fClef figures has to dots that might be detected as 'dot' figures, filter those out
-            if figure.type == 'fClef':
+def handleCorrections(sheets):
+    for sheet in sheets:
+        for stave in sheet.staves:
+            if stave.staveIndex == 0:
+                # filter out the bpm and rhythm figures if any on top of stave 1
                 stave.figures[:] = [
                     fig2 for fig2 in stave.figures
-                    if fig2.type != 'dot'  # filter out dots
-                       or fig2.getCenter()[0] < figure.getCenter()[0]  # that are to the right of the fClef
-                       or overlapRatio(fig2.box, figure.box) < 0.5  # where dot area overlaps more than 0.5 with fClef
+                    if abs(fig2.getCenter()[1] - stave.getHeightCenter()) < 100
                 ]
-    return staves
+
+            for figure in stave.figures:
+
+                # sometimes key signature is detected by the fastRCNN as other figure types
+                if isAccidental(figure):
+
+                    # check if the accidental is part of the key signature
+                    clef = getClef(figure, stave)
+
+                    if abs(clef.getCenter()[0] - figure.getCenter()[0]) <= 100:
+                        # filter out figures that overlap too much with the key signature accidentals
+                        stave.figures[:] = [
+                            fig2 for fig2 in stave.figures
+                            if fig2.type == figure.type
+                               or overlapRatio(figure.box, fig2.box) < 0.5
+                        ]
+
+                # fClef figures has to dots that might be detected as 'dot' figures, filter those out
+                if figure.type == 'fClef':
+                    stave.figures[:] = [
+                        fig2 for fig2 in stave.figures
+                        if fig2.type != 'dot'  # filter out dots
+                           or fig2.getCenter()[0] < figure.getCenter()[0]  # that are to the right of the fClef
+                           or overlapRatio(fig2.box, figure.box) < 0.5  # where dot area overlaps more than 0.5 with fClef
+                    ]
+    return sheets
 
 
 def mapNoteFromLine(n, pitchOffset=0, octaveOffset=4):
@@ -458,6 +476,8 @@ def getClef(figure, stave):
     ]  # list of clefs to the left
 
     # get the closest clef
+    if not clefsToLeft:
+        print('')
     closestClef = max(clefsToLeft, key=lambda clef: clef.getCenter()[0])
 
     return closestClef
@@ -549,121 +569,126 @@ def getNote(figureHead_y, staveLines, clefType, meanGap):
     return note
 
 
-def assignNotes(staves):
-    for stave in staves:
-        # bottom line which has the highest value in y must be index 0
-        staveLines = sorted(stave.lineHeights, reverse=True)
-        for figure in stave.figures:
-            if isNote(figure):
+def assignNotes(sheets):
+    for sheet in sheets:
+        for stave in sheet.staves:
+            # bottom line which has the highest value in y must be index 0
+            staveLines = sorted(stave.lineHeights, reverse=True)
+            for figure in stave.figures:
+                if isNote(figure):
 
-                clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
+                    clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
 
-                for (figureHead_x, figureHead_y) in figure.noteHeads:
-                    note = getNote(figureHead_y, staveLines, clefType, stave.meanGap)
+                    for (figureHead_x, figureHead_y) in figure.noteHeads:
+                        note = getNote(figureHead_y, staveLines, clefType, stave.meanGap)
 
-                    note.noteHead = (figureHead_x, figureHead_y)
-                    figure.notes.append(note)
+                        note.noteHead = (figureHead_x, figureHead_y)
+                        figure.notes.append(note)
 
-                # order the notes increasingly with octave as the first criteria
-                figure.notes.sort(key=lambda noteObj: (noteObj.octave, noteObj.pitch))
+                    # order the notes increasingly with octave as the first criteria
+                    figure.notes.sort(key=lambda noteObj: (noteObj.octave, noteObj.pitch))
 
-            if isAccidental(figure):
-                clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
+                if isAccidental(figure):
+                    clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
 
-                note = getNote(figure.noteHead[1], staveLines, clefType, stave.meanGap)
-                note.noteHead = (figure.noteHead[0], figure.noteHead[1])
-                figure.note = note
+                    note = getNote(figure.noteHead[1], staveLines, clefType, stave.meanGap)
+                    note.noteHead = (figure.noteHead[0], figure.noteHead[1])
+                    figure.note = note
 
-    return staves
-
-
-def getKeySignatures(staves):
-    for stave in staves:
-        previousSignature = ['n', 'n', 'n', 'n', 'n', 'n', 'n']  # Default all naturals
-        for i, figure in enumerate(stave.figures):
-            if isClef(figure):
-
-                # all naturals by default (index 0 -> C, index 6 -> B)
-                signatureAccidentals = ['n', 'n', 'n', 'n', 'n', 'n', 'n']
-
-                j = i + 1  # Start from the first figure to the right
-
-                hasSignature = False
-                while j < len(stave.figures) and isAccidental(stave.figures[j]):
-                    hasSignature = True
-                    accNote = stave.figures[j].note.pitch
-                    stave.figures[j].isSignature = True  # mark that the accidental is part of the signature
-
-                    if stave.figures[j].type == 'sharp':
-                        signatureAccidentals[accNote - 1] = '#'  # Modify based on pitch
-                    elif stave.figures[j].type == 'flat':
-                        signatureAccidentals[accNote - 1] = 'b'
-
-                    j += 1
-
-                # no signature found -> inherit from previous
-                if not hasSignature:
-                    signatureAccidentals = previousSignature.copy()
-
-                figure.signature = signatureAccidentals
-                previousSignature = signatureAccidentals  # update the new previous
-
-    return staves
+    return sheets
 
 
-def applyKeySignature(staves):
-    for stave in staves:
-        for figure in stave.figures:
+def getKeySignatures(sheets):
+    for sheet in sheets:
+        for stave in sheet.staves:
+            previousSignature = ['n', 'n', 'n', 'n', 'n', 'n', 'n']  # Default all naturals
+            for i, figure in enumerate(stave.figures):
+                if isClef(figure):
 
-            if isNote(figure):
+                    # all naturals by default (index 0 -> C, index 6 -> B)
+                    signatureAccidentals = ['n', 'n', 'n', 'n', 'n', 'n', 'n']
 
-                clefSignature = getClef(figure, stave).signature
+                    j = i + 1  # Start from the first figure to the right
 
-                for note in figure.notes:
-                    note.accidental = clefSignature[note.pitch - 1]
+                    hasSignature = False
+                    while j < len(stave.figures) and isAccidental(stave.figures[j]):
+                        hasSignature = True
+                        accNote = stave.figures[j].note.pitch
+                        stave.figures[j].isSignature = True  # mark that the accidental is part of the signature
 
-    return staves
+                        if stave.figures[j].type == 'sharp':
+                            signatureAccidentals[accNote - 1] = '#'  # Modify based on pitch
+                        elif stave.figures[j].type == 'flat':
+                            signatureAccidentals[accNote - 1] = 'b'
 
+                        j += 1
 
-def applyAccidentals(staves):
-    for stave in staves:
-        for i, figure in enumerate(stave.figures):
-            if isAccidental(figure) and not figure.isSignature:
-                # figures to the right
-                for j in range(i + 1, len(stave.figures)):
-                    next_figure = stave.figures[j]
+                    # no signature found -> inherit from previous
+                    if not hasSignature:
+                        signatureAccidentals = previousSignature.copy()
 
-                    if isNote(next_figure):
-                        for note in next_figure.notes:
-                            if note.pitch == figure.note.pitch:
-                                if figure.type == 'flat':
-                                    note.accidental = 'b'
-                                elif figure.type == 'sharp':
-                                    note.accidental = '#'
+                    figure.signature = signatureAccidentals
+                    previousSignature = signatureAccidentals  # update the new previous
 
-                    # accidentals only apply to the measure if not in signature
-                    if next_figure.type == 'bar':
-                        break
-
-    return staves
+    return sheets
 
 
-def assignNoteDurations(staves):
-    for stave in staves:
-        for figure in stave.figures:
-            if isNote(figure):
-                if len(figure.notes) > 0:
+def applyKeySignature(sheets):
+    for sheet in sheets:
+        for stave in sheet.staves:
+            for figure in stave.figures:
+
+                if isNote(figure):
+
+                    clefSignature = getClef(figure, stave).signature
+
                     for note in figure.notes:
-                        note.duration = noteDurations[figure.type]
-                    # take the max of the notes, will be used for adjusting measures to beat
-                    figure.duration = max([note.duration for note in figure.notes])
-                else:
-                    # note heads not detected
-                    figure.duration = noteDurations[figure.type]
+                        note.accidental = clefSignature[note.pitch - 1]
 
-            if isRest(figure):
-                figure.duration = noteDurations[figure.type]
-    return staves
+    return sheets
+
+
+def applyAccidentals(sheets):
+    for sheet in sheets:
+        for stave in sheet.staves:
+            for i, figure in enumerate(stave.figures):
+                if isAccidental(figure) and not figure.isSignature:
+                    # figures to the right
+                    for j in range(i + 1, len(stave.figures)):
+                        next_figure = stave.figures[j]
+
+                        if isNote(next_figure):
+                            for note in next_figure.notes:
+                                if note.pitch == figure.note.pitch:
+                                    if figure.type == 'flat':
+                                        note.accidental = 'b'
+                                    elif figure.type == 'sharp':
+                                        note.accidental = '#'
+
+                        # accidentals only apply to the measure if not in signature
+                        if next_figure.type == 'bar':
+                            break
+
+    return sheets
+
+
+def assignNoteDurations(sheets):
+    for sheet in sheets:
+        for stave in sheet.staves:
+            for figure in stave.figures:
+                if isNote(figure):
+                    if len(figure.notes) > 0:
+                        for note in figure.notes:
+                            note.duration = noteDurations[figure.type]
+                        # take the max of the notes, will be used for adjusting measures to beat
+                        figure.duration = max([note.duration for note in figure.notes])
+                    else:
+                        # note heads not detected
+                        figure.duration = noteDurations[figure.type]
+
+                if isRest(figure):
+                    figure.duration = noteDurations[figure.type]
+    return sheets
 
 
 def doDistance(p1, p2):
@@ -706,77 +731,86 @@ def getBestDot(point, stave, maxDist=50):
     return closestDot
 
 
-def applyDots(staves):
-    for stave in staves:
-        for figure in stave.figures:
-            if isNote(figure) and figure.notes:
-                for note in figure.notes:
-                    bestDot = getBestDot(note.noteHead, stave, 50)
+def applyDots(sheets):
+    for sheet in sheets:
+        for stave in sheet.staves:
+            for figure in stave.figures:
+                if isNote(figure) and figure.notes:
+                    for note in figure.notes:
+                        bestDot = getBestDot(note.noteHead, stave, 50)
+                        if bestDot is not None:
+                            angle = doAngle(note.noteHead, bestDot.getCenter())
+                            if -45 < angle < 50:
+                                # point is to the right -> extend duration
+                                note.duration += note.duration * 0.5
+                                bestDot.used = True
+                            elif 60 < angle < 120 or -120 < angle < -60:
+                                # point is on top or below -> staccato articulation
+                                figure.articulation = 's'
+                                bestDot.used = True
+
+                    # update global duration
+                    figure.duration = max([note.duration for note in figure.notes])
+
+                if isRest(figure):
+                    bestDot = getBestDot(figure.getCenter(), stave, 60)
                     if bestDot is not None:
-                        angle = doAngle(note.noteHead, bestDot.getCenter())
-                        if -45 < angle < 50:
-                            # point is to the right -> extend duration
-                            note.duration += note.duration * 0.5
-                            bestDot.used = True
-                        elif 60 < angle < 120 or -120 < angle < -60:
-                            # point is on top or below -> staccato articulation
-                            figure.articulation = 's'
+                        angle = doAngle(figure.getCenter(), bestDot.getCenter())
+                        if -50 < angle < 50:
+                            figure.duration = figure.duration + figure.duration * 0.5
                             bestDot.used = True
 
-                # update global duration
-                figure.duration = max([note.duration for note in figure.notes])
+        # remove unused dots, they might be points on 'i' letters or other random places
+        for stave in sheet.staves:
+            stave.figures = [figure for figure in stave.figures if not (figure.type == 'dot' and not figure.used)]
 
-            if isRest(figure):
-                bestDot = getBestDot(figure.getCenter(), stave, 60)
-                if bestDot is not None:
-                    angle = doAngle(figure.getCenter(), bestDot.getCenter())
-                    if -50 < angle < 50:
-                        figure.duration = figure.duration + figure.duration * 0.5
-                        bestDot.used = True
-
-    # remove unused dots, they might be points on 'i' letters or other random places
-    for stave in staves:
-        stave.figures = [figure for figure in stave.figures if not (figure.type == 'dot' and not figure.used)]
-
-    return staves
+    return sheets
 
 
-def convertToTracks(staves):
+def convertToTracks(sheets):
     tracks = []
     measuresUp = []
     measuresDown = []
+    measureDurationRequired = -1
 
-    # distribute figures in measures
-    for staveIndex, stave in enumerate(staves):
-        currentMeasureFigures = []
-        for figure in stave.figures:
-            if figure.type == 'bar':
-                if currentMeasureFigures:  # add if there are figures in the measure
-                    if staveIndex % 2 == 0:
-                        measuresUp.append(Measure(staveIndex, currentMeasureFigures))
-                    else:
-                        measuresDown.append(Measure(staveIndex, currentMeasureFigures))
-                currentMeasureFigures = []
-            elif isNote(figure):
-                currentMeasureFigures.append(figure)
-            elif isRest(figure):
-                currentMeasureFigures.append(figure)
+    for sheet in sheets:
+        # distribute figures in measures
+        for staveIndex, stave in enumerate(sheet.staves):
+            currentMeasureFigures = []
+            for figure in stave.figures:
+                if figure.type == 'bar':
+                    if currentMeasureFigures:  # add if there are figures in the measure
+                        if staveIndex % 2 == 0:
+                            measuresUp.append(Measure(staveIndex, sheet.index, currentMeasureFigures))
+                        else:
+                            measuresDown.append(Measure(staveIndex, sheet.index, currentMeasureFigures))
+                    currentMeasureFigures = []
+                elif isNote(figure):
+                    currentMeasureFigures.append(figure)
+                elif isRest(figure):
+                    currentMeasureFigures.append(figure)
 
-        # get last measure if it doesn't end with a bar line
-        if currentMeasureFigures:
-            if staveIndex % 2 == 0:
-                measuresUp.append(Measure(staveIndex, currentMeasureFigures))
-            else:
-                measuresDown.append(Measure(staveIndex, currentMeasureFigures))
+            # get last measure if it doesn't end with a bar line
+            if currentMeasureFigures:
+                if staveIndex % 2 == 0:
+                    measuresUp.append(Measure(staveIndex, sheet.index, currentMeasureFigures))
+                else:
+                    measuresDown.append(Measure(staveIndex, sheet.index, currentMeasureFigures))
 
-    # Find the most common measure duration
-    durations = [measure.duration for measure in measuresDown + measuresUp]
-    measureDuration = max(set(durations), key=durations.count)
+        # find the most common measure duration
+        durations = [measure.duration for measure in measuresDown + measuresUp]
+        measureDuration = max(set(durations), key=durations.count)
+
+        # ensure that for all sheets the measure duration is the same
+        if measureDurationRequired == -1:
+            measureDurationRequired = measureDuration
+        elif measureDuration != measureDurationRequired:
+            raise ValueError('Sheets cannot have different measure durations')
 
     tracks.append(measuresUp)
     tracks.append(measuresDown)
 
-    return tracks, measureDuration
+    return tracks, measureDurationRequired
 
 
 def adjustMeasuresToBeat(tracks, realBeats):
@@ -808,22 +842,24 @@ def adjustMeasuresToBeat(tracks, realBeats):
     return tracks
 
 
-def showPredictionMeasures(image, tracks):
-    imageCopy = image.copy()
-    draw = ImageDraw.Draw(imageCopy)
+def showPredictionMeasures(sheets, tracks):
+    for sheet in sheets:
+        imageCopy = sheet.image.copy()
+        draw = ImageDraw.Draw(imageCopy)
 
-    font = ImageFont.truetype("arial.ttf", 20)
+        font = ImageFont.truetype("arial.ttf", 20)
 
-    colors = ["red", "blue", "green", "orange"]
-    for track in tracks:
-        for mi, measure in enumerate(track):
-            color = colors[mi % len(colors)]
-            for fi, figure in enumerate(measure.figures):
-                box = figure.box
-                draw.rectangle(box, outline=color, width=2)
-                draw.text((box[0], box[1] - 20), f"{mi}, {fi}: {figure.duration}", fill=color, font=font)
+        colors = ["red", "blue", "green", "orange"]
+        for track in tracks:
+            for mi, measure in enumerate(track):
+                if measure.sheetIndex == sheet.index:
+                    color = colors[mi % len(colors)]
+                    for fi, figure in enumerate(measure.figures):
+                        box = figure.box
+                        draw.rectangle(box, outline=color, width=2)
+                        draw.text((box[0], box[1] - 20), f"{mi}, {fi}: {figure.duration}", fill=color, font=font)
 
-    showImage(imageCopy, 'Predictions Measures')
+        showImage(imageCopy, 'Predictions Measures')
 
     return
 

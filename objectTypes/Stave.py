@@ -1,7 +1,8 @@
 
 class Stave:
-    def __init__(self, staveIndex, meanGap):
+    def __init__(self, staveIndex, sheetIndex, meanGap):
         self.staveIndex = staveIndex
+        self.sheetIndex = sheetIndex
         self.meanGap = meanGap
         self.lineHeights = []
         self.topLine = -1

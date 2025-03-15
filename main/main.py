@@ -6,120 +6,118 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
     applyKeySignature, assignNoteDurations, applyDots, adjustMeasuresToBeat, \
-    showPredictionMeasures, createSong, showPredictionsFigures, convertToTracks
+    showPredictionMeasures, createSong, convertToTracks, initSheetsWithStaves, showPredictionsFigures
 from reproduction.playSong import playSong
 from utils.plotUtils import showImage
-from vision.staveDetection.staveDetection import getStaves
 
 
-def readAndPlay(imagePath, bpm, show=False):
-
-    staveLinesImage, staves = getStaves(imagePath)
-
-    if show:
-        showImage(staveLinesImage, 'Staves found')
-
-    image = Image.open(imagePath).convert("RGB")
-
-    # verify number of staves is even
-    if len(staves) % 2 != 0:
-        raise ValueError(f"Stave detection went wrong. Staves detected: {len(staves)}")
-
-    i = 0
-    x_increment = int(SLICE_WIDTH / 3)
+def readAndPlay(sheetPaths, bpm, show=False):
+    sheets = initSheetsWithStaves(sheetPaths)
 
     model, device = startModel(slicedModelsDir + 'fasterrcnn_epoch_9.pth', 10)
+    x_increment = int(SLICE_WIDTH / 3)
 
-    figures = []
+    for sheet in sheets:
+        # verify number of staves is even
+        if len(sheet.staves) % 2 != 0:
+            raise ValueError(f"Stave detection went wrong. Staves detected: {len(sheet.staves)}")
 
-    while i < (len(staves)):
-        print(f"ANALYSING STAVE PAIR {int(i / 2) + 1} ", end="")
-        sliceTop, sliceBottom = obtainSliceHeights(staves[i], staves[i + 1])
-        j = 0
-        while j < IMAGE_WIDTH - SLICE_WIDTH:
-            print("::::::", end="")
+        i = 0
+        figures = []
 
-            slicedImage = image.crop((j, sliceTop, j + SLICE_WIDTH, sliceBottom))
+        while i < (len(sheet.staves)):
+            print(f"ANALYSING STAVE PAIR {int(i / 2) + 1} ", end="")
+            sliceTop, sliceBottom = obtainSliceHeights(sheet.staves[i], sheet.staves[i + 1])
+            j = 0
+            while j < IMAGE_WIDTH - SLICE_WIDTH:
+                print("::::::", end="")
 
-            sliceFigures = getPredictions(slicedImage, model, 0.15, device)
+                slicedImage = sheet.image.crop((j, sliceTop, j + SLICE_WIDTH, sliceBottom))
 
-            sliceFigures = filterOutBorderFigures(sliceFigures, 30)
+                sliceFigures = getPredictions(slicedImage, model, 0.15, device)
 
-            # showPredictions(slicedImage, sliceFigures)
+                sliceFigures = filterOutBorderFigures(sliceFigures, 30)
 
-            sliceFigures = mergeFigures(sliceFigures)
+                # showPredictions(slicedImage, sliceFigures)
 
-            sliceFigures = translateToFullSheet(sliceFigures, j, sliceTop)
+                sliceFigures = mergeFigures(sliceFigures)
 
-            figures = figures + sliceFigures
+                sliceFigures = translateToFullSheet(sliceFigures, j, sliceTop)
 
-            j = j + x_increment
+                figures = figures + sliceFigures
 
-        i = i + 2
+                j = j + x_increment
 
-        print("  COMPLETED")
+            i = i + 2
 
-    figures = mergeFigures(figures, 0.3)
+            print("  COMPLETED")
+
+        # include teh figures to the sheet, at this point we don't know the stave of each figure
+        sheet.figures = mergeFigures(figures, 0.3)
 
     # saveFigures(image, fullSheetFigures, myFiguresDataSet, 0)
     print('Running figure classification..... ', end='')
 
     figureClassificationModel = startFiguresModel(figureModels + 'figure_classification_model.pth')
 
-    figures = classifyFigures(figures, figureClassificationModel, image)
+    sheets = classifyFigures(sheets, figureClassificationModel)
 
     print('\t\tCOMPLETED')
 
-    figures = assignObjectTypes(figures)
+    sheets = assignObjectTypes(sheets)
 
-    figures = getNoteHeadCenters(figures)
+    sheets = getNoteHeadCenters(sheets)
 
-    figures = detectTemplateFigures(imagePath, figures)
+    sheets = detectTemplateFigures(sheets)
 
-    figures = detectMeasureBarLines(imagePath, figures)
+    sheets = detectMeasureBarLines(sheets)
 
-    figures = detectPoints(imagePath, figures)
+    sheets = detectPoints(sheets)
 
-    staves = distributeFiguresInStaves(figures, staves)
+    sheets = distributeFiguresInStaves(sheets)
 
-    staves = handleCorrections(staves)
+    sheets = handleCorrections(sheets)
 
-    staves = assignNotes(staves)
+    sheets = assignNotes(sheets)
 
-    staves = getKeySignatures(staves)
+    sheets = getKeySignatures(sheets)
 
-    staves = applyKeySignature(staves)
+    sheets = applyKeySignature(sheets)
 
-    staves = applyAccidentals(staves)
+    sheets = applyAccidentals(sheets)
 
-    staves = assignNoteDurations(staves)
+    sheets = assignNoteDurations(sheets)
 
-    staves = applyDots(staves)
+    sheets = applyDots(sheets)
+
     if show:
-        showPredictionsStaves(image, staves, 'types')
-        showPredictionsStaves(image, staves, 'notes')
-        showPredictionsStaves(image, staves, 'duration')
+        showPredictionsStaves(sheets, 'types')
+        showPredictionsStaves(sheets, 'notes')
+        showPredictionsStaves(sheets, 'duration')
 
     # --------------------------------------------------------------------------------------
     # END OF IMAGE RECOGNITION
     # STARTING REPRODUCTION PROCESS
     # --------------------------------------------------------------------------------------
 
-    tracks, measureBeats = convertToTracks(staves)
+    tracks, measureBeats = convertToTracks(sheets)
 
     print(measureBeats)
     if show:
-        showPredictionMeasures(image, tracks)
+        showPredictionMeasures(sheets, tracks)
 
     tracks = adjustMeasuresToBeat(tracks, measureBeats)
 
     song = createSong(tracks, measureBeats, bpm)
 
     print(song.toString())
+
     if show:
-        showPredictionMeasures(image, tracks)
+        showPredictionMeasures(sheets, tracks)
 
     playSong(song)
 
 
-readAndPlay(fullsheetsDir + '/thinking_out_loud1.png', 80)
+# readAndPlay([fullsheetsDir + '/roar1.png', fullsheetsDir + '/roar2.png'], 90)
+readAndPlay([myDataImg + '/image_9.png', myDataImg + '/image_10.png'], 70)
+readAndPlay([fullsheetsDir + '/thinking_out_loud1.png', fullsheetsDir + '/thinking_out_loud2.png'], 80)

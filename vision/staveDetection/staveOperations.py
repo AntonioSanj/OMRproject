@@ -179,12 +179,12 @@ def getLinesBelow(lineHeight, meanGap, extraLines):
     return newLines
 
 
-def generateStaves(lineHeights, meanGap, extraLines=2):
+def generateStaves(lineHeights, meanGap, sheetIndex, extraLines=2):
     staves = []
 
     i = 1
     staveIndex = 0
-    currentStave = Stave(staveIndex, meanGap)
+    currentStave = Stave(staveIndex,sheetIndex, meanGap)
 
     while i < len(lineHeights) - 1:
 
@@ -206,7 +206,7 @@ def generateStaves(lineHeights, meanGap, extraLines=2):
             # store current stave before resetting values
             staves.append(currentStave)
             staveIndex += 1
-            currentStave = Stave(staveIndex, meanGap)
+            currentStave = Stave(staveIndex, sheetIndex, meanGap)
 
         i += 1
 

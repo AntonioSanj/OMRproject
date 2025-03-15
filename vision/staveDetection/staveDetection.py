@@ -3,7 +3,7 @@ from vision.staveDetection.staveOperations import *
 from utils.plotUtils import *
 
 
-def getStaves(imagePath, show=False, printData=False, debug=False):
+def getStaves(imagePath, sheetIndex, show=False, printData=False, debug=False):
     img, gray = loadImageGrey(imagePath)
 
     thresh_image = thresh(gray, 160)
@@ -28,7 +28,7 @@ def getStaves(imagePath, show=False, printData=False, debug=False):
     consolidatedLines = consolidateLines(lineHeights, meanGap, 5)
 
     # one extra line is added up and below (C and A assuming gClef)
-    staves = generateStaves(consolidatedLines, meanGap, 1)
+    staves = generateStaves(consolidatedLines, meanGap, sheetIndex, 1)
 
     result = drawLineHeights(staves, rotatedImage, 2)
 
