@@ -25,7 +25,6 @@ from vision.staveDetection.staveDetection import getStaves
 def initSheetsWithStaves(sheetDirs):
     sheets = []
     for i, sheetPath in enumerate(sheetDirs):
-
         linesImage, staves = getStaves(sheetPath, i)
         image = Image.open(sheetPath).convert("RGB")
         sheets.append(MusicSheet(i, sheetPath, image, staves))
@@ -330,7 +329,8 @@ def distributeFiguresInStaves(sheets):
                 top_stave.figures.append(
                     Figure((figure.box[0], top_stave.topLine - 7, figure.box[2], top_stave.bottomLine + 7), 'bar', 1))
                 bottom_stave.figures.append(
-                    Figure((figure.box[0], bottom_stave.topLine - 7, figure.box[2], bottom_stave.bottomLine + 7), 'bar', 1))
+                    Figure((figure.box[0], bottom_stave.topLine - 7, figure.box[2], bottom_stave.bottomLine + 7), 'bar',
+                           1))
 
         # sort figures in based on center x of the box
         for stv in sheet.staves:
@@ -386,7 +386,7 @@ def showPredictionsStaves(sheets, labeling='type', coloring=None):
                 if isNote(figure):
                     for noteHead in figure.noteHeads:
                         x, y = noteHead
-                        draw.ellipse((x-1, y-1, x+1, y+1), fill="magenta")
+                        draw.ellipse((x - 1, y - 1, x + 1, y + 1), fill="magenta")
 
         showImage(imageCopy, 'Predictions in staves')
 
@@ -438,7 +438,8 @@ def handleCorrections(sheets):
                         fig2 for fig2 in stave.figures
                         if fig2.type != 'dot'  # filter out dots
                            or fig2.getCenter()[0] < figure.getCenter()[0]  # that are to the right of the fClef
-                           or overlapRatio(fig2.box, figure.box) < 0.5  # where dot area overlaps more than 0.5 with fClef
+                           or overlapRatio(fig2.box, figure.box) < 0.5
+                        # where dot area overlaps more than 0.5 with fClef
                     ]
     return sheets
 
@@ -846,6 +847,31 @@ def adjustMeasuresToBeat(tracks, realBeats):
     return tracks
 
 
+def setStartPulse(tracks, swing):
+    # when a half note is in a strat pulse
+    for ti, track in enumerate(tracks):
+        startPulse = 0
+        for measure in track:
+            for fi, figure in enumerate(measure.figures):
+                figure.startPulse = startPulse
+                figureNoSwingDuration = figure.duration
+
+                if swing:
+                    if figure.type == 'half':
+                        if startPulse % 1 == 0.5:  # half lands on a .5 pulse
+                            figure.duration = 0.33
+                            figure.startPulse = startPulse + 0.17
+                            prevFig = measure.figures[fi - 1]
+                            if prevFig and prevFig.type != 'half':
+                                prevFig.duration += 0.17
+                        if startPulse % 1 == 0:
+                            figure.duration = 0.5 + 0.17
+
+                startPulse += figureNoSwingDuration
+
+    return tracks
+
+
 def showPredictionMeasures(sheets, tracks):
     for sheet in sheets:
         imageCopy = sheet.image.copy()
@@ -861,7 +887,8 @@ def showPredictionMeasures(sheets, tracks):
                     for fi, figure in enumerate(measure.figures):
                         box = figure.box
                         draw.rectangle(box, outline=color, width=2)
-                        draw.text((box[0], box[1] - 20), f"{mi}, {fi}: {figure.duration}", fill=color, font=font)
+                        draw.text((box[0], box[1] - 20), f"{figure.startPulse}, {figure.duration}", fill=color,
+                                  font=font)
 
         showImage(imageCopy, 'Predictions Measures')
 
@@ -871,11 +898,11 @@ def showPredictionMeasures(sheets, tracks):
 def createSong(tracks, beats, bpm):
     song = Song([], [], beats, bpm)
     for ti, track in enumerate(tracks):
-        startPulse = 0
+        # startPulse = 0
         for measure in track:
             for figure in measure.figures:
 
-                multiSound = MultiSound([], startPulse, figure.duration)
+                multiSound = MultiSound([], figure.startPulse, figure.duration)
 
                 if isNote(figure):
                     if len(figure.notes) > 0:
@@ -914,6 +941,6 @@ def createSong(tracks, beats, bpm):
                     song.upperTrack.append(multiSound)
                 else:
                     song.lowerTrack.append(multiSound)
-                startPulse += figure.duration
+                # startPulse += figure.duration
 
     return song

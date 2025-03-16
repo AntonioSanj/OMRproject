@@ -11,22 +11,16 @@ class PulseClock:
         self.start_time = None  # Store start time
         self.lock = threading.Lock()
 
-    def start(self, n):
-        # starts the clock that keeps track of song pulses in 0.25 increments
+    def start(self, beatsPerMeasure):
+
         self.running = True
         self.start_time = time.time()  # Set start time
-        last_printed_pulse = -1
         while self.running:
             elapsed_time = time.time() - self.start_time
-            new_pulse = elapsed_time / self.pulse_duration  # Convert to pulse count
+            pulse = elapsed_time / self.pulse_duration  # obtains the pulse
 
             with self.lock:
-                self.current_pulse = round(new_pulse, 2)  # Round for better precision
-
-            # Print '|' every `n` pulses
-            if int(self.current_pulse) % n == 0 and int(self.current_pulse) != last_printed_pulse:
-                print(" | ", end="", flush=True)  # Print without a newline
-                last_printed_pulse = int(self.current_pulse)  # Update last printed pulse
+                self.current_pulse = round(pulse, 2)
 
             time.sleep(0.005)
 

@@ -20,6 +20,7 @@ class NoteFigure(Figure):
         self.noteHeads = []
         self.notes = []
         self.duration = 0
+        self.startPulse = 0
         self.articulation = 'n'  # 'n' for natural, 's' for staccato
 
     @classmethod
@@ -43,6 +44,7 @@ class RestFigure(Figure):
     def __init__(self, box, label, score):
         super().__init__(box, label, score)
         self.duration = 0
+        self.startPulse = 0
 
     @classmethod
     def fromFigure(cls, figure):

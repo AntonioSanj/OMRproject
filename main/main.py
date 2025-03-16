@@ -6,12 +6,13 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
     applyKeySignature, assignNoteDurations, applyDots, adjustMeasuresToBeat, \
-    showPredictionMeasures, createSong, convertToTracks, initSheetsWithStaves, showPredictionsFigures
+    showPredictionMeasures, createSong, convertToTracks, initSheetsWithStaves, showPredictionsFigures, \
+    setStartPulse
 from reproduction.playSong import playSong
 from utils.plotUtils import showImage
 
 
-def readAndPlay(sheetPaths, bpm, show=False):
+def readAndPlay(sheetPaths, bpm, swing=False, show=False):
     print(f'Reading {len(sheetPaths)} sheets:\n' + ''.join(sh + '\n' for sh in sheetPaths))
 
     sheets = initSheetsWithStaves(sheetPaths)
@@ -118,6 +119,8 @@ def readAndPlay(sheetPaths, bpm, show=False):
 
     tracks = adjustMeasuresToBeat(tracks, measureBeats)
 
+    tracks = setStartPulse(tracks, swing)
+
     song = createSong(tracks, measureBeats, bpm)
 
     print('\t\tCOMPLETED\n')
@@ -131,6 +134,6 @@ def readAndPlay(sheetPaths, bpm, show=False):
     print('\n\n')
 
 
-readAndPlay([fullsheetsDir + '/roar1.png', fullsheetsDir + '/roar2.png'], 90)
+readAndPlay([myDataImg + '/pinkpanther1.png', fullsheetsDir + '/pinkpanther2.png'], 117, True)
 readAndPlay([myDataImg + '/image_9.png', myDataImg + '/image_10.png'], 70)
 readAndPlay([fullsheetsDir + '/thinking_out_loud1.png', fullsheetsDir + '/thinking_out_loud2.png'], 80)
