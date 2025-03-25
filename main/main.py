@@ -1,15 +1,11 @@
-from PIL import Image
-
 from constants import *
 from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeFigures, \
     translateToFullSheet, filterOutBorderFigures, startFiguresModel, classifyFigures, \
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
     applyKeySignature, assignNoteDurations, applyDots, adjustMeasuresToBeat, \
-    showPredictionMeasures, createSong, convertToTracks, initSheetsWithStaves, showPredictionsFigures, \
-    setStartPulse
+    showPredictionMeasures, createSong, convertToTracks, initSheetsWithStaves, setStartPulse
 from reproduction.playSong import playSong
-from utils.plotUtils import showImage
 
 
 def readAndPlay(sheetPaths, bpm, swing=False, show=False):
@@ -133,7 +129,3 @@ def readAndPlay(sheetPaths, bpm, swing=False, show=False):
     playSong(song)
     print('\n\n')
 
-
-readAndPlay([myDataImg + '/pinkpanther1.png', fullsheetsDir + '/pinkpanther2.png'], 117, True)
-readAndPlay([myDataImg + '/image_9.png', myDataImg + '/image_10.png'], 70)
-readAndPlay([fullsheetsDir + '/thinking_out_loud1.png', fullsheetsDir + '/thinking_out_loud2.png'], 80)
