@@ -13,7 +13,7 @@ from kivymd.uix.filemanager import MDFileManager
 from kivymd.uix.label import MDLabel
 
 from app.MainScreen import mainScreen
-from app.playScreen import playScreen
+from app.PlayScreen import playScreen
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(project_root)
@@ -28,39 +28,14 @@ ScreenManager:
 
 
 class MainScreen(Screen):
-    pass
-
-
-class PlayScreen(Screen):
-    pass
-
-
-class MyApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.sm = None
-        self.file_manager = None
-        self.selected_files = []
-        self.bpm = None
-        self.swing = None
-
-    def build(self):
-
-        self.theme_cls.primary_palette = "Blue"
         self.file_manager = MDFileManager(
             select_path=self.select_files,
             exit_manager=self.close_file_manager,
             preview=True,
             selector="multi"
         )
-
-        Window.size = (480 * 1.1, 800 * 1.1)
-        Window.title = "Demo Application"
-
-        self.sm = ScreenManager()
-        self.sm.add_widget(MainScreen(name="main"))
-        self.sm.add_widget(PlayScreen(name="play"))
-        return Builder.load_string(KV)
 
     def open_file_manager(self):
         self.file_manager.show(expanduser("~/Desktop/UDC/QUINTO/TFG/src_code/dataset/fullsheets"))
@@ -71,12 +46,14 @@ class MyApp(MDApp):
             self.update_file_list(cleaned_paths)
             self.file_manager.close()
 
+    def close_file_manager(self, *args):
+        self.file_manager.close()
+
     def update_file_list(self, files):
         self.selected_files = files
-        print(self.root.get_screen("main"))
-        file_list = self.root.get_screen("main").ids.file_list
+        file_list = self.ids.file_list
         file_list.clear_widgets()
-        play_button = self.root.get_screen("main").ids.play_button
+        play_button = self.ids.play_button
 
         for index, file_path in enumerate(self.selected_files):
             file_name = os.path.basename(file_path)
@@ -127,7 +104,6 @@ class MyApp(MDApp):
         elif direction == "down" and index < len(self.selected_files) - 1:
             self.selected_files[index], self.selected_files[index + 1] = self.selected_files[index + 1], \
                 self.selected_files[index]
-
         self.update_file_list(self.selected_files)
 
     def delete_item(self, file_path):
@@ -135,13 +111,33 @@ class MyApp(MDApp):
             self.selected_files.remove(file_path)
             self.update_file_list(self.selected_files)
 
-    def close_file_manager(self, *args):
-        self.file_manager.close()
-
     def play(self):
-        self.bpm = self.root.get_screen("main").ids.bpm_input.text.strip()
-        self.swing = self.root.get_screen("main").ids.swing_checkbox.active
-        self.root.current = "play"
+        bpm_input = self.ids.bpm_input.text.strip()
+        swing_active = self.ids.swing_checkbox.active
+        self.manager.get_screen("play").start_playing(self.selected_files, bpm_input, swing_active)
+        self.manager.current = "play"
+
+
+class PlayScreen(Screen):
+    def start_playing(self, selected_files, bpm, swing):
+        """Receives file list, BPM, and Swing settings to start playback."""
+        print(f"Playing files: {selected_files}")
+        print(f"BPM: {bpm}, Swing: {swing}")
+    pass
+
+
+class MyApp(MDApp):
+    def build(self):
+
+        self.theme_cls.primary_palette = "Blue"
+
+        Window.size = (480 * 1.1, 800 * 1.1)
+        Window.title = "Demo Application"
+
+        self.sm = ScreenManager()
+        self.sm.add_widget(MainScreen(name="main"))
+        self.sm.add_widget(PlayScreen(name="play"))
+        return Builder.load_string(KV)
 
 
 if __name__ == "__main__":

@@ -31,7 +31,7 @@ mainScreen = """
                         size_hint_x: 1
                         size_hint_y: 0.8
                         height: dp(70)
-                        on_release: app.open_file_manager()
+                        on_release: root.open_file_manager()
                         pos_hint: {"center_x": 0.5, "center_y": 0.5}
                     
                 BoxLayout:
@@ -84,7 +84,7 @@ mainScreen = """
                 pos_hint: {"center_x": 0.5}
                 size_hint_y: None
                 height: dp(50)
-                on_release: app.play()
+                on_release: root.play()
                 opacity: 0
                 disabled: True
                 
