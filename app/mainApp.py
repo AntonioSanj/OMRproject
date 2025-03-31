@@ -4,6 +4,7 @@ from os.path import expanduser
 
 from kivy.core.window import Window
 from kivy.lang import Builder
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
@@ -11,108 +12,33 @@ from kivymd.uix.card import MDSeparator
 from kivymd.uix.filemanager import MDFileManager
 from kivymd.uix.label import MDLabel
 
+from app.MainScreen import mainScreen
+from app.playScreen import playScreen
+
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(project_root)
 sys.path.append(os.path.join(project_root, "main"))
 from main.main import readAndPlay
 
-mainScreen = """
-Screen:
-    BoxLayout:
-        orientation: 'vertical'
-                
-        MDTopAppBar:
-            title: 'Demo Application'
-            elevation: 5
-            
-        BoxLayout:
-            orientation: 'vertical'
-            padding: [dp(30), dp(50), dp(30), dp(30)]
-                
-            BoxLayout:
-                orientation: 'horizontal'
-                spacing: dp(30)
-                size_hint_y: None
-                height: dp(70)
-                padding: dp(20)
-                
-                BoxLayout:
-                    size_hint_x: 0.5
-                    size_hint_y: None
-                    height: dp(80)
-                    pos_hint: {"center_y": 0.5}
-                    
-                    MDRaisedButton:
-                        text: "Load Images"
-                        font_size: dp(22)
-                        size_hint_x: 1
-                        size_hint_y: 0.8
-                        height: dp(70)
-                        on_release: app.open_file_manager()
-                        pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                    
-                BoxLayout:
-                    orientation: "vertical"
-                    size_hint_x: 0.3
-                    spacing: dp(10)
-                    pos_hint: {"center_y": 0.5}
-                    
-                    MDTextField:
-                        id: bpm_input
-                        hint_text: "BPM"
-                        input_filter: "int"
-                        height: dp(50)
-                        size_hint_x: 1
-                        
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        spacing: dp(10)
-                        size_hint_x: 1
-                        size_hint_y: 1
-                        height: dp(40)
-                        
-                        MDLabel:
-                            text: "Swing"
-                            valign: 'center'
-                            size_hint_x: None
-                            width: dp(45)
-                            pos_hint: {"center_y": 0.5}
-                        
-                        MDCheckbox:
-                            id: swing_checkbox
-                            size_hint: None, None
-                            size: dp(35), dp(35)
-                            pos_hint: {"center_y": 0.5}
-                        
-            Widget:
-                size_hint_y: 0.05
-    
-            MDScrollView:
-                size_hint_y: 0.5
-                MDList:
-                    id: file_list
-    
-            Widget:
-                size_hint_y: 0.05
-                
-            MDRaisedButton:
-                id: play_button
-                text: "Play"
-                pos_hint: {"center_x": 0.5}
-                size_hint_y: None
-                height: dp(50)
-                on_release: app.play()
-                opacity: 0
-                disabled: True
-                
-            Widget:
-                size_hint_y: 0.05
-"""
+KV = """
+ScreenManager:
+    MainScreen:
+    PlayScreen:
+""" + mainScreen + playScreen
+
+
+class MainScreen(Screen):
+    pass
+
+
+class PlayScreen(Screen):
+    pass
 
 
 class MyApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.sm = None
         self.file_manager = None
         self.selected_files = []
         self.bpm = None
@@ -128,27 +54,29 @@ class MyApp(MDApp):
             selector="multi"
         )
 
-        Window.size = (480*1.1, 800*1.1)
+        Window.size = (480 * 1.1, 800 * 1.1)
         Window.title = "Demo Application"
 
-        ui = Builder.load_string(mainScreen)
-
-        return ui
+        self.sm = ScreenManager()
+        self.sm.add_widget(MainScreen(name="main"))
+        self.sm.add_widget(PlayScreen(name="play"))
+        return Builder.load_string(KV)
 
     def open_file_manager(self):
         self.file_manager.show(expanduser("~/Desktop/UDC/QUINTO/TFG/src_code/dataset/fullsheets"))
 
     def select_files(self, paths):
         if paths:
-            cleaned_paths = [os.path.abspath(path) for path in paths]  # Convert to absolute paths
+            cleaned_paths = [os.path.abspath(path) for path in paths]
             self.update_file_list(cleaned_paths)
             self.file_manager.close()
 
     def update_file_list(self, files):
         self.selected_files = files
-        file_list = self.root.ids.file_list
+        print(self.root.get_screen("main"))
+        file_list = self.root.get_screen("main").ids.file_list
         file_list.clear_widgets()
-        play_button = self.root.ids.play_button
+        play_button = self.root.get_screen("main").ids.play_button
 
         for index, file_path in enumerate(self.selected_files):
             file_name = os.path.basename(file_path)
@@ -193,7 +121,6 @@ class MyApp(MDApp):
         play_button.disabled = not bool(files)
 
     def move_item(self, index, direction):
-        """Moves an item up or down in the list."""
         if direction == "up" and index > 0:
             self.selected_files[index], self.selected_files[index - 1] = self.selected_files[index - 1], \
                 self.selected_files[index]
@@ -205,17 +132,16 @@ class MyApp(MDApp):
 
     def delete_item(self, file_path):
         if file_path in self.selected_files:
-            self.selected_files.remove(file_path)  # Remove from list
+            self.selected_files.remove(file_path)
             self.update_file_list(self.selected_files)
 
     def close_file_manager(self, *args):
         self.file_manager.close()
 
     def play(self):
-        bpm = self.root.ids.bpm_input.text.strip()
-        swing = self.root.ids.swing_checkbox.active
-
-        readAndPlay(self.selected_files, bpm, swing)
+        self.bpm = self.root.get_screen("main").ids.bpm_input.text.strip()
+        self.swing = self.root.get_screen("main").ids.swing_checkbox.active
+        self.root.current = "play"
 
 
 if __name__ == "__main__":
