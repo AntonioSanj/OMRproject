@@ -10,7 +10,7 @@ playScreen = """
             
         BoxLayout:
             orientation: 'vertical'
-            padding: [dp(30), dp(50), dp(30), dp(30)]
+            padding: [dp(10), dp(50), dp(10), dp(30)]
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             
             MDCarousel:

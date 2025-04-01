@@ -1,8 +1,8 @@
 import os
 import sys
 
+from kivy.uix.image import Image
 from kivy.uix.screenmanager import Screen
-from kivymd.uix.fitimage import FitImage
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(project_root)
@@ -27,7 +27,7 @@ class PlayScreen(Screen):
         self.ids.carousel.clear_widgets()
         for file_path in self.selected_files:
             if file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
-                self.ids.carousel.add_widget(FitImage(source=file_path))
+                self.ids.carousel.add_widget(Image(source=file_path, fit_mode="scale-down"))
 
     def carousel_previous(self):
         carousel = self.ids.carousel
