@@ -41,3 +41,6 @@ class PlayScreen(Screen):
 
     def play(self):
         print(self.selected_files)
+
+    def go_back(self):
+        self.manager.current = "main"

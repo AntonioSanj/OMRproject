@@ -7,6 +7,7 @@ playScreen = """
         MDTopAppBar:
             title: 'Play Screen'
             elevation: 3
+            left_action_items: [["arrow-left", lambda x: root.go_back()]]
             
         BoxLayout:
             orientation: 'vertical'
@@ -21,6 +22,9 @@ playScreen = """
                 halign: "center"
                 pos_hint: {"center_y": 0.9}
                 
+            Widget:
+                size_hint_y: 1
+            MDSeparator
             Widget:
                 size_hint_y: 1
                 
@@ -46,6 +50,8 @@ playScreen = """
                     on_release: root.play()
                     icon_size: "56sp"
                     size: dp(70), dp(70)
+                    md_bg_color: app.theme_cls.primary_color
+                    radius: [24, 24, 24, 24]
     
                 MDIconButton:
                     icon: "arrow-right"
@@ -55,6 +61,9 @@ playScreen = """
                     
                 Widget:
                     size_hint_x: 0.1
+            Widget:
+                size_hint_y: 1
+            MDSeparator
             Widget:
                 size_hint_y: 1
 """

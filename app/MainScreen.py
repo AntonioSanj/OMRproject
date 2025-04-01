@@ -12,6 +12,7 @@ from kivymd.uix.label import MDLabel
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.selected_files = None
         self.file_manager = MDFileManager(
             select_path=self.select_files,
             exit_manager=self.close_file_manager,
