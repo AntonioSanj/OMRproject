@@ -1,0 +1,60 @@
+playScreen = """
+<PlayScreen>:
+    name: "play"
+    BoxLayout:
+        orientation: 'vertical'
+                
+        MDTopAppBar:
+            title: 'Play Screen'
+            elevation: 3
+            
+        BoxLayout:
+            orientation: 'vertical'
+            padding: [dp(30), dp(50), dp(30), dp(30)]
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            
+            MDCarousel:
+                id: carousel
+                direction: "right"
+                size_hint_y: None
+                height: dp(550)
+                halign: "center"
+                pos_hint: {"center_y": 0.9}
+                
+            Widget:
+                size_hint_y: 1
+                
+            BoxLayout:
+                spacing: "20dp"
+                orientation: "horizontal"
+                size_hint_y: None
+                height: dp(70)
+                halign: "center"
+                pos_hint: {"center_x": 0.5}
+                
+                Widget:
+                    size_hint_x: 0.1
+                
+                MDIconButton:
+                    icon: "arrow-left"
+                    on_release: root.carousel_previous()
+                    size: dp(70), dp(70)
+                    icon_size: "48sp"
+    
+                MDIconButton:
+                    icon: "play"
+                    on_release: root.play()
+                    icon_size: "56sp"
+                    size: dp(70), dp(70)
+    
+                MDIconButton:
+                    icon: "arrow-right"
+                    on_release: root.carousel_next()
+                    icon_size: "48sp"
+                    size: dp(70), dp(70)
+                    
+                Widget:
+                    size_hint_x: 0.1
+            Widget:
+                size_hint_y: 1
+"""
