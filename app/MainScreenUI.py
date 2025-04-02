@@ -81,9 +81,11 @@ mainScreen = """
             MDRaisedButton:
                 id: play_button
                 text: "Play"
+                font_size: dp(24)
                 pos_hint: {"center_x": 0.5}
                 size_hint_y: None
-                height: dp(50)
+                size_hint_x: 0.5
+                height: dp(70)
                 on_release: root.play()
                 opacity: 0
                 disabled: True

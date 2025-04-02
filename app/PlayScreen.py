@@ -25,6 +25,13 @@ class PlayScreen(Screen):
         self.swing = swing
 
         self.ids.carousel.clear_widgets()
+
+        file_name = os.path.basename(self.selected_files[0])
+        self.ids.file_name_label.text = file_name
+
+        self.ids.carousel.unbind(index=self.update_file_name)
+        self.ids.carousel.bind(index=self.update_file_name)
+
         for file_path in self.selected_files:
             if file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
                 self.ids.carousel.add_widget(Image(source=file_path, fit_mode="scale-down"))
@@ -38,6 +45,11 @@ class PlayScreen(Screen):
         carousel = self.ids.carousel
         if carousel.index < len(carousel.slides) - 1:
             carousel.load_next()
+
+    def update_file_name(self, instance, index):
+        if 0 <= index < len(self.selected_files):
+            file_name, _ = os.path.splitext(os.path.basename(self.selected_files[index]))
+            self.ids.file_name_label.text = file_name
 
     def play(self):
         print(self.selected_files)

@@ -11,8 +11,19 @@ playScreen = """
             
         BoxLayout:
             orientation: 'vertical'
-            padding: [dp(10), dp(50), dp(10), dp(30)]
+            padding: [dp(10), dp(20), dp(10), dp(30)]
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            
+            MDLabel:
+                id: file_name_label
+                halign: "center"
+                size_hint_y: None
+                height: dp(40)
+                theme_text_color: "Primary"
+                bold: True
+            Widget
+            MDSeparator
+            Widget
             
             MDCarousel:
                 id: carousel
