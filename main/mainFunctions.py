@@ -898,7 +898,6 @@ def showPredictionMeasures(sheets, tracks):
 def createSong(tracks, beats, bpm):
     song = Song([], [], beats, bpm)
     for ti, track in enumerate(tracks):
-        # startPulse = 0
         for measure in track:
             for figure in measure.figures:
 

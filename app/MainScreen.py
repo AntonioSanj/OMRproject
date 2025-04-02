@@ -7,6 +7,7 @@ from kivymd.uix.button import MDIconButton
 from kivymd.uix.card import MDSeparator
 from kivymd.uix.filemanager import MDFileManager
 from kivymd.uix.label import MDLabel
+from kivymd.toast.kivytoast.kivytoast import toast
 
 
 class MainScreen(Screen):
@@ -97,6 +98,8 @@ class MainScreen(Screen):
     def play(self):
         bpm_input = self.ids.bpm_input.text.strip()
         swing_active = self.ids.swing_checkbox.active
-        self.manager.current = "play"
-        self.manager.get_screen("play").start_playing(self.selected_files, bpm_input, swing_active)
-
+        if bpm_input:
+            self.manager.current = "play"
+            self.manager.get_screen("play").start_playing(self.selected_files, bpm_input, swing_active)
+        else:
+            toast('Insert BPM', background=[0.2, 0.2, 0.2, 0.2], duration=1)

@@ -8,7 +8,7 @@ from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeF
 from reproduction.playSong import playSong
 
 
-def readAndPlay(sheetPaths, bpm, swing=False, show=False):
+def readSheets(sheetPaths, bpm, swing=False, show=False):
     print(f'Reading {len(sheetPaths)} sheets:\n' + ''.join(sh + '\n' for sh in sheetPaths))
 
     sheets = initSheetsWithStaves(sheetPaths)
@@ -126,6 +126,4 @@ def readAndPlay(sheetPaths, bpm, swing=False, show=False):
     if show:
         showPredictionMeasures(sheets, tracks)
 
-    playSong(song)
-    print('\n\n')
-
+    return song

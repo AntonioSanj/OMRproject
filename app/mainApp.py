@@ -3,6 +3,7 @@ import sys
 
 from kivy.core.window import Window
 from kivy.lang import Builder
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.app import MDApp
 
@@ -24,7 +25,7 @@ ScreenManager:
 
 class MyApp(MDApp):
     def build(self):
-        self.theme_cls.primary_palette = "Blue"
+        self.theme_cls.primary_palette = "Red"
 
         Window.size = (430 * 1.1, 800 * 1.1)
         Window.title = "Demo Application"
