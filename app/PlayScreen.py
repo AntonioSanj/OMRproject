@@ -2,6 +2,7 @@ import os
 import sys
 import threading
 
+from kivy.clock import Clock
 from kivy.uix.image import Image
 from kivy.uix.screenmanager import Screen
 from kivymd.toast import toast
@@ -65,6 +66,7 @@ class PlayScreen(Screen):
 
     def readSongData(self):
         self.song = readSheets(self.selected_files, int(self.bpm), self.swing)
+        Clock.schedule_once(lambda dt: toast('Song is ready!', background=[0.2, 0.2, 0.2, 0.2], duration=2))
 
     def play(self):
         if self.song is None:
