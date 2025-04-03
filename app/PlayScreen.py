@@ -2,7 +2,6 @@ import os
 import sys
 import threading
 
-from kivy.clock import Clock
 from kivy.uix.image import Image
 from kivy.uix.screenmanager import Screen
 from kivymd.toast import toast
@@ -18,6 +17,8 @@ from reproduction.playSong import playSong
 class PlayScreen(Screen):
     def __init__(self, **kw):
         super().__init__()
+        self.playThread = None
+        self.readThread = None
         self.is_playing = False
         self.selected_files = None
         self.swing = False
@@ -31,7 +32,9 @@ class PlayScreen(Screen):
         self.bpm = bpm
         self.swing = swing
 
-        threading.Thread(target=self.readSongData, daemon=True).start()
+        toast('Reading sheets in background', background=[0.2, 0.2, 0.2, 0.2], duration=2)
+        self.readThread = threading.Thread(target=self.readSongData, daemon=True)
+        self.readThread.start()
 
         self.ids.carousel.clear_widgets()
 
@@ -65,11 +68,12 @@ class PlayScreen(Screen):
 
     def play(self):
         if self.song is None:
-            toast('Song not ready yet', background=[0.2, 0.2, 0.2, 0.2], duration=1)
+            toast('Song not ready yet', background=[0.2, 0.2, 0.2, 0.2], duration=2)
         elif self.is_playing:
-            toast('Song is already playing', background=[0.2, 0.2, 0.2, 0.2], duration=1)
+            toast('Song is already playing', background=[0.2, 0.2, 0.2, 0.2], duration=2)
         else:
-            threading.Thread(target=self.playBackSong, daemon=True).start()
+            self.playThread = threading.Thread(target=self.playBackSong, daemon=True)
+            self.playThread.start()
 
     def playBackSong(self):
         self.is_playing = True
@@ -77,4 +81,9 @@ class PlayScreen(Screen):
         self.is_playing = False
 
     def go_back(self):
-        self.manager.current = "main"
+        if self.is_playing:
+            toast('Cannot exit while song playing', background=[0.2, 0.2, 0.2, 0.2], duration=2)
+        elif self.song is None:
+            toast('Cannot exit while reading sheets', background=[0.2, 0.2, 0.2, 0.2], duration=2)
+        else:
+            self.manager.current = "main"
