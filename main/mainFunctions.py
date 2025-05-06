@@ -432,7 +432,7 @@ def handleCorrections(sheets):
                                or overlapRatio(figure.box, fig2.box) < 0.5
                         ]
 
-                # fClef figures has to dots that might be detected as 'dot' figures, filter those out
+                # fClef figures has two dots that might be detected as 'dot' figures, filter those out
                 if figure.type == 'fClef':
                     stave.figures[:] = [
                         fig2 for fig2 in stave.figures
@@ -481,8 +481,6 @@ def getClef(figure, stave):
     ]  # list of clefs to the left
 
     # get the closest clef
-    if not clefsToLeft:
-        print('')
     closestClef = max(clefsToLeft, key=lambda clef: clef.getCenter()[0])
 
     return closestClef

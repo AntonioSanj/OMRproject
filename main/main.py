@@ -75,6 +75,11 @@ def readSheets(sheetPaths, bpm, swing=False, show=False):
 
     sheets = detectPoints(sheets)
 
+    # --------------------------------------------------------------------------------------
+    # END OF IMAGE RECOGNITION
+    # STARTING READING PROCESS
+    # --------------------------------------------------------------------------------------
+
     print('\t\tCOMPLETED')
     print('Computing dependencies.....', end='')
 
@@ -101,19 +106,18 @@ def readSheets(sheetPaths, bpm, swing=False, show=False):
         showPredictionsStaves(sheets, 'notes')
         showPredictionsStaves(sheets, 'duration')
 
-    # --------------------------------------------------------------------------------------
-    # END OF IMAGE RECOGNITION
-    # STARTING REPRODUCTION PROCESS
-    # --------------------------------------------------------------------------------------
-
-    print('Wrapping data for reproduction...', end='')
-
     tracks, measureBeats = convertToTracks(sheets)
 
     if show:
         showPredictionMeasures(sheets, tracks)
 
     tracks = adjustMeasuresToBeat(tracks, measureBeats)
+
+    # --------------------------------------------------------------------------------------
+    # END OF READING
+    # STARTING REPRODUCTION PROCESS
+    # --------------------------------------------------------------------------------------
+    print('Wrapping data for reproduction...', end='')
 
     tracks = setStartPulse(tracks, swing)
 
