@@ -9,15 +9,6 @@ class Stave:
         self.bottomLine = -1
         self.figures = []
 
-    def setLineHeights(self, lineHeights):
-        self.lineHeights = lineHeights
-
-    def setTopLine(self, value):
-        self.topLine = value
-
-    def setBottomLine(self, value):
-        self.bottomLine = value
-
     def addLineHeight(self, value):
         self.lineHeights.append(value)
 

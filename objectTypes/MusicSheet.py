@@ -5,5 +5,5 @@ class MusicSheet:
         self.path = path
         self.image = image
         self.staves = staves
-        self.figures = []  # a list of all the figures in the stave
+        self.figures = []  # a list of all the figures in the sheet
 

@@ -30,11 +30,16 @@ def getPointModifications(image_path, show=False, print_points=False):
     locations = np.where(result >= threshold)  # (y_coords, x_coords)
 
     # Convert to list of (x, y) coordinates
-    points = list(zip(locations[1], locations[0]))
+    points = [(x, y, kernel.shape[1], kernel.shape[0]) for x, y in zip(locations[1], locations[0])]
 
     points = filterClosePoints(points, 5)
 
-    points = [(x + kernel.shape[1] // 2, y + kernel.shape[0] // 2) for (x, y) in points]
+    boxLocations = []
+    for x, y, w, h in points:
+        box = (x, y, x + w, y + h)
+        boxLocations.append(box)
+
+    # points = [(x + kernel.shape[1] // 2, y + kernel.shape[0] // 2) for (x, y) in points]
 
     if print_points:
         print(f'{len(points)} POINTS FOUND:\n{points}')
@@ -43,7 +48,7 @@ def getPointModifications(image_path, show=False, print_points=False):
         for point in points:
             cv2.rectangle(binary, point, (point[0] + kernel.shape[1], point[1] + kernel.shape[0]), 255, 2)
         showImage(binary)
-    return points
+    return boxLocations
 
 
 

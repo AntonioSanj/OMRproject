@@ -13,7 +13,7 @@ from app.PlayScreenUI import playScreen
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(project_root)
-sys.path.append(os.path.join(project_root, "main"))
+sys.path.append(os.path.join(project_root, "readSheets"))
 
 KV = """
 ScreenManager:
@@ -30,7 +30,7 @@ class MyApp(MDApp):
         Window.title = "Demo Application"
 
         self.sm = ScreenManager()
-        self.sm.add_widget(MainScreen(name="main"))
+        self.sm.add_widget(MainScreen(name="readSheets"))
         self.sm.add_widget(PlayScreen(name="play"))
         return Builder.load_string(KV)
 

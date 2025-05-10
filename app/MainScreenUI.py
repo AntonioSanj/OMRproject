@@ -1,6 +1,6 @@
 mainScreen = """
 <MainScreen>:
-    name: "main"
+    name: "readSheets"
     BoxLayout:
         orientation: 'vertical'
                 

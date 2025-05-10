@@ -1,5 +1,5 @@
 from constants import *
-from mainFunctions import obtainSliceHeights, getPredictions, startModel, mergeFigures, \
+from readSheetFunctions import obtainSliceHeights, getPredictions, startModel, mergeFigures, \
     translateToFullSheet, filterOutBorderFigures, startFiguresModel, classifyFigures, \
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \

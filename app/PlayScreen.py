@@ -9,9 +9,9 @@ from kivymd.toast import toast
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(project_root)
-sys.path.append(os.path.join(project_root, "main"))
+sys.path.append(os.path.join(project_root, "readSheets"))
 sys.path.append(os.path.join(project_root, "reproduction"))
-from main.main import readSheets
+from readSheets.readSheetsMain import readSheets
 from reproduction.playSong import playSong
 
 
@@ -88,4 +88,4 @@ class PlayScreen(Screen):
         elif self.song is None:
             toast('Cannot exit while reading sheets', background=[0.2, 0.2, 0.2, 0.2], duration=2)
         else:
-            self.manager.current = "main"
+            self.manager.current = "readSheets"

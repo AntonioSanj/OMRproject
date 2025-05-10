@@ -304,7 +304,7 @@ def detectPoints(sheets):
         points = getPointModifications(sheet.path)
 
         for point in points:
-            figure = Dot((point[0] - 7, point[1] - 7, point[0] + 7, point[1] + 7), 'dot', 1)
+            figure = Dot(point, 'dot', 1)
             sheet.figures.append(figure)
     return sheets
 

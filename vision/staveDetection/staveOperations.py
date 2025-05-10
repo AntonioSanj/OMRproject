@@ -195,13 +195,13 @@ def generateStaves(lineHeights, meanGap, sheetIndex, extraLines=2):
         if (not isGapAboveMeanGap(i, lineHeights, meanGap, 5) and
                 isGapBelowMeanGap(i, lineHeights, meanGap, 5)):
             # set stave top line
-            currentStave.setTopLine(lineHeights[i])
+            currentStave.topLine = lineHeights[i]
 
         # meanGap is above, not below, that is last line of a stave
         if (isGapAboveMeanGap(i, lineHeights, meanGap, 5) and
                 not isGapBelowMeanGap(i, lineHeights, meanGap, 5)):
             # set stave bottom line
-            currentStave.setBottomLine(lineHeights[i])
+            currentStave.bottomLine = lineHeights[i]
 
             # store current stave before resetting values
             staves.append(currentStave)
