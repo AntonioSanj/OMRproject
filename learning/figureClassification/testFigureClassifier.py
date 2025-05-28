@@ -65,6 +65,8 @@ def classify_all_figures(dataset_path, model):
                     if prediction.lower() == category.lower():  # Case-insensitive comparison
                         class_correct[category] += 1
                         total_correct += 1
+                    else:
+                        print(f'{category} was classified as {prediction}')
 
     # Print class-wise accuracy
     print("Accuracy per class:")
@@ -86,7 +88,7 @@ def testFigureClassification(model_dir, image_dir):
 modelFigureClass = startClassModel(figureModels + 'figure_classification_model.pth')
 
 print("\nTRAINING SET")
-classify_all_figures(myFiguresDataSet, modelFigureClass)
+# classify_all_figures(myFiguresDataSet, modelFigureClass)
 
 print("TEST SET")
 classify_all_figures(myFiguresDataSetTest, modelFigureClass)

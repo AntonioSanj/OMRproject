@@ -4,7 +4,7 @@ import time
 import pygame
 
 from constants import soundFilesDir
-from reproduction.PulseClock import PulseClock
+from reproduction.Metronome import Metronome
 
 
 def playSong(song):
@@ -14,11 +14,11 @@ def playSong(song):
     print("Playing song...")
 
     # Create and start the global clock
-    clock = PulseClock(song.bpm)
-    clock_thread = threading.Thread(target=clock.start, args=(song.measureBeats,))
+    clock = Metronome(song.bpm)
+    clock_thread = threading.Thread(target=clock.start)
     clock_thread.start()
 
-    # Create threads for both tracks so they play in parallel
+    # create threads for both tracks so they play in parallel
     upper_thread = threading.Thread(target=play_track, args=(song.upperTrack, clock))
     lower_thread = threading.Thread(target=play_track, args=(song.lowerTrack, clock))
 
@@ -38,8 +38,8 @@ def playSong(song):
 def play_track(track, clock):
     for multisound in track:
         while True:
-            current_pulse = clock.get_pulse()
-            if current_pulse >= multisound.start:  # allow some error margin
+            current_beat = clock.get_pulse()
+            if current_beat >= multisound.start:  # allow some error margin
                 break  # play the multisound
             time.sleep(0.001)  # keep waiting
 
@@ -47,10 +47,8 @@ def play_track(track, clock):
 
 
 def play_multisound(multisound):
-    for sound_dto in multisound.sounds:
-        sound_thread = threading.Thread(target=play_sound, args=(sound_dto.sound, sound_dto.duration),
-                                        daemon=True)
-        sound_thread.start()
+    for sound in multisound.sounds:
+        play_sound(sound.sound, sound.duration)
 
 
 def play_sound(soundName, duration):

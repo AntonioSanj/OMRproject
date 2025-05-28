@@ -13,7 +13,7 @@ from objectTypes.Figure import Figure, ClefFigure, NoteFigure, RestFigure, Accid
 from objectTypes.Measure import Measure
 from objectTypes.MusicSheet import MusicSheet
 from objectTypes.Note import Note
-from objectTypes.SoundDTO import SoundDTO, Song, MultiSound
+from objectTypes.Sound import Sound, Song, MultiSound
 from utils.plotUtils import showImage
 from vision.figureDetection.figureDetection import extractFigureLocations
 from vision.figureDetection.pointDetection import getPointModifications
@@ -367,7 +367,7 @@ def showPredictionsStaves(sheets, labeling='type', coloring=None):
                             (note.accidental if note.accidental != 'n' else '')
                             for note in figure.notes)
                     if isAccidental(figure):
-                        tagText = notePitchLabels[figure.note.pitch] + str(figure.note.octave)
+                        tagText = notePitchLabels[figure.pitch] + str(figure.octave)
 
                 elif labeling == 'types':
                     tagText = figure.type
@@ -595,8 +595,8 @@ def assignNotes(sheets):
                     clefType = getClef(figure, stave).type  # obtain clef for later pitch assignation
 
                     note = getNote(figure.noteHead[1], staveLines, clefType, stave.meanGap)
-                    note.noteHead = (figure.noteHead[0], figure.noteHead[1])
-                    figure.note = note
+                    figure.pitch = note.pitch
+                    figure.octave = note.octave
 
     return sheets
 
@@ -616,7 +616,7 @@ def getKeySignatures(sheets):
                     hasSignature = False
                     while j < len(stave.figures) and isAccidental(stave.figures[j]):
                         hasSignature = True
-                        accNote = stave.figures[j].note.pitch
+                        accNote = stave.figures[j].pitch
                         stave.figures[j].isSignature = True  # mark that the accidental is part of the signature
 
                         if stave.figures[j].type == 'sharp':
@@ -662,7 +662,7 @@ def applyAccidentals(sheets):
 
                         if isNote(next_figure):
                             for note in next_figure.notes:
-                                if note.pitch == figure.note.pitch:
+                                if note.pitch == figure.pitch:
                                     if figure.type == 'flat':
                                         note.accidental = 'b'
                                     elif figure.type == 'sharp':
@@ -851,14 +851,14 @@ def setStartPulse(tracks, swing):
         startPulse = 0
         for measure in track:
             for fi, figure in enumerate(measure.figures):
-                figure.startPulse = startPulse
+                figure.startBeat = startPulse
                 figureNoSwingDuration = figure.duration
 
                 if swing:
                     if figure.type == 'half':
                         if startPulse % 1 == 0.5:  # half lands on a .5 pulse
                             figure.duration = 0.33
-                            figure.startPulse = startPulse + 0.17
+                            figure.startBeat = startPulse + 0.17
                             prevFig = measure.figures[fi - 1]
                             if prevFig and prevFig.type != 'half':
                                 prevFig.duration += 0.17
@@ -885,7 +885,7 @@ def showPredictionMeasures(sheets, tracks):
                     for fi, figure in enumerate(measure.figures):
                         box = figure.box
                         draw.rectangle(box, outline=color, width=2)
-                        draw.text((box[0], box[1] - 20), f"{figure.startPulse}, {figure.duration}", fill=color,
+                        draw.text((box[0], box[1] - 20), f"{figure.startBeat}, {figure.duration}", fill=color,
                                   font=font)
 
         showImage(imageCopy, 'Predictions Measures')
@@ -899,7 +899,7 @@ def createSong(tracks, beats, bpm):
         for measure in track:
             for figure in measure.figures:
 
-                multiSound = MultiSound([], figure.startPulse, figure.duration)
+                multiSound = MultiSound([], figure.startBeat, figure.duration)
 
                 if isNote(figure):
                     if len(figure.notes) > 0:
@@ -922,15 +922,15 @@ def createSong(tracks, beats, bpm):
                             else:  # natural note
                                 sound = notePitchLabels[note.pitch] + str(note.octave)
 
-                            soundDTO = SoundDTO(sound, note.duration)
+                            soundDTO = Sound(sound, note.duration)
                             multiSound.sounds.append(soundDTO)
                     else:
                         # no noteHeads in the figure
-                        soundDTO = SoundDTO('rest', figure.duration)
+                        soundDTO = Sound('rest', figure.duration)
                         multiSound.sounds.append(soundDTO)
 
                 elif isRest(figure):
-                    soundDTO = SoundDTO('rest', figure.duration)
+                    soundDTO = Sound('rest', figure.duration)
                     multiSound.sounds.append(soundDTO)
 
                 # assign to track

@@ -27,9 +27,8 @@ def getMeasureBars(imagePath, show=False):
         (x1, y1, x2, y2) if y1 < y2 else (x1, y2, x2, y1) for x1, y1, x2, y2 in lineTuples
     ]
 
-    linesImage = drawLines(lines, img, thickness=5)
-
     if show:
+        linesImage = drawLines(lines, img, thickness=5)
         print('Number of measure bars found:', len(lines))
         showImage(linesImage)
 

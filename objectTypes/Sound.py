@@ -1,4 +1,4 @@
-class SoundDTO:
+class Sound:
     # specifies how long a single sound file
     def __init__(self, sound, duration):
         self.sound = sound  # 'C4' 'E3#' 'A5b' 'rest'

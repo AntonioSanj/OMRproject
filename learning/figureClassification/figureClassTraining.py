@@ -17,8 +17,8 @@ data_dir = myFiguresDataSet  # Your dataset folder path
 batch_size = 4
 learning_rate = 0.005
 validation_split = 0.2  # Percentage of data to use for validation
-patience = 1000
-max_epochs = 1000
+patience = 10
+max_epochs = 100
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -114,7 +114,7 @@ while not stop:
             if epoch_loss < best_val_loss:
                 best_val_loss = epoch_loss
                 epochs_without_improvement = 0
-                torch.save(model.state_dict(), figureModels + f"figure_classification_model.pth")
+                # torch.save(model.state_dict(), figureModels + f"figure_classification_model.pth")
             else:
                 epochs_without_improvement += 1
 
@@ -124,7 +124,7 @@ while not stop:
 
     if epoch % 5 == 0:
         print("\nSTARTING EVALUATION TEST")
-        testFigureClassification(figureModels + 'figure_classification_model.pth', myFiguresDataSetTest)
+        # testFigureClassification(figureModels + 'figure_classification_model.pth', myFiguresDataSetTest)
 
     if epochs_without_improvement >= patience:
         print(f"TRAINING STOPPED. {patience} epochs with no improvement.")

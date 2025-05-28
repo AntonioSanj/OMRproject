@@ -44,6 +44,6 @@ for epoch in range(num_epochs):
     lr_scheduler.step()
 
     # Save the model's state dictionary after every epoch
-    model_path = models_dir + f'fasterrcnn_epoch_{epoch + 1}.pth'
-    torch.save(model.state_dict(), model_path)
-    print(f"Model saved: {model_path}")
+    # model_path = models_dir + f'fasterrcnn_epoch_{epoch + 1}.pth'
+    # torch.save(model.state_dict(), model_path)
+    # print(f"Model saved: {model_path}")
