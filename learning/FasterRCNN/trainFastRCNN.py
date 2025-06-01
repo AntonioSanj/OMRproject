@@ -6,7 +6,8 @@ from torch.utils.data import DataLoader, random_split
 from constants import *
 from learning.FasterRCNN.getModel import get_model
 from learning.utils.cocoDataSet import get_coco_dataset
-from learning.utils.trainEpoch import train_one_epoch, evaluate_one_epoch
+from learning.utils.evalEpoch import evaluate_one_epoch
+from learning.utils.trainEpoch import train_one_epoch
 
 images = mySlicedDataImg
 ann = mySlicedDataCoco
@@ -51,7 +52,7 @@ for epoch in range(num_epochs):
     train_one_epoch(model, optimizer, train_loader, device, epoch)
     lr_scheduler.step()
     print(f'\nVALIDATION EPOCH {epoch} -----------------------------------------------------')
-    evaluate_one_epoch(model, val_loader, device, epoch, coco_gt)
+    evaluate_one_epoch(model, val_loader, device, coco_gt)
     if saveModels:
         # Save the model's state dictionary after every epoch
         model_path = models_dir + f'fasterrcnn_epoch_{epoch + 1}.pth'
