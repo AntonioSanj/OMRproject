@@ -51,4 +51,5 @@ def drawBoundingBoxes(imagePath, csvPath):
     return image
 
 
-drawAllBoundingBoxes(mySlicedDataImg, mySlicedDataCsv)
+drawAllBoundingBoxes(myDataImg, myDataCsv)
+# drawAllBoundingBoxes(mySlicedDataImg, mySlicedDataCsv)

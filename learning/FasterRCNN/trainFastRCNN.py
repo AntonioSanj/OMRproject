@@ -6,10 +6,12 @@ from learning.utils.cocoDataSet import get_coco_dataset
 from learning.FasterRCNN.getModel import get_model
 from learning.utils.trainEpoch import train_one_epoch
 
-images = mySlicedDataImg
-ann = mySlicedDataCoco
-models_dir = slicedModelsDir
+images = myDataImg
+ann = myDataCoco
+models_dir = modelsDir
 num_classes = 10  # Background + categories
+num_epochs = 20
+saveModels = False
 
 train_dataset = get_coco_dataset(
     img_dir=images,
@@ -38,12 +40,12 @@ optimizer = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
 lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
 # Training loop
-num_epochs = 10
 for epoch in range(num_epochs):
     train_one_epoch(model, optimizer, train_loader, device, epoch)
     lr_scheduler.step()
 
-    # Save the model's state dictionary after every epoch
-    # model_path = models_dir + f'fasterrcnn_epoch_{epoch + 1}.pth'
-    # torch.save(model.state_dict(), model_path)
-    # print(f"Model saved: {model_path}")
+    if saveModels:
+        # Save the model's state dictionary after every epoch
+        model_path = models_dir + f'fasterrcnn_epoch_{epoch + 1}.pth'
+        torch.save(model.state_dict(), model_path)
+        print(f"Model saved: {model_path}")

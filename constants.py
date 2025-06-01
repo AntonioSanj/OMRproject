@@ -76,7 +76,7 @@ mySlicedDataJson = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\my
 mySlicedDataCoco = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\coco\coco_annotations.json'
 mySlicedDataCoco2 = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\coco\coco_annotations2.json'
 slicedModelsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/FasterRCNN/sliceModels/'
-
+fastRCNNOutput = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/output/fastRCNN_output'
 # performance data
 figClassPerformanceDataDir = "C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figureClassification/performance_data"
 

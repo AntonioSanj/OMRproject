@@ -108,5 +108,7 @@ def csvToCoco(csv_directory, output_file, transform_x=0, transform_y=0):
     print(f"COCO JSON saved to {output_file}")
 
 
-csvToCoco(mySlicedDataCsv, mySlicedDataCoco)
-csvToCoco(mySlicedDataCsv2, mySlicedDataCoco2)
+# csvToCoco(mySlicedDataCsv, mySlicedDataCoco)
+# csvToCoco(mySlicedDataCsv2, mySlicedDataCoco2)
+csvToCoco(myDataCsv, myDataCoco)
+csvToCoco(myDataCsv2, myDataCoco2)
