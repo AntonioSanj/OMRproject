@@ -58,6 +58,7 @@ FLAT_FIGURE_HEAD_HEIGHT = 27
 noteHeadTemplate = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/noteHeadDetection/notehead_template.png'
 fourHeadTemplate = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/vision/noteHeadDetection/four_head_template.png'
 outputVision = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\output\staveDetection_output'
+fastRCNNOutput = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/output/fastRCNN_output'
 
 # first approximation F-RCNN
 myDataImg = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\img'
@@ -67,6 +68,8 @@ myDataJson = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSe
 myDataCoco = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\coco\coco_annotations.json'
 myDataCoco2 = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\myDataSet\coco\coco_annotations2.json'
 modelsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/FasterRCNN/models/'
+frcnnPerformanceDataDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/FasterRCNN/performance_data/'
+
 
 # second approximation F-RCNN
 mySlicedDataImg = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\img'
@@ -76,7 +79,8 @@ mySlicedDataJson = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\my
 mySlicedDataCoco = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\coco\coco_annotations.json'
 mySlicedDataCoco2 = r'C:\Users\Usuario\Desktop\UDC\QUINTO\TFG\src_code\dataset\mySlicedDataSet\coco\coco_annotations2.json'
 slicedModelsDir = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/FasterRCNN/sliceModels/'
-fastRCNNOutput = 'C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/output/fastRCNN_output'
+
+
 # performance data
 figClassPerformanceDataDir = "C:/Users/Usuario/Desktop/UDC/QUINTO/TFG/src_code/learning/figureClassification/performance_data"
 
