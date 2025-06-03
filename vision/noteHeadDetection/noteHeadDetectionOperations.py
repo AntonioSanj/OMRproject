@@ -157,6 +157,10 @@ def drawPoints(noteHeadPoints, image, filename="Note head detection"):
 
     for (x, y) in noteHeadPoints:
         imgArray[y, x] = (255, 0, 255)
+        imgArray[y + 1, x] = (255, 0, 255)
+        imgArray[y - 1, x] = (255, 0, 255)
+        imgArray[y, x + 1] = (255, 0, 255)
+        imgArray[y, x - 1] = (255, 0, 255)
 
     imgCopy = Image.fromarray(imgArray)
 

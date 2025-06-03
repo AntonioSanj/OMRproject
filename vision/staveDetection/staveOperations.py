@@ -184,7 +184,7 @@ def generateStaves(lineHeights, meanGap, sheetIndex, extraLines=2):
 
     i = 1
     staveIndex = 0
-    currentStave = Stave(staveIndex,sheetIndex, meanGap)
+    currentStave = Stave(staveIndex, sheetIndex, meanGap)
 
     while i < len(lineHeights) - 1:
 
@@ -225,8 +225,15 @@ def printStaves(staves):
     return
 
 
-def drawLineHeights(staves, image, thickness=1):
+def drawStaves(staves, image, thickness=1):
     for stave in staves:
         for lh in stave.lineHeights:
             cv2.line(image, (0, lh), (IMAGE_WIDTH, lh), COLORS[stave.staveIndex % len(COLORS)], thickness)
     return image
+
+
+def drawHeights(lineHeights, image, thickness=1):
+    img = image.copy()
+    for line in lineHeights:
+        cv2.line(img, (0, line), (IMAGE_WIDTH, line), (255, 0, 0), thickness)
+    showImage(img)

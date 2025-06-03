@@ -5,43 +5,14 @@ from staveDetection import getStaves
 import os
 
 
-def testStaveDetection(sourceDir, outputDir, show=False, printData=False, maxData=-1, debug=False):
-    # check sourceDir exists
-    if not os.path.exists(sourceDir):
-        raise FileNotFoundError(f"Source directory '{sourceDir}' does not exist.")
-
-    # check outputDir exists
-    if not os.path.exists(outputDir):
-        raise FileNotFoundError(f"Output directory '{outputDir}' does not exist.")
-
-    # clear output folder
-    for filename in os.listdir(outputDir):
-        file_path = os.path.join(outputDir, filename)
-        os.remove(file_path)
-
-    count = 0
-
+def testStaveDetection(sourceDir, outputDir, printData=False, debug=False):
     for filename in os.listdir(sourceDir):
-
-        # stop processing when maxData is reached
-        if maxData != -1 and count > maxData - 1:
-            print(f"STAVE DETECTION FINISHED. REACHED MAX-DATA={maxData}")
-            return
-
-        # get file path
         filePath = os.path.join(sourceDir, filename)
-
-        # process image
-        image, _ = getStaves(filePath, show, printData, debug)
-
-        # save image
+        image, _ = getStaves(filePath, 0, printData=printData, debug=debug)
         cv2.imwrite(outputDir + '/output_' + filename, image)
 
-        count += 1
-        print(f"({count}):\t", filename, "\t\tStaves detected")
-
-    print(f"STAVE DETECTION FINISHED. {count} IMAGES PROCESSED")
     return
 
 
-testStaveDetection(fullsheetsDir, outputVision, True, True)
+getStaves(fullsheetsDir + 'roar1.png', 0, debug=True)
+testStaveDetection(fullsheetsDir, outputVision, debug=False)

@@ -1,20 +1,24 @@
 from constants import *
 from utils.plotUtils import showImage
-from vision.visionUtils import loadImageGrey, thresh
-from vision.measureBarDetection.measureBarDetectionOperations import getVerticalLines, sobelFilter, filterVerticalEdges, \
+from vision.visionUtils import loadImageGrey, thresh, sobelFilter
+from vision.measureBarDetection.measureBarDetectionOperations import getVerticalLines, filterVerticalEdges, \
     mergeLines, drawLines
 
 
-def getMeasureBars(imagePath, show=False):
+def getMeasureBars(imagePath, show=False, debug=False):
     img, gray = loadImageGrey(imagePath)
 
     thresh_image = thresh(gray, 160)
 
-    vertical_edges = sobelFilter(thresh_image)
+    vertical_edges = sobelFilter(thresh_image, 1, 0)
+
+    showImage(vertical_edges) if debug else None
 
     thresh_edges = thresh(vertical_edges, 160)
 
     filtered_vertical_edges = filterVerticalEdges(thresh_edges)
+
+    showImage(filtered_vertical_edges) if debug else None
 
     lines = getVerticalLines(filtered_vertical_edges, 100, 20, 10)
 
@@ -28,7 +32,7 @@ def getMeasureBars(imagePath, show=False):
     ]
 
     if show:
-        linesImage = drawLines(lines, img, thickness=5)
+        linesImage = drawLines(lines, img, thickness=3)
         print('Number of measure bars found:', len(lines))
         showImage(linesImage)
 

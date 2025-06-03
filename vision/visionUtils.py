@@ -29,6 +29,10 @@ def cannyEdges(image, dilate_kernel_radius):
     return edges
 
 
+def sobelFilter(grayImage, dx=0, dy=1):
+    return cv2.Sobel(grayImage, cv2.CV_8U, dx=dx, dy=dy, ksize=3)
+
+
 def createKernelFromImage(image_path, invert=False):
     img, imgGrey = loadImageGrey(image_path)  # Load the image in grayscale
     if invert:

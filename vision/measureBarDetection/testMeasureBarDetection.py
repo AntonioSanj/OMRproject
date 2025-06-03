@@ -14,6 +14,6 @@ def testMeasureBarDetection(img_dir):
         getMeasureBars(file_path, True)
 
 
-testMeasureBarDetection(myDataImg)
+# testMeasureBarDetection(myDataImg)
 
 getMeasureBars(fullsheetsDir + 'thinking_out_loud1.png', True)

@@ -19,7 +19,7 @@ saveModels = False
 full_dataset = get_coco_dataset(img_dir=images, ann_file=ann)
 
 # random 80/20 split
-train_size = int(0.8 * len(full_dataset))
+train_size = int(0.9 * len(full_dataset))
 val_size = len(full_dataset) - train_size
 train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
 print('Train and Val sizes:', len(train_dataset), len(val_dataset))

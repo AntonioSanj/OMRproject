@@ -3,39 +3,29 @@ from vision.staveDetection.staveOperations import *
 from utils.plotUtils import *
 
 
-def getStaves(imagePath, sheetIndex, show=False, printData=False, debug=False):
+def getStaves(imagePath, sheetIndex, printData=False, debug=False):
     img, gray = loadImageGrey(imagePath)
+    showImage(img) if debug else None
 
-    thresh_image = thresh(gray, 160)
-    # showImage(thresh_image, 'threshold')
+    horizontal_edges = cannyEdges(img, 3)
+    showImage(horizontal_edges, 'horizontal edges') if debug else None
 
-    twisted_edges = cannyEdges(thresh_image, 3)
-    # showImage(twisted_edges, 'edges')
+    lines, linesImage = getHorizontalLines(horizontal_edges, img, 1000, 700, 120)
 
-    rotatedImage = rotateAdjustImage(twisted_edges, img)
-    # showImage(rotatedImage, 'rotate')
-
-    horizontal_edges = cannyEdges(rotatedImage, 3)
-    # showImage(horizontal_edges, 'horizontal edges')
-
-    lines, linesImage = getHorizontalLines(horizontal_edges, rotatedImage, 1000, 700, 120)
-
-    if debug:
-        showImage(linesImage, 'Detected lines')
+    showImage(linesImage, 'Detected lines') if debug else None
 
     lineHeights, meanGap = getLineHeights(lines, 3)
 
     consolidatedLines = consolidateLines(lineHeights, meanGap, 5)
+    drawHeights(consolidatedLines, img) if debug else None
 
     # one extra line is added up and below (C and A assuming gClef)
     staves = generateStaves(consolidatedLines, meanGap, sheetIndex, 1)
 
-    result = drawLineHeights(staves, rotatedImage, 2)
+    result = drawStaves(staves, img, 1)
+    showImage(result) if debug else None
 
     if printData:
         printStaves(staves)
-
-    if show:
-        showCompareImages(result, gray)
 
     return result, staves

@@ -1,9 +1,9 @@
 import torch
 from matplotlib import pyplot as plt, patches
-from torchvision.ops import box_iou
+import torchvision.transforms.functional as F
 
 
-def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.05, iou_thresh=0.7):
+def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.15, iou_thresh=0.5):
     model.eval()
 
     total_preds = 0
@@ -13,22 +13,14 @@ def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.05, i
     iou_scores = []
 
     categories = {v['id']: v['name'] for v in coco_gt.loadCats(coco_gt.getCatIds())}
-    valid_ids = set(coco_gt.getImgIds())
 
     with torch.no_grad():
         for batch_idx, (images, targets) in enumerate(data_loader):
             images = [img.to(device) for img in images]
             outputs = model(images)
 
-            if batch_idx == 0:
-                visualize_predictions(images[0], outputs[0], categories, score_thresh=0.15)
-
-            for target, output in zip(targets, outputs):
+            for image_tensor, target, output in zip(images, targets, outputs):
                 image_id = int(target[0]['image_id']) if isinstance(target, list) else int(target['image_id'])
-
-                if image_id not in valid_ids:
-                    print(f"[WARNING] image_id {image_id} not found in COCO ground truth!")
-                    continue
 
                 # evaluation is only done in those that are given a high enough score
                 scores = output['scores'].cpu()
@@ -37,26 +29,31 @@ def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.05, i
                 labels = output["labels"].cpu()[keep_idxs]
 
                 gt_boxes, gt_labels = extract_ground_truth(coco_gt, image_id)
+
+                visualize_preds_vs_groundtruth(image_tensor, output, gt_boxes, categories, score_thresh=score_thresh)
+
                 total_preds += len(boxes)
                 total_gt += len(gt_boxes)
 
-                ious = box_iou(boxes, gt_boxes)
+                for pred_box, pred_label in zip(boxes, labels):
+                    best_iou = 0.0
+                    best_idx = -1
 
-                for i, (box, label) in enumerate(zip(boxes, labels)):
-                    # select best IoU of the predicted box
-                    iou_vals = ious[i]
-                    best_idx = torch.argmax(iou_vals).item()
-                    best_iou = iou_vals[best_idx].item()
+                    for j, gt_box in enumerate(gt_boxes):
+                        iou_val = IoU(pred_box.tolist(), gt_box.tolist())
+                        if iou_val > best_iou:
+                            best_iou = iou_val
+                            best_idx = j
 
-                    # if it matches enough with any GT segmentation is good
                     if best_iou >= iou_thresh:
                         correct_localization += 1
-                        if label == gt_labels[best_idx]:
+                        if pred_label == gt_labels[best_idx]:
                             correct_classification += 1
 
                     iou_scores.append(best_iou)
-    loc_acc = (correct_localization / total_preds)*100 if total_preds > 0 else 0.0
-    cls_acc = (correct_classification / correct_localization)*100 if correct_localization > 0 else 0.0
+
+    loc_acc = (correct_localization / total_preds) * 100 if total_preds > 0 else 0.0
+    cls_acc = (correct_classification / correct_localization) * 100 if correct_localization > 0 else 0.0
     avg_iou = sum(iou_scores) / len(iou_scores) if iou_scores else 0.0
 
     print(f"Segmentation Accuracy: {loc_acc:.2f}%")
@@ -84,28 +81,57 @@ def extract_ground_truth(coco, image_id):
     return torch.tensor(gt_boxes), torch.tensor(gt_labels)
 
 
-def visualize_predictions(image_tensor, predictions, categories, score_thresh=0.15):
-    image = image_tensor.permute(1, 2, 0).cpu().numpy()
-    if image.max() > 1:
-        image = image / 255.0
-
-    fig, ax = plt.subplots(1, figsize=(12, 8))
+def visualize_preds_vs_groundtruth(image_tensor, output, gt_boxes, categories, score_thresh=0.15):
+    image = F.to_pil_image(image_tensor.cpu())
+    fig, ax = plt.subplots(1, figsize=(10, 10))
     ax.imshow(image)
 
-    boxes = predictions['boxes'].cpu().numpy()
-    labels = predictions['labels'].cpu().numpy()
-    scores = predictions['scores'].cpu().numpy()
+    # Ground Truth boxes (green)
+    for box in gt_boxes:
+        x1, y1, x2, y2 = box.tolist()
+        rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1,
+                                 linewidth=2, edgecolor='green', facecolor='none')
+        ax.add_patch(rect)
+
+    # Predicted boxes (red)
+    boxes = output['boxes'].cpu()
+    labels = output['labels'].cpu()
+    scores = output['scores'].cpu()
 
     for box, label, score in zip(boxes, labels, scores):
         if score < score_thresh:
             continue
-        x1, y1, x2, y2 = box
-        width, height = x2 - x1, y2 - y1
-        rect = patches.Rectangle((x1, y1), width, height,
-                                 linewidth=2, edgecolor='r', facecolor='none')
+        x1, y1, x2, y2 = box.tolist()
+        rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1,
+                                 linewidth=2, edgecolor='red', facecolor='none')
         ax.add_patch(rect)
-        ax.text(x1, y1 - 10, f"{categories[label]}: {score:.2f}",
-                color='red', fontsize=12)
+
+        best_iou = 0.0
+        for gt_box in gt_boxes:
+            iou = IoU(box.tolist(), gt_box.tolist())
+            best_iou = max(best_iou, iou)
+
+        label_name = categories.get(int(label), str(label))
+        color = 'blue' if best_iou > 0.5 else 'pink'
+        ax.text(x1, y2 + 5, f'{best_iou:.2f}', color=color, fontsize=10)
 
     plt.axis('off')
+    plt.tight_layout()
     plt.show()
+
+
+def IoU(boxA, boxB):
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
+
+    interWidth = max(0, xB - xA)
+    interHeight = max(0, yB - yA)
+    interArea = interWidth * interHeight
+
+    boxAArea = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
+    boxBArea = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
+
+    unionArea = boxAArea + boxBArea - interArea
+    return interArea / unionArea if unionArea > 0 else 0.0

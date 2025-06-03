@@ -6,10 +6,6 @@ import numpy as np
 from constants import RED
 
 
-def sobelFilter(grayImage, dx=1, dy=0):
-    return cv2.Sobel(grayImage, cv2.CV_8U, dx=dx, dy=dy, ksize=3)
-
-
 def getVerticalLines(edges, threshold, minLineLength, maxLineGap, angle_tolerance=10):
     angle = np.pi / 180
     lines = cv2.HoughLinesP(edges, 1, angle, threshold=threshold, minLineLength=minLineLength, maxLineGap=maxLineGap)
