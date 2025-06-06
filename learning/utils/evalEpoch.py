@@ -67,7 +67,7 @@ def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.15, i
 
     precision = (correct_localization / total_preds) * 100 if total_preds > 0 else 0.0
     cls_acc = (correct_classification / correct_localization) * 100 if correct_localization > 0 else 0.0
-    avg_iou = sum(iou_scores) / len(iou_scores) if iou_scores else 0.0
+    avg_iou = (sum(iou_scores) / len(iou_scores))*100 if iou_scores else 0.0
     recall = 100 * (total_gt - total_unmatched_gt) / total_gt if total_gt > 0 else 0.0
     f1_score = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
 

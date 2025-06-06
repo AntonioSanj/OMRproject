@@ -67,10 +67,10 @@ def testImage(image_path, modelDir, num_classes, threshold=0.0, saveDir=None):
     draw_boxes(Image.open(image_path), prediction, threshold, fig_size=(9, 16), saveDir=saveDir)  # Example of increased size
 
 
-testImage(fullsheetsDir + '/thinking_out_loud1.png', modelsDir + '/fasterrcnn_epoch_10.pth', 10, 0.01, fastRCNNOutput + '/img2.png')
-testImage(myDataImg + '/feelthelove1.png', modelsDir + '/fasterrcnn_epoch_10.pth', 10, 0.01, fastRCNNOutput + '/img1.png')
+# testImage(fullsheetsDir + '/thinking_out_loud1.png', modelsDir + '/fasterrcnn_epoch_10.pth', 10, 0.01, fastRCNNOutput + '/img2.png')
+# testImage(myDataImg + '/feelthelove1.png', modelsDir + '/fasterrcnn_epoch_10.pth', 10, 0.01, fastRCNNOutput + '/img1.png')
 # testImage(mySlicedDataImg + '/slice30.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
-# testImage(mySlicedDataImg + '/slice31.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
-# testImage(mySlicedDataImg + '/slice32.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
-# testImage(mySlicedDataImg + '/slice33.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
-# testImage(mySlicedDataImg + '/slice36.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15)
+# testImage(mySlicedDataImg + '/slice31.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15,fastRCNNOutput+'img3.png')
+# testImage(mySlicedDataImg + '/slice32.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15, fastRCNNOutput+'img4.png')
+# testImage(mySlicedDataImg + '/slice33.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15, fastRCNNOutput+'img5.png')
+# testImage(mySlicedDataImg + '/slice36.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15, fastRCNNOutput+'img6.png')

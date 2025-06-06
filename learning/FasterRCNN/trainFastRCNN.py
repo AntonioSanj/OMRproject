@@ -9,8 +9,9 @@ from learning.utils.cocoDataSet import get_coco_dataset
 from learning.utils.evalEpoch import evaluate_one_epoch
 from learning.utils.trainEpoch import train_one_epoch
 
-images = mySlicedDataImg
-ann = mySlicedDataCoco
+images = myDataImg
+ann = myDataCoco
+dataSplit = 0.9
 
 num_classes = 10  # Background + categories
 num_epochs = 20
@@ -20,11 +21,11 @@ saveModels = False
 
 initScoreThresh = 0.05
 iouThresh = 0.5
-saveDataFile = 'performanceData'
+saveDataFile = 'performanceFullData'
 
 # random 80/20 split dataset load
 full_dataset = get_coco_dataset(img_dir=images, ann_file=ann)
-train_size = int(0.9 * len(full_dataset))
+train_size = int(dataSplit * len(full_dataset))
 val_size = len(full_dataset) - train_size
 train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
 print('Train and Val sizes:', len(train_dataset), len(val_dataset))
