@@ -4,7 +4,7 @@ from readSheetFunctions import obtainSliceHeights, getPredictions, startModel, m
     getNoteHeadCenters, detectTemplateFigures, distributeFiguresInStaves, detectMeasureBarLines, detectPoints, \
     handleCorrections, showPredictionsStaves, assignNotes, getKeySignatures, assignObjectTypes, applyAccidentals, \
     applyKeySignature, assignNoteDurations, applyDots, adjustMeasuresToBeat, \
-    showPredictionMeasures, createSong, convertToTracks, initSheetsWithStaves, setStartPulse
+    showPredictionMeasures, createSong, convertToTracks, initSheetsWithStaves, setStartPulse, showPredictionsFigures
 from reproduction.playSong import playSong
 
 
@@ -75,6 +75,8 @@ def readSheets(sheetPaths, bpm, swing=False, show=False):
 
     sheets = detectPoints(sheets)
 
+    showPredictionsFigures(sheets) if show else None
+
     # --------------------------------------------------------------------------------------
     # END OF IMAGE RECOGNITION
     # STARTING READING PROCESS
@@ -108,8 +110,7 @@ def readSheets(sheetPaths, bpm, swing=False, show=False):
 
     tracks, measureBeats = convertToTracks(sheets)
 
-    if show:
-        showPredictionMeasures(sheets, tracks)
+    showPredictionMeasures(sheets, tracks) if show else None
 
     tracks = adjustMeasuresToBeat(tracks, measureBeats)
 
@@ -127,7 +128,6 @@ def readSheets(sheetPaths, bpm, swing=False, show=False):
 
     print(song.toString())
 
-    if show:
-        showPredictionMeasures(sheets, tracks)
+    showPredictionMeasures(sheets, tracks) if show else None
 
     return song

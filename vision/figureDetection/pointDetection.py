@@ -45,8 +45,8 @@ def getPointModifications(image_path, show=False, print_points=False):
         print(f'{len(points)} POINTS FOUND:\n{points}')
 
     if show:
-        for point in points:
-            cv2.rectangle(binary, point, (point[0] + kernel.shape[1], point[1] + kernel.shape[0]), 255, 2)
+        for (x, y, w, h) in points:
+            cv2.rectangle(binary, (x, y), (x + w, y + h), 255, 2)
         showImage(binary)
     return boxLocations
 

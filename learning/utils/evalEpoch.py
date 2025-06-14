@@ -5,10 +5,8 @@ import torch
 from matplotlib import pyplot as plt, patches
 import torchvision.transforms.functional as F
 
-from constants import frcnnPerformanceDataDir
 
-
-def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.15, iou_thresh=0.5, saveDataFile=None, debug=False):
+def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.15, iou_thresh=0.5, saveDataPath=None, debug=False):
     model.eval()
 
     total_preds = 0
@@ -71,10 +69,10 @@ def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.15, i
     recall = 100 * (total_gt - total_unmatched_gt) / total_gt if total_gt > 0 else 0.0
     f1_score = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
 
-    print(f"Segmentation Precision: {precision:.2f}%")
-    print(f"Segmentation F1 Score: {f1_score:.2f}%")
-    print(f"Segmentation Recall: {recall:.2f}%")
-    print(f"Average Segmentation IoU: {avg_iou:.2f}")
+    print(f"Precision: {precision:.2f}%")
+    print(f"F1 Score: {f1_score:.2f}%")
+    print(f"Recall: {recall:.2f}%")
+    print(f"IoU: {avg_iou:.2f}")
     print(f"Classification Accuracy: {cls_acc:.2f}%")
 
     metrics = {
@@ -85,7 +83,7 @@ def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.15, i
         "average_iou": round(avg_iou, 2)
     }
 
-    saveMetricsToJson(metrics, frcnnPerformanceDataDir + saveDataFile, score_thresh) if saveDataFile is not None else None
+    saveMetricsToJson(metrics, saveDataPath) if saveDataPath is not None else None
 
 
 def extract_ground_truth(coco, image_id):
@@ -164,9 +162,8 @@ def IoU(boxA, boxB):
     return interArea / unionArea if unionArea > 0 else 0.0
 
 
-def saveMetricsToJson(metrics, path, scoreThresh):
+def saveMetricsToJson(metrics, path):
     # set the path based on the score threshold
-    path = path + '_' + f"{scoreThresh:.2f}".replace('.', '_') + '.json'
     if os.path.exists(path):
         with open(path, "r") as f:
             data = json.load(f)

@@ -9,8 +9,8 @@ from learning.utils.cocoDataSet import get_coco_dataset
 from learning.utils.evalEpoch import evaluate_one_epoch
 from learning.utils.trainEpoch import train_one_epoch
 
-images = myDataImg
-ann = myDataCoco
+images = mySlicedDataImg
+ann = mySlicedDataCoco
 dataSplit = 0.9
 
 num_classes = 10  # Background + categories
@@ -21,7 +21,8 @@ saveModels = False
 
 initScoreThresh = 0.05
 iouThresh = 0.5
-saveDataFile = 'performanceFullData'
+saveDataDir = frcnnPerformanceSlice
+saveDataFile = '1_performance'
 
 # random 80/20 split dataset load
 full_dataset = get_coco_dataset(img_dir=images, ann_file=ann)
@@ -46,22 +47,35 @@ lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1
 
 # create filtered COCO object only with the images for validation
 val_img_ids = [full_dataset.ids[i] for i in val_dataset.indices]
-coco_gt = copy.deepcopy(full_dataset.coco)
-coco_gt.dataset['images'] = [img for img in coco_gt.dataset['images'] if img['id'] in val_img_ids]
-coco_gt.createIndex()
+coco_gt_val = copy.deepcopy(full_dataset.coco)
+coco_gt_val.dataset['images'] = [img for img in coco_gt_val.dataset['images'] if img['id'] in val_img_ids]
+coco_gt_val.createIndex()
+
+# create filtered COCO object only with the images for training
+train_img_ids = [full_dataset.ids[i] for i in train_dataset.indices]
+coco_gt_train = copy.deepcopy(full_dataset.coco)
+coco_gt_train.dataset['images'] = [img for img in coco_gt_train.dataset['images'] if img['id'] in train_img_ids]
+coco_gt_train.createIndex()
 
 # training loop
 for epoch in range(num_epochs):
-
-    print(f'\nTRAINING EPOCH {epoch} -----------------------------------------------------')
+    print('\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+    print(f'\nTRAINING EPOCH {epoch}')
     train_one_epoch(model, optimizer, train_loader, device, epoch)
     lr_scheduler.step()
 
-    print(f'\nVALIDATION EPOCH {epoch} -----------------------------------------------------')
+    print(f'\nEVALUATION EPOCH {epoch}')
     for inc in [0, 0.05, 0.1, 0.15, 0.2, 0.25]:
         scoreThresh = initScoreThresh + inc
-        print('Score Threshold:', f"{scoreThresh:.2f}")
-        evaluate_one_epoch(model, val_loader, device, coco_gt, score_thresh=initScoreThresh + inc, iou_thresh=iouThresh, saveDataFile=saveDataFile)
+        print("\nScore Threshold", f"({scoreThresh:.2f})", '---------------------------------------------')
+
+        print('Training set performance', f"(Th: {scoreThresh:.2f})\n")
+        path = saveDataDir + '/train/' + saveDataFile + '_' + f"{scoreThresh:.2f}".replace('.', '_') + '.json'
+        evaluate_one_epoch(model, train_loader, device, coco_gt_train, score_thresh=initScoreThresh + inc, iou_thresh=iouThresh, saveDataPath=path)
+
+        print('\nValidation set performance', f"({scoreThresh:.2f})")
+        path = saveDataDir + '/val/' + saveDataFile + '_' + f"{scoreThresh:.2f}".replace('.', '_') + '.json'
+        evaluate_one_epoch(model, val_loader, device, coco_gt_val, score_thresh=initScoreThresh + inc, iou_thresh=iouThresh, saveDataPath=path)
 
     if saveModels:
         # Save the model's state dictionary after every epoch
