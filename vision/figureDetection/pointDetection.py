@@ -26,7 +26,7 @@ def getPointModifications(image_path, show=False, print_points=False):
 
     result = cv2.matchTemplate(binary, kernel, cv2.TM_CCOEFF_NORMED)
 
-    threshold = 0.8
+    threshold = 0.7
     locations = np.where(result >= threshold)  # (y_coords, x_coords)
 
     # Convert to list of (x, y) coordinates

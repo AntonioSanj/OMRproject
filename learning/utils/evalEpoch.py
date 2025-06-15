@@ -80,7 +80,7 @@ def evaluate_one_epoch(model, data_loader, device, coco_gt, score_thresh=0.15, i
         "recall": round(recall, 2),
         "f1_score": round(f1_score, 2),
         "classification_accuracy": round(cls_acc, 2),
-        "average_iou": round(avg_iou, 2)
+        "IoU": round(avg_iou, 2)
     }
 
     saveMetricsToJson(metrics, saveDataPath) if saveDataPath is not None else None

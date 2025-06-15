@@ -3,7 +3,7 @@ from vision.staveDetection.staveOperations import *
 from utils.plotUtils import *
 
 
-def getStaves(imagePath, sheetIndex, printData=False, debug=False):
+def getStaves(imagePath, sheetIndex, printData=False, debug=False, show=False):
     img, gray = loadImageGrey(imagePath)
     showImage(img) if debug else None
 
@@ -23,7 +23,7 @@ def getStaves(imagePath, sheetIndex, printData=False, debug=False):
     staves = generateStaves(consolidatedLines, meanGap, sheetIndex, 1)
 
     result = drawStaves(staves, img, 1)
-    showImage(result) if debug else None
+    showImage(result) if debug or show else None
 
     if printData:
         printStaves(staves)
