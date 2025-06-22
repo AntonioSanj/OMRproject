@@ -110,7 +110,7 @@ def plotAllMetricDataFiles(path, imageName=None):
             plot_metrics(fullPath, score=scoreThresh, imageName=imageName)
 
 
-plotAllMetricDataFiles(frcnnPerformanceSlice + '/train', 'train_sliced')
-plotAllMetricDataFiles(frcnnPerformanceSlice + '/val', 'val_sliced')
-# plotClassification(frcnnPerformanceSlice + '/train', 'Training set classification accuracy', save='trainsliceclass')
-# plotClassification(frcnnPerformanceSlice + '/val', 'Validation set classification accuracy', save='valsliceclass')
+# plotAllMetricDataFiles(frcnnPerformanceSlice + '/2/train', '2train_full')
+# plotAllMetricDataFiles(frcnnPerformanceSlice + '/2/val', '2val_full')
+# plotClassification(frcnnPerformanceFull + '/2/train', 'Training set classification accuracy', save='trainsliceclass')
+plotClassification(frcnnPerformanceSlice + '/val', 'Test set classification accuracy', save='valsliceclass')

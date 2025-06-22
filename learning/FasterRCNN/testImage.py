@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import torch
 from PIL import Image
@@ -39,7 +41,7 @@ def draw_boxes(image, prediction, threshold=0.0, fig_size=(10, 10), saveDir=None
             ax.add_patch(plt.Rectangle((x_min, y_min), x_max - x_min, y_max - y_min,
                                        linewidth=1, edgecolor='r', facecolor='none'))
             ax.text(x_min, y_min, f"{class_name} ({score:.2f})", color='r')
-
+    ax.text(50, 50, f"TH ({threshold:.2f})", color='r')
     ax.axis('off')
     if saveDir is not None:
         plt.savefig(saveDir, bbox_inches='tight', pad_inches=0)
@@ -64,7 +66,32 @@ def testImage(image_path, modelDir, num_classes, threshold=0.0, saveDir=None):
     with torch.no_grad():  # Disable gradient computation for inference
         prediction = model(image_tensor)
 
-    draw_boxes(Image.open(image_path), prediction, threshold, fig_size=(9, 16), saveDir=saveDir)  # Example of increased size
+    draw_boxes(Image.open(image_path), prediction, threshold, fig_size=(9, 16),
+               saveDir=saveDir)  # Example of increased size
+
+
+def test_images_in_directory(directory_path, modelDir, num_classes):
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+    model = get_model(num_classes)
+    model.load_state_dict(torch.load(modelDir, map_location=device))
+    model.to(device)
+    model.eval()
+
+    for filename in os.listdir(directory_path):
+        if filename.lower().endswith('.png'):
+            image_path = os.path.join(directory_path, filename)
+
+            image = Image.open(image_path).convert("RGB")
+            image_tensor = F.to_tensor(image).unsqueeze(0).to(device)
+
+            with torch.no_grad():
+                prediction = model(image_tensor)
+
+            th_init = 0.05
+            for inc in [0, 0.05, 0.1, 0.15, 0.2, 0.25]:
+                th = th_init + inc
+                draw_boxes(image, prediction, th)
 
 
 # testImage(fullsheetsDir + '/thinking_out_loud1.png', modelsDir + '/fasterrcnn_epoch_10.pth', 10, 0.01, fastRCNNOutput + '/img2.png')
@@ -74,3 +101,4 @@ def testImage(image_path, modelDir, num_classes, threshold=0.0, saveDir=None):
 # testImage(mySlicedDataImg + '/slice32.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15, fastRCNNOutput+'img4.png')
 # testImage(mySlicedDataImg + '/slice33.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15, fastRCNNOutput+'img5.png')
 # testImage(mySlicedDataImg + '/slice36.png', slicedModelsDir + 'fasterrcnn_epoch_6.pth', 10, 0.15, fastRCNNOutput+'img6.png')
+test_images_in_directory(fullsheetsDir, modelsDir + '/fasterrcnn_epoch_10.pth', 10)

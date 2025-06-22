@@ -80,7 +80,7 @@ mainScreen = """
                 
             MDRaisedButton:
                 id: play_button
-                text: "Play"
+                text: "Read"
                 font_size: dp(24)
                 pos_hint: {"center_x": 0.5}
                 size_hint_y: None
