@@ -34,6 +34,3 @@ class MyApp(MDApp):
         self.sm.add_widget(PlayScreen(name="play"))
         return Builder.load_string(KV)
 
-
-if __name__ == "__main__":
-    MyApp().run()
